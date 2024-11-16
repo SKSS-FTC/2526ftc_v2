@@ -26,6 +26,9 @@ import org.firstinspires.ftc.teamcode.Utils;
 
 public class Swerve {
 
+  double TRACK_LENGTH_METERS = .31;
+  double TRACK_WIDTH_METERS = .38;
+
   private final GoBildaPinpointDriver odometry;
   private GoBildaPinpointDriver.DeviceStatus odometryStatus;
 
@@ -42,16 +45,15 @@ public class Swerve {
     odometry.setEncoderResolution(goBILDA_4_BAR_POD);
     odometry.setEncoderDirections(FORWARD, FORWARD);
 
-    double trackLengthMeters = .31;
-    double trackWidthMeters = .38;
     kinematics =
         new SwerveDriveKinematics(
-            new Translation2d(trackLengthMeters / 2, trackWidthMeters / 2),
-            new Translation2d(trackLengthMeters / 2, -trackWidthMeters / 2),
-            new Translation2d(-trackLengthMeters / 2, trackWidthMeters / 2),
-            new Translation2d(-trackLengthMeters / 2, -trackWidthMeters / 2));
-    drivebaseRadius = Math.hypot(trackLengthMeters / 2, trackWidthMeters / 2);
+            new Translation2d(TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2),
+            new Translation2d(TRACK_LENGTH_METERS / 2, -TRACK_WIDTH_METERS / 2),
+            new Translation2d(-TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2),
+            new Translation2d(-TRACK_LENGTH_METERS / 2, -TRACK_WIDTH_METERS / 2));
+    drivebaseRadius = Math.hypot(TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2);
 
+    //
     for (int i = 0; i < 4; i++) {
       modules[i] = new Module(opMode, i);
     }

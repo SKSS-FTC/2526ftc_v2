@@ -11,7 +11,7 @@ buildscript {
     }
     dependencies {
         // Note for FTC Teams: Do not modify this yourself.
-        classpath 'com.android.tools.build:gradle:8.6.0'
+        classpath 'com.android.tools.build:gradle:8.6.1'
     }
 }
 
@@ -66,4 +66,13 @@ spotless {
         indentWithSpaces(2)
         endWithNewline()
     }
+}
+
+tasks.named("build") {
+    dependsOn("spotlessApply")
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
