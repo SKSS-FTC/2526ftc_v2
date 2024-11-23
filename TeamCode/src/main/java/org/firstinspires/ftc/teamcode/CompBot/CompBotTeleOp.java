@@ -52,16 +52,24 @@ public class CompBotTeleOp extends LinearOpMode {
 
       // Arm X length
       if (gamepad2.left_stick_x != 0 && armXTimer.milliseconds() > 5 && opModeIsActive()) {
-        armX += gamepad2.left_stick_x / 100;
+        armX += Math.pow(gamepad2.left_stick_x, 3);
       } else armYTimer.reset();
 
       // Arm Y length
       if (gamepad2.left_stick_y != 0 && armYTimer.milliseconds() > 5 && opModeIsActive()) {
-        armY += -gamepad2.left_stick_y / 100;
+        armY += -Math.pow(gamepad2.left_stick_y, 3);
       } else armYTimer.reset();
 
       mek.wristAngle(wristAngle);
       mek.moveXY(armX, armY);
+
+      // If any input related to the mekanism is moved, cancel the auto movement
+      if (gamepad2.dpad_up
+          || gamepad2.dpad_down
+          || gamepad2.left_stick_x != 0
+          || gamepad2.left_stick_y != 0) {
+        mek.autoClipRun.set(false);
+      }
     }
   }
 }

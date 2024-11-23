@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** This class is for the mechanism */
 public class Mekanism {
@@ -21,8 +22,7 @@ public class Mekanism {
   public final LinearOpMode myOp;
 
   DcMotor pivot, slide;
-  Servo spintake, wrist;
-  Servo clipServo;
+  Servo intake, wrist, ramp1, ramp2;
   DigitalChannel homePivot;
 
   // TODO: Find proper numbers for this
@@ -30,9 +30,52 @@ public class Mekanism {
   int COUNTS_PER_DEGREE = 30; // Encoder counts per degree
 
   ElapsedTime homeTimer = new ElapsedTime();
-  ElapsedTime elementTimer = new ElapsedTime();
 
-  // Constructor for Mekanism stuff
+  public AtomicBoolean autoClipRun = new AtomicBoolean(false);
+
+  Thread autoClip =
+      new Thread() {
+        public void run() {
+          autoClipRun.set(true);
+
+          // If the clip is too close, move it out, so it doesn't hit the clip holder
+          while (slide.getCurrentPosition() < 200 && autoClipRun.get() && myOp.opModeIsActive()) {
+            slide.setTargetPosition(210);
+            wrist.setPosition(0.1);
+            myOp.sleep(10);
+          }
+
+          ramp1.setPosition(1.0);
+          ramp2.setPosition(1.0);
+          myOp.sleep(750);
+          ramp1.setPosition(0.0);
+          ramp2.setPosition(0.0);
+          myOp.sleep(250);
+          ramp1.setPosition(0.25);
+          ramp2.setPosition(0.25);
+          myOp.sleep(250);
+          ramp1.setPosition(0.0);
+          ramp2.setPosition(0.0);
+
+          // Move the pivot to above the clip holder
+          while (pivot.getCurrentPosition() > 1500 && autoClipRun.get() && myOp.opModeIsActive()) {
+            pivot.setTargetPosition(1510);
+            myOp.sleep(10);
+          }
+
+          // Bring the slide down to the initial clipping position
+          while (slide.getTargetPosition() > 200 && autoClipRun.get() && myOp.opModeIsActive()) {
+            slide.setTargetPosition(190);
+            myOp.sleep(10);
+          }
+        }
+      };
+
+  /**
+   * Main constructor for the Mekansim class
+   *
+   * @param myOp LinearOpMode class
+   */
   public Mekanism(LinearOpMode myOp) {
     this.myOp = myOp;
 
@@ -64,11 +107,12 @@ public class Mekanism {
 
     // Servos for the end effector
     wrist = myOp.hardwareMap.get(Servo.class, "wrist");
-    spintake = myOp.hardwareMap.get(Servo.class, "spintake"); // TODO: Get proper name
     wrist.scaleRange(0, 1); // TODO: Set ranges for wrist positions
 
-    clipServo = myOp.hardwareMap.get(Servo.class, "clip"); // TODO: Get proper name
-    clipServo.scaleRange(0, 1); // TODO: Set proper scale range
+    ramp1 = myOp.hardwareMap.get(Servo.class, "ramp 1");
+    ramp2 = myOp.hardwareMap.get(Servo.class, "ramp 2");
+    ramp1.scaleRange(0, 1); // TODO: Set proper scale range
+    ramp2.scaleRange(0, 1); // TODO: Set proper scale range
 
     homePivot = myOp.hardwareMap.get(DigitalChannel.class, "homePivot"); // TODO: Get proper name
   }
@@ -142,9 +186,9 @@ public class Mekanism {
    *
    * @param power (-1) to 1
    */
-  public void setSpintake(double power) {
+  public void setIntake(double power) {
     power = (power + 1) / 2;
-    spintake.setPosition(power);
+    intake.setPosition(power);
   }
 
   /** Moves the slide to clip an element */
