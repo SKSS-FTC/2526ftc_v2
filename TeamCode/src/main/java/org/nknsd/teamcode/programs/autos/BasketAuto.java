@@ -2,6 +2,7 @@ package org.nknsd.teamcode.programs.autos;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.nknsd.teamcode.autoSteps.AutoStepMoveNRotate;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.autoSteps.AutoStepAbsoluteControl;
@@ -95,6 +96,8 @@ public class BasketAuto extends NKNProgramTrue {
         AutoStepAbsoluteControl alignToPark = new AutoStepAbsoluteControl(-0.05, 2.2, 90);
         AutoStepMove driveInToPark = new AutoStepMove(0.58, 0);
 
+        AutoStepMoveNRotate turnToEnd = new AutoStepMoveNRotate(0, 0, 90);
+
 
         AutoStepRotateArm rotateToHigh = new AutoStepRotateArm(RotationHandler.RotationPositions.HIGH);
         AutoStepRotateArm rotateToPickup = new AutoStepRotateArm(RotationHandler.RotationPositions.PICKUP);
@@ -160,6 +163,7 @@ public class BasketAuto extends NKNProgramTrue {
         stepList.add(releaseBlock);
         stepList.add(backAwayFromBasket);
         stepList.add(retract);
+        stepList.add(turnToEnd);
 
 
         autoHeart.linkSteps(stepList, autoSkeleton);
