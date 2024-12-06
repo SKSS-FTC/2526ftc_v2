@@ -3,21 +3,18 @@ package org.nknsd.teamcode.autoSteps;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
-import org.nknsd.teamcode.components.handlers.RotationHandler;
 
 import java.util.concurrent.TimeUnit;
 
-public class AutoStepRotateArm implements NKNAutoStep {
-    private final RotationHandler.RotationPositions rotationPosition;
+public class AutoStepSpecimenClaw implements NKNAutoStep {
     AutoSkeleton autoSkeleton;
-    private long timeBegan;
-    private final long duration;
+    private final SpecimenClawHandler.ClawPositions clawPosition;
 
-    public AutoStepRotateArm(RotationHandler.RotationPositions rotationPosition) {
-        this.rotationPosition = rotationPosition;
-        duration = 0;
+    public AutoStepSpecimenClaw(SpecimenClawHandler.ClawPositions clawPosition) {
+        this.clawPosition = clawPosition;
     }
 
     @Override
@@ -27,8 +24,7 @@ public class AutoStepRotateArm implements NKNAutoStep {
     }
 
     public void begin(ElapsedTime runtime, Telemetry telemetry) {
-        autoSkeleton.setTargetArmRotation(rotationPosition);
-        timeBegan = runtime.now(TimeUnit.MILLISECONDS);
+        autoSkeleton.setSpecimenClawTarget(clawPosition);
     }
 
     @Override
@@ -36,11 +32,11 @@ public class AutoStepRotateArm implements NKNAutoStep {
 
     @Override
     public boolean isDone(ElapsedTime runtime) {
-        return runtime.now(TimeUnit.MILLISECONDS) - timeBegan > duration;
+        return true;
     }
 
     @Override
     public String getName() {
-        return "Rotating to " + rotationPosition.name();
+        return "Setting specimen claw value";
     }
 }
