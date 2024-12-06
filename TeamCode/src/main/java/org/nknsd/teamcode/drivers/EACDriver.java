@@ -111,14 +111,14 @@ public class EACDriver implements NKNComponent {
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
         // Add event listeners
-        gamePadHandler.addListener2(controlScheme.sampleDown(), rotateDown, "Sample Rotate Down");
-        gamePadHandler.addListener2(controlScheme.sampleUp(), rotateUp, "Sample Rotate Up");
-        gamePadHandler.addListener2(controlScheme.sampleExtend(), extend, "Sample Extend");
-        gamePadHandler.addListener2(controlScheme.sampleRetract(), retract, "Sample Retract");
-        gamePadHandler.addListener2(controlScheme.sampleGrab(), grab, "Sample Grab");
-        gamePadHandler.addListener2(controlScheme.sampleRelease(), release, "Sample Release");
-        gamePadHandler.addListener2(controlScheme.sampleNeutral(), neutral, "Sample Neutral");
-        gamePadHandler.addListener2(controlScheme.swapEACcontrol(), () -> isInEACState = !isInEACState, "Swap EAC & Specimen");
+        gamePadHandler.addListener(controlScheme.sampleDown(), rotateDown, "Sample Rotate Down");
+        gamePadHandler.addListener(controlScheme.sampleUp(), rotateUp, "Sample Rotate Up");
+        gamePadHandler.addListener(controlScheme.sampleExtend(), extend, "Sample Extend");
+        gamePadHandler.addListener(controlScheme.sampleRetract(), retract, "Sample Retract");
+        gamePadHandler.addListener(controlScheme.sampleGrab(), grab, "Sample Grab");
+        gamePadHandler.addListener(controlScheme.sampleRelease(), release, "Sample Release");
+        gamePadHandler.addListener(controlScheme.sampleNeutral(), neutral, "Sample Neutral");
+        gamePadHandler.addListener(controlScheme.swapEACcontrol(), () -> isInEACState = !isInEACState, "Swap EAC & Specimen");
     }
 
     @Override
@@ -147,6 +147,7 @@ public class EACDriver implements NKNComponent {
         } else {
             telemetry.addData("Arm Controller State", "Specimen");
         }
+        telemetry.addData("Sample Controls", controlScheme.getName());
     }
 
     public void link(GamePadHandler gamePadHandler, RotationHandler rotationHandler, ExtensionHandler extensionHandler, IntakeSpinnerHandler servoHandler, EACControlScheme controlScheme) {

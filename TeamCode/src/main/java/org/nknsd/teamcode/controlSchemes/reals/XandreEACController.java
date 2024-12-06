@@ -9,6 +9,12 @@ import java.util.concurrent.Callable;
 
 public class XandreEACController extends EACControlScheme {
     boolean controlEACDelay = false;
+
+    @Override
+    public String getName() {
+        return "Xandre";
+    }
+
     @Override
     public Callable<Boolean> swapEACcontrol() {
         return new Callable<Boolean>() {

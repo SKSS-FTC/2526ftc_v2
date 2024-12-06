@@ -76,7 +76,7 @@ public class AdvancedWheelDriver implements NKNComponent {
         moveSpeedMultiplier = 0;
         this.gamepad = gamepad1;
 
-        gamePadHandler.addListener(GamePadHandler.GamepadButtons.Y, 1, "disableAutonomousIMUYawCorrection", true, disableAutonomousIMUCorrection);
+        gamePadHandler.addListener(controlScheme.initDisableAutoFix(), disableAutonomousIMUCorrection, "Disable Autonomous IMU Yaw Correction");
         return true;
     }
 
@@ -87,11 +87,11 @@ public class AdvancedWheelDriver implements NKNComponent {
 
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
-        gamePadHandler.addListener(GamePadHandler.GamepadButtons.RIGHT_BUMPER, 1, "speedUp", true, speedUp);
-        gamePadHandler.addListener(GamePadHandler.GamepadButtons.LEFT_BUMPER, 1, "speedDown", true, speedDown);
-        gamePadHandler.addListener(GamePadHandler.GamepadButtons.BACK, 1, "resetIMU", true, resetImu);
+        gamePadHandler.addListener(controlScheme.gearDown(), speedDown, "Speed Down");
+        gamePadHandler.addListener(controlScheme.gearUp(), speedUp, "Speed Up");
+        gamePadHandler.addListener(controlScheme.resetAngle(), () -> {}, "Reset Angle");
 
-        gamePadHandler.removeListener(GamePadHandler.GamepadButtons.Y, 1, "disableAutonomousIMUYawCorrection", true);
+        gamePadHandler.removeListener("Disable Autonomous IMU Yaw Correction");
     }
 
     @Override
@@ -118,6 +118,7 @@ public class AdvancedWheelDriver implements NKNComponent {
     public void doTelemetry(Telemetry telemetry) {
         telemetry.addData("Gear", (moveSpeedMultiplier - speedMin) / speedStepAmount);
         telemetry.addData("Raw Speed", moveSpeedMultiplier);
+        telemetry.addData("Wheel Controls", controlScheme.getName());
     }
 
     public void link(GamePadHandler gamePadHandler, WheelHandler wheelHandler, IMUSensor imuSensor, WheelControlScheme controlScheme) {

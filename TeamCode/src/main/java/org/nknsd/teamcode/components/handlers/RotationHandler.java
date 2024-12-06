@@ -52,9 +52,10 @@ public class RotationHandler implements NKNComponent {
         motor = hardwareMap.dcMotor.get(motorName);
         motor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        if (potHandler.getPotVoltage() < RotationPositions.HIGH.target) { // Arm is already rotated out when initializing, so we can move to pickup position
-            targetRotationPosition = RotationPositions.PICKUP;
-        }
+//        if (potHandler.getPotVoltage() < RotationPositions.HIGH.target) { // Arm is already rotated out when initializing, so we can move to pickup position
+//            targetRotationPosition = RotationPositions.PICKUP;
+//        }
+//        Deprecated, caused annoyances, especially with catching on baskets
         return true;
     }
 

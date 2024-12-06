@@ -30,6 +30,7 @@ public class AlternateMovementNKNProgram extends NKNProgramTrue {
         // Misc
         GamePadHandler gamePadHandler = new GamePadHandler();
         components.add(gamePadHandler);
+        //telemetryEnabled.add(gamePadHandler);
 
         WheelHandler wheelHandler = new WheelHandler();
         components.add(wheelHandler);
@@ -60,10 +61,11 @@ public class AlternateMovementNKNProgram extends NKNProgramTrue {
         // Specimen Handler
         SpecimenRotationHandler specimenRotationHandler = new SpecimenRotationHandler();
         components.add(specimenRotationHandler);
-        telemetryEnabled.add(specimenRotationHandler);
+        //telemetryEnabled.add(specimenRotationHandler);
 
         SpecimenExtensionHandler specimenExtensionHandler = new SpecimenExtensionHandler();
         components.add(specimenExtensionHandler);
+        //telemetryEnabled.add(specimenExtensionHandler);
 
         SpecimenClawHandler specimenClawHandler = new SpecimenClawHandler();
         components.add(specimenClawHandler);
@@ -80,6 +82,7 @@ public class AlternateMovementNKNProgram extends NKNProgramTrue {
 
         SpecimenDriver specimenDriver = new SpecimenDriver();
         components.add(specimenDriver);
+        telemetryEnabled.add(specimenDriver);
 
 
         // Controllers
@@ -94,6 +97,7 @@ public class AlternateMovementNKNProgram extends NKNProgramTrue {
         extensionHandler.link(rotationHandler);
         eacDriver.link(gamePadHandler, rotationHandler, extensionHandler, intakeSpinnerHandler, eacController);
         specimenDriver.link(specimenExtensionHandler, specimenRotationHandler, specimenClawHandler, gamePadHandler, specimenController);
+        wheelController.link(gamePadHandler);
         eacController.link(gamePadHandler);
         eacController.linkExtensionHandler(extensionHandler);
         specimenController.link(gamePadHandler);

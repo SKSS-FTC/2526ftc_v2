@@ -66,9 +66,8 @@ public class WheelDriver implements NKNComponent {
 
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
-        gamePadHandler.addListener2(controlScheme.gearDown(), speedDown, "Speed Down");
-        gamePadHandler.addListener2(controlScheme.gearUp(), speedUp, "Speed Up");
-        gamePadHandler.addListener2(controlScheme.resetAngle(), () -> {}, "Reset Angle");
+        gamePadHandler.addListener(controlScheme.gearDown(), speedDown, "Speed Down");
+        gamePadHandler.addListener(controlScheme.gearUp(), speedUp, "Speed Up");
     }
 
     @Override
@@ -105,6 +104,7 @@ public class WheelDriver implements NKNComponent {
     public void doTelemetry(Telemetry telemetry) {
         telemetry.addData("Gear", (moveSpeedMultiplier - speedMin) / speedStepAmount);
         telemetry.addData("Raw Speed", moveSpeedMultiplier);
+        telemetry.addData("Wheel Controls", controlScheme.getName());
     }
 
     public void link(GamePadHandler gamePadHandler, WheelHandler wheelHandler, WheelControlScheme controlScheme) {

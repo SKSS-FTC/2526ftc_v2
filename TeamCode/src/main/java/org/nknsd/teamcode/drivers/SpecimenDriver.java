@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.nknsd.teamcode.components.handlers.IntakeSpinnerHandler;
 import org.nknsd.teamcode.controlSchemes.abstracts.SpecimenControlScheme;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
@@ -30,18 +29,16 @@ public class SpecimenDriver implements NKNComponent {
     Runnable specimenExtend = new Runnable() {
         @Override
         public void run() {
-            if (specimenRotationHandler.targetPosition() != SpecimenRotationHandler.SpecimenRotationPositions.FORWARD) {
-                boolean done = false; // Repeat until we either hit the end of the array or we reach a valid extension position
-                int index = specimenExtensionHandler.targetPosition().ordinal();
-                while (!done) {
-                    index++;
+            boolean done = false; // Repeat until we either hit the end of the array or we reach a valid extension position
+            int index = specimenExtensionHandler.targetPosition().ordinal();
+            while (!done) {
+                index++;
 
-                    if (index >= SpecimenExtensionHandler.SpecimenExtensionPositions.values().length) {
-                        return;
-                    }
-
-                    done = specimenExtensionHandler.gotoPosition(SpecimenExtensionHandler.SpecimenExtensionPositions.values()[index]);
+                if (index >= SpecimenExtensionHandler.SpecimenExtensionPositions.values().length) {
+                    return;
                 }
+
+                done = specimenExtensionHandler.gotoPosition(SpecimenExtensionHandler.SpecimenExtensionPositions.values()[index]);
             }
         }
     };
@@ -114,12 +111,12 @@ public class SpecimenDriver implements NKNComponent {
 
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
-        gamePadHandler.addListener2(controlScheme.specimenBackwards(), specimenBackward, "Specimen Rotate Backwards");
-        gamePadHandler.addListener2(controlScheme.specimenForward(), specimenForward, "Specimen Rotate Forwards");
-        gamePadHandler.addListener2(controlScheme.specimenGrab(), grip, "Specimen Grip");
-        gamePadHandler.addListener2(controlScheme.specimenRelease(), release, "Specimen Release");
-        gamePadHandler.addListener2(controlScheme.specimenRaise(), specimenExtend, "Specimen Extend");
-        gamePadHandler.addListener2(controlScheme.specimenLower(), specimenRetract, "Specimen Lower");
+        gamePadHandler.addListener(controlScheme.specimenBackwards(), specimenBackward, "Specimen Rotate Backwards");
+        gamePadHandler.addListener(controlScheme.specimenForward(), specimenForward, "Specimen Rotate Forwards");
+        gamePadHandler.addListener(controlScheme.specimenGrab(), grip, "Specimen Grip");
+        gamePadHandler.addListener(controlScheme.specimenRelease(), release, "Specimen Release");
+        gamePadHandler.addListener(controlScheme.specimenRaise(), specimenExtend, "Specimen Extend");
+        gamePadHandler.addListener(controlScheme.specimenLower(), specimenRetract, "Specimen Lower");
     }
 
     @Override
@@ -139,7 +136,7 @@ public class SpecimenDriver implements NKNComponent {
 
     @Override
     public void doTelemetry(Telemetry telemetry) {
-
+        telemetry.addData("Specimen Controls", controlScheme.getName());
     }
 
     public void link (SpecimenExtensionHandler specimenExtensionHandler, SpecimenRotationHandler specimenRotationHandler, SpecimenClawHandler specimenClawHandler, GamePadHandler gamepadHandler, SpecimenControlScheme controlScheme){

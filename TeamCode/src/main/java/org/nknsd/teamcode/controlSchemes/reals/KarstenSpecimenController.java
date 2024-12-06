@@ -7,6 +7,11 @@ import java.util.concurrent.Callable;
 
 public class KarstenSpecimenController extends SpecimenControlScheme {
     @Override
+    public String getName() {
+        return "Karsten";
+    }
+
+    @Override
     public Callable<Boolean> specimenGrab() {
         return new Callable<Boolean>() {
             @Override
