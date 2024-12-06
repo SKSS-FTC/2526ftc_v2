@@ -51,7 +51,7 @@ public class AutoSkeleton {
 
         movementPIDx = new PIDModel(kP, kI, kD);
         movementPIDy = new PIDModel(kP, kI, kD);
-        movementPIDturn = new PIDModel(maxSpeed / 16, maxSpeed / (16000), 0.5);
+        movementPIDturn = new PIDModel(maxSpeed / 16, maxSpeed / (6000), 0.5);
     }
 
     public void link(WheelHandler wheelHandler, RotationHandler rotationHandler, ExtensionHandler extensionHandler, IntakeSpinnerHandler intakeSpinnerHandler, FlowSensor flowSensor, IMUSensor imuSensor) {
@@ -230,5 +230,9 @@ public class AutoSkeleton {
 
     public void setSpecimenClawTarget(SpecimenClawHandler.ClawPositions clawPosition) {
         specimenClawHandler.setClawPosition(clawPosition);
+    }
+
+    public void setSpecimenRotationTarget(SpecimenRotationHandler.SpecimenRotationPositions rotationPosition) {
+        specimenRotationHandler.goToPosition(rotationPosition);
     }
 }
