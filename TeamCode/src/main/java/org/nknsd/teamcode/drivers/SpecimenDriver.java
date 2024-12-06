@@ -29,18 +29,16 @@ public class SpecimenDriver implements NKNComponent {
     Runnable specimenExtend = new Runnable() {
         @Override
         public void run() {
-            if (specimenRotationHandler.targetPosition() != SpecimenRotationHandler.SpecimenRotationPositions.FORWARD) {
-                boolean done = false; // Repeat until we either hit the end of the array or we reach a valid extension position
-                int index = specimenExtensionHandler.targetPosition().ordinal();
-                while (!done) {
-                    index++;
+            boolean done = false; // Repeat until we either hit the end of the array or we reach a valid extension position
+            int index = specimenExtensionHandler.targetPosition().ordinal();
+            while (!done) {
+                index++;
 
-                    if (index >= SpecimenExtensionHandler.SpecimenExtensionPositions.values().length) {
-                        return;
-                    }
-
-                    done = specimenExtensionHandler.gotoPosition(SpecimenExtensionHandler.SpecimenExtensionPositions.values()[index]);
+                if (index >= SpecimenExtensionHandler.SpecimenExtensionPositions.values().length) {
+                    return;
                 }
+
+                done = specimenExtensionHandler.gotoPosition(SpecimenExtensionHandler.SpecimenExtensionPositions.values()[index]);
             }
         }
     };
@@ -138,7 +136,7 @@ public class SpecimenDriver implements NKNComponent {
 
     @Override
     public void doTelemetry(Telemetry telemetry) {
-
+        telemetry.addData("Specimen Controls", controlScheme.getName());
     }
 
     public void link (SpecimenExtensionHandler specimenExtensionHandler, SpecimenRotationHandler specimenRotationHandler, SpecimenClawHandler specimenClawHandler, GamePadHandler gamepadHandler, SpecimenControlScheme controlScheme){

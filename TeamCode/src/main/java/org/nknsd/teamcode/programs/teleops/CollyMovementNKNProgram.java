@@ -2,6 +2,7 @@ package org.nknsd.teamcode.programs.teleops;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.nknsd.teamcode.controlSchemes.reals.CollyWheelController;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.components.handlers.ExtensionHandler;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
@@ -62,15 +63,17 @@ public class CollyMovementNKNProgram extends NKNProgramTrue {
 
 
         // Controllers
+        CollyWheelController wheelController = new CollyWheelController();
         KarstenEACController eacController = new KarstenEACController();
         eacController.link(gamePadHandler);
         eacController.linkExtensionHandler(extensionHandler);
 
 
         // Link the components to each other
-        wheelDriver.link(gamePadHandler, wheelHandler, imuSensor);
+        wheelDriver.link(gamePadHandler, wheelHandler, imuSensor, wheelController);
         rotationHandler.link(potentiometerSensor, extensionHandler);
         extensionHandler.link(rotationHandler);
         eacDriver.link(gamePadHandler, rotationHandler, extensionHandler, intakeSpinnerHandler, eacController);
+        wheelController.link(gamePadHandler);
     }
 }

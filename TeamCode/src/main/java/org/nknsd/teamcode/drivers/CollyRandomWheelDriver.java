@@ -115,6 +115,7 @@ public class CollyRandomWheelDriver implements NKNComponent {
     public void doTelemetry(Telemetry telemetry) {
         telemetry.addData("Gear", (moveSpeedMultiplier - speedMin) / speedStepAmount);
         telemetry.addData("Raw Speed", moveSpeedMultiplier);
+        telemetry.addData("Wheel Controls", controlScheme.getName());
     }
 
     public void link(GamePadHandler gamePadHandler, WheelHandler wheelHandler, IMUSensor imuSensor, WheelControlScheme controlScheme) {
