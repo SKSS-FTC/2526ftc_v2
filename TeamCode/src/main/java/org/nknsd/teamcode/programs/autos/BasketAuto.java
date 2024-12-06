@@ -76,22 +76,25 @@ public class BasketAuto extends NKNProgramTrue {
         extensionHandler.link(rotationHandler);
 
         autoSkeleton.link(wheelHandler, rotationHandler, extensionHandler, intakeSpinnerHandler, flowSensor, imuSensor);
+        autoSkeleton.setOffset(new double[]{0.0, 1.02}, 0);
         assembleList(stepList, autoHeart, autoSkeleton);
     }
 
     private void assembleList(List<NKNAutoStep> stepList, AutoHeart autoHeart, AutoSkeleton autoSkeleton) {
         // Declare steps
         AutoStepSleep sleep = new AutoStepSleep(375);
+        AutoStepSleep armSleep = new AutoStepSleep(500);
 
         AutoStepMove moveSlightForward = new AutoStepMove(0, 0.2);
-        AutoStepAbsoluteControl orientToBasket = new AutoStepAbsoluteControl(-0.79, 0.34, -135);
+        AutoStepAbsoluteControl orientToBasket = new AutoStepAbsoluteControl(-0.88, 0.32, -135);
         AutoStepRelativeMove backAwayFromBasket = new AutoStepRelativeMove(0, -.35, 200);
-        AutoStepRelativeMove slightlyBackAway = new AutoStepRelativeMove(0, -.3, 100);
+        AutoStepRelativeMove backSLIGHTLYAwayFromBasket = new AutoStepRelativeMove(0, -.35, 100);
+        AutoStepRelativeMove slightlyBackAway = new AutoStepRelativeMove(0, -.4, 190);
 
-        AutoStepAbsoluteControl pickUpFirstYellow = new AutoStepAbsoluteControl(0.4113, 1.28, -68.3);
+        AutoStepAbsoluteControl pickUpFirstYellow = new AutoStepAbsoluteControl(0.4113, 1.33, -68.3);
         AutoStepRelativeMove moveToPickup = new AutoStepRelativeMove(0, 0.3, 400);
 
-        AutoStepAbsoluteControl pickUpSecondYellow = new AutoStepAbsoluteControl(-0.0716, 1.6, -90);
+        AutoStepAbsoluteControl pickUpSecondYellow = new AutoStepAbsoluteControl(-0.0716, 1.64, -90);
         AutoStepAbsoluteControl alignToPark = new AutoStepAbsoluteControl(-0.05, 2.2, 90);
         AutoStepMove driveInToPark = new AutoStepMove(0.58, 0);
 
@@ -111,14 +114,15 @@ public class BasketAuto extends NKNProgramTrue {
         AutoStepChangeMaxSpeed slowSpeed = new AutoStepChangeMaxSpeed(0.6);
         AutoStepChangeMaxSpeed normalSpeed = new AutoStepChangeMaxSpeed(0.8);
 
+
+
         // Put away first block
         stepList.add(moveSlightForward);
+        stepList.add(rotateToHigh); // rotate early and often
         stepList.add(orientToBasket);
-        stepList.add(backAwayFromBasket);
-        stepList.add(rotateToHigh);
         stepList.add(extendToHigh);
         stepList.add(releaseBlock);
-        stepList.add(slightlyBackAway);
+        stepList.add(backAwayFromBasket);
         stepList.add(retract);
 
         // Get second block
@@ -126,6 +130,7 @@ public class BasketAuto extends NKNProgramTrue {
         stepList.add(pickUpFirstYellow);
         stepList.add(neutralServo);
         stepList.add(rotateToPickup);
+        stepList.add(armSleep);
         stepList.add(moveToPickup);
         stepList.add(sleep);
         stepList.add(gripBlock);
@@ -135,9 +140,8 @@ public class BasketAuto extends NKNProgramTrue {
 
         // Place second block
         stepList.add(normalSpeed);
-        stepList.add(orientToBasket);
         stepList.add(rotateToHigh);
-        stepList.add(sleep);
+        stepList.add(orientToBasket);
         stepList.add(extendToHigh);
         stepList.add(releaseBlock);
         stepList.add(backAwayFromBasket);
@@ -148,18 +152,21 @@ public class BasketAuto extends NKNProgramTrue {
         stepList.add(pickUpSecondYellow);
         stepList.add(gripBlock);
         stepList.add(rotateToPickup);
+        stepList.add(armSleep);
         stepList.add(moveToPickup);
         stepList.add(sleep);
         stepList.add(rotateToRest);
 
         // Place third block
         stepList.add(normalSpeed);
-        stepList.add(orientToBasket);
         stepList.add(rotateToHigh);
+        stepList.add(orientToBasket);
+        stepList.add(slightlyBackAway);
         stepList.add(extendToHigh);
         stepList.add(releaseBlock);
         stepList.add(backAwayFromBasket);
         stepList.add(retract);
+        stepList.add(rotateToRest);
 
 
         autoHeart.linkSteps(stepList, autoSkeleton);

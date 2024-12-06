@@ -2,6 +2,7 @@ package org.nknsd.teamcode.programs.tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.nknsd.teamcode.controlSchemes.reals.CollyWheelController;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.components.sensors.FlowSensor;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
@@ -40,6 +41,7 @@ public class AbsoluteMovementTestProgram extends NKNProgramTrue {
         AdvancedWheelDriver wheelDriver = new AdvancedWheelDriver(0, 1, 5, GamePadHandler.GamepadSticks.LEFT_JOYSTICK_Y, GamePadHandler.GamepadSticks.LEFT_JOYSTICK_X, GamePadHandler.GamepadSticks.RIGHT_JOYSTICK_X);
         components.add(wheelDriver);
         //telemetryEnabled.add(wheelDriver);
-        wheelDriver.link(gamePadHandler, wheelHandler, imuSensor);
+        CollyWheelController wheelController = new CollyWheelController();
+        wheelDriver.link(gamePadHandler, wheelHandler, imuSensor, wheelController);
     }
 }

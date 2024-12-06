@@ -4,6 +4,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.nknsd.teamcode.components.handlers.ExtensionHandler;
+import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
+import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
+import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
 import org.nknsd.teamcode.components.sensors.FlowSensor;
 import org.nknsd.teamcode.components.sensors.IMUSensor;
 import org.nknsd.teamcode.components.handlers.IntakeSpinnerHandler;
@@ -22,6 +25,9 @@ public class AutoSkeleton {
     private IMUSensor imuSensor;
     private RotationHandler rotationHandler;
     private ExtensionHandler extensionHandler;
+    private SpecimenExtensionHandler specimenExtensionHandler;
+    private SpecimenRotationHandler specimenRotationHandler;
+    private SpecimenClawHandler specimenClawHandler;
     private double targetRotation = 0;
     private IntakeSpinnerHandler intakeSpinnerHandler;
     private PIDModel movementPIDx;
@@ -30,7 +36,8 @@ public class AutoSkeleton {
     private boolean xDirPos = true;
     private boolean yDirPos = true;
     private boolean turnDirPos = true;
-
+    private double[] offset;
+    private double headingOffset;
 
 
     public AutoSkeleton(double maxSpeed, double movementMargin, double turnMargin) {
@@ -39,8 +46,8 @@ public class AutoSkeleton {
         this.turnMargin = turnMargin;
 
         double kP = 0.5;
-        double kI = maxSpeed / (TILE_LENGTH * TILE_LENGTH * 3500); //I is REALLY FREAKING SMALL
-        double kD = 6;
+        double kI = maxSpeed / (TILE_LENGTH * TILE_LENGTH * 4000); //I is REALLY FREAKING SMALL
+        double kD = 7;
 
         movementPIDx = new PIDModel(kP, kI, kD);
         movementPIDy = new PIDModel(kP, kI, kD);
@@ -54,6 +61,17 @@ public class AutoSkeleton {
         this.rotationHandler = rotationHandler;
         this.extensionHandler = extensionHandler;
         this.intakeSpinnerHandler = intakeSpinnerHandler;
+    }
+
+    public void specimenLink(SpecimenExtensionHandler specimenExtensionHandler, SpecimenRotationHandler specimenRotationHandler, SpecimenClawHandler specimenClawHandler) {
+        this.specimenExtensionHandler = specimenExtensionHandler;
+        this.specimenRotationHandler = specimenRotationHandler;
+        this.specimenClawHandler = specimenClawHandler;
+    }
+
+    public void setOffset(double[] posOffset, double headingOffset) { //Requires an array of size 2 and a heading within reasonable values
+        offset = posOffset;
+        this.headingOffset = (headingOffset * Math.PI) / 180;
     }
 
     public void setTargetPosition(double x, double y) {
@@ -83,13 +101,19 @@ public class AutoSkeleton {
     public boolean isExtensionDone() {
         return extensionHandler.isExtensionDone();
     }
+    public boolean isSpecExtensionDone() {
+        return specimenExtensionHandler.isExtensionDone();
+    }
 
     public boolean runToPosition(Telemetry telemetry, ElapsedTime runtime) {
         // Get position
         FlowSensor.PoseData pos = flowSensor.getOdometryData().pos;
-        double x = pos.x;
-        double y = pos.y;
+        double x = pos.x + offset[0];
+        double y = pos.y + offset[1];
         double yaw = imuSensor.getYaw();
+        //btw, heading offset gets applied again later :)
+        x = (Math.cos(headingOffset) * x) - (Math.sin(headingOffset) * y);
+        y = (Math.sin(headingOffset) * x) + (Math.cos(headingOffset) * y);
 
         telemetry.addData("Cur X", x);
         telemetry.addData("Cur Y", y);
@@ -157,6 +181,13 @@ public class AutoSkeleton {
             telemetry.addData("Turn", "Done");
         }
 
+        // Ok now we apply headingOffset
+        // If we applied the offset to our position, it'd be.. bad..
+        // It'd think that the one meter we travelled was 1 meter in the other direction
+        // This will hopefully work
+        // Apply rotation offset
+        xSpeed = (Math.cos(headingOffset) * xSpeed) - (Math.sin(headingOffset) * ySpeed);
+        ySpeed = (Math.sin(headingOffset) * xSpeed) + (Math.cos(headingOffset) * ySpeed);
 
         xSpeed = Math.max(Math.min(xSpeed, maxSpeed), -maxSpeed);
         ySpeed = Math.max(Math.min(ySpeed, maxSpeed), -maxSpeed);
@@ -191,5 +222,13 @@ public class AutoSkeleton {
 
     public void relativeRun(double x, double y) {
         wheelHandler.relativeVectorToMotion(y, x, 0);
+    }
+
+    public void setTargetSpecArmExtension(SpecimenExtensionHandler.SpecimenExtensionPositions extensionPosition) {
+        specimenExtensionHandler.gotoPosition(extensionPosition);
+    }
+
+    public void setSpecimenClawTarget(SpecimenClawHandler.ClawPositions clawPosition) {
+        specimenClawHandler.setClawPosition(clawPosition);
     }
 }

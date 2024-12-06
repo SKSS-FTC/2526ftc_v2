@@ -1,8 +1,16 @@
 package org.nknsd.teamcode.programs.autos;
 
+import android.widget.GridLayout;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import org.nknsd.teamcode.autoSteps.AutoStepAbsoluteControl;
+import org.nknsd.teamcode.autoSteps.AutoStepExtendSpecimenArm;
+import org.nknsd.teamcode.autoSteps.AutoStepSpecimenClaw;
+import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
+import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
+import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.autoSteps.AutoStepExtendArm;
@@ -24,7 +32,7 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 import java.util.LinkedList;
 import java.util.List;
 
-@Autonomous(name = "Score Specimen on Bar (IN DEV)")@Disabled
+@Autonomous(name = "Score Specimen on Bar (IN DEV)")
 public class SpecimenAuto extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
@@ -69,11 +77,25 @@ public class SpecimenAuto extends NKNProgramTrue {
         components.add(intakeSpinnerHandler);
 
 
+        // Specimen Stuff
+        SpecimenRotationHandler specimenRotationHandler = new SpecimenRotationHandler();
+        components.add(specimenRotationHandler);
+        telemetryEnabled.add(specimenRotationHandler);
+
+        SpecimenExtensionHandler specimenExtensionHandler = new SpecimenExtensionHandler();
+        components.add(specimenExtensionHandler);
+
+        SpecimenClawHandler specimenClawHandler = new SpecimenClawHandler();
+        components.add(specimenClawHandler);
+
+
         // Linking
         rotationHandler.link(potentiometerSensor, extensionHandler);
         extensionHandler.link(rotationHandler);
 
         autoSkeleton.link(wheelHandler, rotationHandler, extensionHandler, intakeSpinnerHandler, flowSensor, imuSensor);
+        autoSkeleton.specimenLink(specimenExtensionHandler, specimenRotationHandler, specimenClawHandler);
+        autoSkeleton.setOffset(new double[]{0.0, 0.0}, 180);
         assembleList(stepList, autoHeart, autoSkeleton);
     }
 
@@ -81,27 +103,29 @@ public class SpecimenAuto extends NKNProgramTrue {
         // Declare steps
         AutoStepSleep sleep = new AutoStepSleep(200);
 
-        AutoStepMove moveToBar = new AutoStepMove(0, 1.1);
+        AutoStepAbsoluteControl moveToBar = new AutoStepAbsoluteControl(-0.4332, 1.2692, 0);
+        AutoStepMove closeInOnBar = new AutoStepMove(0, 0.2);
 
         AutoStepRotateArm rotateToSpecimen = new AutoStepRotateArm(RotationHandler.RotationPositions.SPECIMEN);
 
-        AutoStepExtendArm extendToSpecimen = new AutoStepExtendArm(ExtensionHandler.ExtensionPositions.SPECIMEN);
+        AutoStepExtendSpecimenArm extendToReady = new AutoStepExtendSpecimenArm(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_READY);
+        AutoStepExtendSpecimenArm extendToClip = new AutoStepExtendSpecimenArm(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_CLIP);
 
-        AutoStepServo grip = new AutoStepServo(IntakeSpinnerHandler.HandStates.GRIP, 0);
+        AutoStepSpecimenClaw grip = new AutoStepSpecimenClaw(SpecimenClawHandler.ClawPositions.GRIP);
         AutoStepServo release = new AutoStepServo(IntakeSpinnerHandler.HandStates.RELEASE, 500);
-
 
 
         // Create path
         // Approach bar and align arm
-        stepList.add(moveToBar);
-        stepList.add(rotateToSpecimen);
         stepList.add(grip);
+        stepList.add(moveToBar);
+
 
         // Deposit specimen
-        stepList.add(extendToSpecimen);
-        stepList.add(sleep);
-        stepList.add(release);
+        stepList.add(extendToReady);
+        stepList.add(closeInOnBar);
+        stepList.add(extendToClip);
+
 
         autoHeart.linkSteps(stepList, autoSkeleton);
     }

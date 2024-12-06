@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.nknsd.teamcode.controlSchemes.abstracts.WheelControlScheme;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
 import org.nknsd.teamcode.components.sensors.IMUSensor;
@@ -20,6 +21,7 @@ public class AdvancedWheelDriver implements NKNComponent {
     private final GamePadHandler.GamepadSticks turnStick;
     private GamePadHandler gamePadHandler;
     private WheelHandler wheelHandler;
+    private WheelControlScheme controlScheme;
 
     private double moveSpeedMultiplier;
     private boolean imuCorrection = true;
@@ -118,9 +120,10 @@ public class AdvancedWheelDriver implements NKNComponent {
         telemetry.addData("Raw Speed", moveSpeedMultiplier);
     }
 
-    public void link(GamePadHandler gamePadHandler, WheelHandler wheelHandler, IMUSensor imuSensor) {
+    public void link(GamePadHandler gamePadHandler, WheelHandler wheelHandler, IMUSensor imuSensor, WheelControlScheme controlScheme) {
         this.gamePadHandler = gamePadHandler;
         this.wheelHandler = wheelHandler;
         this.imuSensor = imuSensor;
+        this.controlScheme = controlScheme;
     }
 }

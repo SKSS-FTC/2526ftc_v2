@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
+import org.nknsd.teamcode.controlSchemes.reals.CollyWheelController;
 import org.nknsd.teamcode.controlSchemes.reals.XandreSpecimenController;
 import org.nknsd.teamcode.drivers.SpecimenDriver;
 import org.nknsd.teamcode.frameworks.NKNComponent;
@@ -82,12 +83,13 @@ public class AlternateMovementNKNProgram extends NKNProgramTrue {
 
 
         // Controllers
+        CollyWheelController wheelController = new CollyWheelController();
         KarstenEACController eacController = new KarstenEACController();
         XandreSpecimenController specimenController = new XandreSpecimenController();
 
 
         // Link the components to each other
-        wheelDriver.link(gamePadHandler, wheelHandler, imuSensor);
+        wheelDriver.link(gamePadHandler, wheelHandler, imuSensor, wheelController);
         rotationHandler.link(potentiometerSensor, extensionHandler);
         extensionHandler.link(rotationHandler);
         eacDriver.link(gamePadHandler, rotationHandler, extensionHandler, intakeSpinnerHandler, eacController);
