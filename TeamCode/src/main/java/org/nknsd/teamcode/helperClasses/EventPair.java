@@ -13,7 +13,7 @@ public class EventPair {
         this.name = name;
     }
 
-    public boolean isEqualTo(Callable<Boolean> listener, Runnable event) {
-        return this.listener == listener && this.event == event;
+    public boolean isEqualTo(String name) {
+        return this.name.equals(name);
     }
 }
