@@ -10,6 +10,11 @@ public class CollyWheelController extends WheelControlScheme {
     private boolean delaySpeedChangesDown = false;
 
     @Override
+    public String getName() {
+        return "Colly";
+    }
+
+    @Override
     public Callable<Boolean> gearUp() {
         return new Callable<Boolean>() {
             @Override

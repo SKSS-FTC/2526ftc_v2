@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.nknsd.teamcode.frameworks.NKNComponent;
+import org.nknsd.teamcode.helperClasses.AdvancedTelemetry;
 import org.nknsd.teamcode.helperClasses.EventPair;
 
 import java.util.ArrayList;
@@ -16,18 +17,17 @@ public class GamePadHandler implements NKNComponent {
     // The key is the button + the name of the event
     private final ArrayList<EventPair> eventListeners = new ArrayList<EventPair>();
     private Telemetry telemetry;
+    private AdvancedTelemetry advancedTelemetry;
     private Gamepad gamePad1;
     private Gamepad gamePad2;
 
 
     private void iterateListeners() {
-//        telemetry.addData("Iterate Triggered", "Yes");
         for (EventPair eventListener : eventListeners) {
-//            telemetry.addData("Event Checked", eventListener.name);
             try {
                 if (eventListener.listener.call()) {
                     eventListener.event.run();
-//                    telemetry.addData("Event run", eventListener.name);
+                    advancedTelemetry.addData("Event run", eventListener.name);
                 }
             } catch (Exception e) {
                 telemetry.addData("Caught an exception!! REALLY BAD!! GET DILLON!! Event Name", eventListener.name);
@@ -41,6 +41,7 @@ public class GamePadHandler implements NKNComponent {
         this.gamePad1 = gamePad1;
         this.gamePad2 = gamePad2;
         this.telemetry = telemetry;
+        advancedTelemetry = new AdvancedTelemetry(telemetry);
 
         return true;
     }
@@ -73,6 +74,7 @@ public class GamePadHandler implements NKNComponent {
     @Override
     public void doTelemetry(Telemetry telemetry) {
         eventListeners.forEach((n) -> telemetry.addData("Event Found", n.name));
+        advancedTelemetry.printData();
     }
 
     public Gamepad getGamePad1() {
