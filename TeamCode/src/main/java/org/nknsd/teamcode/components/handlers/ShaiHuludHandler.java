@@ -74,4 +74,14 @@ public class ShaiHuludHandler implements NKNComponent {
             this.pos = pos;
         }
     }
+
+    public enum ExtensionPositions {
+        EXTENDED(0),
+        RETRACTED(0);
+
+        double pos;
+        ExtensionPosition(double pos) {
+            this.pos = pos;
+        }
+    }
 }
