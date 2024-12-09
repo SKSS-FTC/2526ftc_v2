@@ -68,7 +68,7 @@ public class CollyMovementNKNProgram extends NKNProgramTrue {
 
 
         // Link the components to each other
-        wheelDriver.link(gamePadHandler, wheelHandler, imuSensor);
+        //wheelDriver.link(gamePadHandler, wheelHandler, imuSensor);
         rotationHandler.link(potentiometerSensor, extensionHandler);
         extensionHandler.link(rotationHandler);
         eacDriver.link(gamePadHandler, rotationHandler, extensionHandler, intakeSpinnerHandler, eacController);
