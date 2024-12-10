@@ -43,9 +43,8 @@ public class SpecimenExtensionHandler implements NKNComponent {
             motor.setDirection(DcMotor.Direction.REVERSE);
         }
 
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //this was the line you were supposed to cut!!
         motor.setPower(motorPower);
-        motor.setTargetPosition(SpecimenExtensionPositions.RESTING.position);
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         return true;
@@ -58,7 +57,7 @@ public class SpecimenExtensionHandler implements NKNComponent {
 
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
-
+        motor.setTargetPosition(SpecimenExtensionPositions.RESTING.position);
     }
 
     @Override

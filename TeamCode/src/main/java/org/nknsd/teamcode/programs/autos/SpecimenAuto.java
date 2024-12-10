@@ -42,7 +42,7 @@ public class SpecimenAuto extends NKNProgramTrue {
 
 
         // Core mover
-        AutoSkeleton autoSkeleton = new AutoSkeleton(0.3, 0.8, 1.5);
+        AutoSkeleton autoSkeleton = new AutoSkeleton(0.3, 0.8, 1);
 
         AutoHeart autoHeart = new AutoHeart(stepList);
         components.add(autoHeart);
@@ -118,11 +118,12 @@ public class SpecimenAuto extends NKNProgramTrue {
         AutoStepAbsoluteControl moveTo1stSample = new AutoStepAbsoluteControl(1.6, 2.4861, 0);
         AutoStepMove depositSample = new AutoStepMove(0, -1.801);
         AutoStepAbsoluteControl moveTo2ndSample = new AutoStepAbsoluteControl(2.15, 2.4861, 0);
-        AutoStepAbsoluteControl moveTo3rdSample = new AutoStepAbsoluteControl(2.4, 2.4861, 0);
-        AutoStepAbsoluteControl prepareFor1stPickup = new AutoStepAbsoluteControl(1.5608, 0.6233, 0);
-        AutoStepMoveForwardWithSensor approachPickup = new AutoStepMoveForwardWithSensor(14, 0.2, .4);
+        //AutoStepAbsoluteControl moveTo3rdSample = new AutoStepAbsoluteControl(2.4, 2.4861, 0);
+        AutoStepAbsoluteControl prepareFor1stPickup = new AutoStepAbsoluteControl(1.6008, 0.5233, 0);
+        AutoStepMoveForwardWithSensor approachPickup = new AutoStepMoveForwardWithSensor(15.2, 0.2, .4);
         AutoStepRelativeMove alignSpecimen = new AutoStepRelativeMove(-0.3, 0, 400);
         AutoStepMoveNRotate rotateToEnd = new AutoStepMoveNRotate(0, 0, -90);
+        AutoStepMove slightEndAdjust = new AutoStepMove(-.2, 0);
 
         AutoStepSpecimenRotate rotateToDeposit = new AutoStepSpecimenRotate(SpecimenRotationHandler.SpecimenRotationPositions.BACK);
         AutoStepSpecimenRotate rotateToCollect = new AutoStepSpecimenRotate(SpecimenRotationHandler.SpecimenRotationPositions.FORWARD);
@@ -181,6 +182,7 @@ public class SpecimenAuto extends NKNProgramTrue {
         stepList.add(rotateToDeposit);
         stepList.add(normalSpeed);
         stepList.add(moveToBar);
+        stepList.add(slightEndAdjust);
         //actual deposit
         stepList.add(extendToReady);
         stepList.add(approachBar);
@@ -190,6 +192,7 @@ public class SpecimenAuto extends NKNProgramTrue {
         stepList.add(release);
         stepList.add(rotateToEnd);
         stepList.add(extendToRest);
+        stepList.add(sleep);
 
 
 
