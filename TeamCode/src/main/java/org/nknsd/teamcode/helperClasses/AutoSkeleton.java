@@ -245,4 +245,8 @@ public class AutoSkeleton {
     public double getSensorForDist() {
         return sensorForDist.getDistance();
     }
+
+    public double getSensorBackDist() {
+        return 0;
+    }
 }
