@@ -27,7 +27,7 @@ public class SpecimenExtensionHandler implements NKNComponent {
     public enum SpecimenExtensionPositions {
         RESTING(0),
         SPECIMEN_READY(1550),
-        SPECIMEN_CLIP(2420);
+        SPECIMEN_CLIP(2320);
 
         final int position;
 
@@ -98,7 +98,7 @@ public class SpecimenExtensionHandler implements NKNComponent {
     }
     public void resetEncoder() {
         if (target == SpecimenExtensionPositions.RESTING) {
-            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            //motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
     }

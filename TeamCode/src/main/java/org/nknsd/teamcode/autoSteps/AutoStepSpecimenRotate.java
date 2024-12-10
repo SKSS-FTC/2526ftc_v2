@@ -7,7 +7,7 @@ import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
-public class AutoStepSpecimenRotate implements NKNAutoStep {
+public class AutoStepSpecimenRotate extends NKNAutoStep {
     AutoSkeleton autoSkeleton;
     private final SpecimenRotationHandler.SpecimenRotationPositions rotationPosition;
 

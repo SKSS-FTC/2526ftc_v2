@@ -8,7 +8,7 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 import java.util.concurrent.TimeUnit;
 
-public class AutoStepMoveForwardWithSensor implements NKNAutoStep {
+public class AutoStepMoveForwardWithSensor extends NKNAutoStep {
     AutoSkeleton autoSkeleton;
     private final double targ; private final double speed; private final double margin;
 

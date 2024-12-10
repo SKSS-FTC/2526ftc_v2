@@ -14,7 +14,10 @@ public class DistanceSensorTest extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         DistSensor forwardSensor = new DistSensor("sensorForDist");
+        DistSensor backwardSensor = new DistSensor("sensorBackDist");
         components.add(forwardSensor);
+        components.add(backwardSensor);
         telemetryEnabled.add(forwardSensor);
+        telemetryEnabled.add(backwardSensor);
     }
 }

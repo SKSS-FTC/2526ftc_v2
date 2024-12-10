@@ -7,7 +7,7 @@ import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 import org.nknsd.teamcode.components.handlers.ExtensionHandler;
 
-public class AutoStepExtendArm implements NKNAutoStep {
+public class AutoStepExtendArm extends NKNAutoStep {
     private final ExtensionHandler.ExtensionPositions extensionPosition;
     AutoSkeleton autoSkeleton;
 

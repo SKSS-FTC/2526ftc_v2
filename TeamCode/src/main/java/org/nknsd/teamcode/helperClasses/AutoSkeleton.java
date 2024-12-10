@@ -30,6 +30,7 @@ public class AutoSkeleton {
     private SpecimenRotationHandler specimenRotationHandler;
     private SpecimenClawHandler specimenClawHandler;
     private DistSensor sensorForDist;
+    private DistSensor sensorBackDist;
     private double targetRotation = 0;
     private IntakeSpinnerHandler intakeSpinnerHandler;
     private PIDModel movementPIDx;
@@ -53,7 +54,7 @@ public class AutoSkeleton {
 
         movementPIDx = new PIDModel(kP, kI, kD);
         movementPIDy = new PIDModel(kP, kI, kD);
-        movementPIDturn = new PIDModel(maxSpeed / 10, maxSpeed / (800), 0.5);
+        movementPIDturn = new PIDModel(maxSpeed / 13, maxSpeed / (500), 0.5);
     }
 
     public void link(WheelHandler wheelHandler, RotationHandler rotationHandler, ExtensionHandler extensionHandler, IntakeSpinnerHandler intakeSpinnerHandler, FlowSensor flowSensor, IMUSensor imuSensor) {
@@ -71,8 +72,9 @@ public class AutoSkeleton {
         this.specimenClawHandler = specimenClawHandler;
     }
 
-    public void distSensorLink(DistSensor sensorForDist) {
+    public void distSensorLink(DistSensor sensorForDist, DistSensor sensorBackDist) {
         this.sensorForDist = sensorForDist;
+        this.sensorBackDist = sensorBackDist;
     }
 
     public void setOffset(double[] posOffset, double headingOffset) { //Requires an array of size 2 and a heading within reasonable values
@@ -247,6 +249,6 @@ public class AutoSkeleton {
     }
 
     public double getSensorBackDist() {
-        return 0;
+        return sensorBackDist.getDistance();
     }
 }

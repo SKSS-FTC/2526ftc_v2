@@ -8,7 +8,7 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 import java.util.concurrent.TimeUnit;
 
-public class AutoStepSleep implements NKNAutoStep {
+public class AutoStepSleep extends NKNAutoStep {
     AutoSkeleton autoSkeleton;
     private final long time;
     private long startTime;

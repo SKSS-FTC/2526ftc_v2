@@ -9,7 +9,7 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 import java.util.concurrent.TimeUnit;
 
-public class AutoStepSpecimenClaw implements NKNAutoStep {
+public class AutoStepSpecimenClaw extends NKNAutoStep {
     AutoSkeleton autoSkeleton;
     private final SpecimenClawHandler.ClawPositions clawPosition;
 

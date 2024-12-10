@@ -3,18 +3,16 @@ package org.nknsd.teamcode.autoSteps;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.nknsd.teamcode.components.sensors.DistSensor;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
-public class AutoStepMoveForwardWithTwoSensors implements NKNAutoStep { //this class uses the back sensor for movement
+public class AutoStepMoveBackwardWithSensor extends NKNAutoStep {
     AutoSkeleton autoSkeleton;
     private final double targ; private final double speed; private final double margin;
-    private double totalDist;
 
-    public AutoStepMoveForwardWithTwoSensors(double target, double speed, double margin) {
+    public AutoStepMoveBackwardWithSensor(double target, double speed, double margin) {
         this.targ = target;
-        this.speed = speed;
+        this.speed = -speed;
         this.margin = margin;
     }
 
@@ -24,7 +22,6 @@ public class AutoStepMoveForwardWithTwoSensors implements NKNAutoStep { //this c
     }
 
     public void begin(ElapsedTime runtime, Telemetry telemetry) {
-        totalDist = autoSkeleton.getSensorBackDist() + autoSkeleton.getSensorForDist();
         autoSkeleton.relativeRun(0, speed);
     }
 
@@ -40,8 +37,7 @@ public class AutoStepMoveForwardWithTwoSensors implements NKNAutoStep { //this c
     @Override
     public boolean isDone(ElapsedTime runtime) {
         // naive implementation
-        double dist = (totalDist - autoSkeleton.getSensorForDist() + autoSkeleton.getSensorBackDist()) / 2;
-        if (Math.abs(targ - dist) < margin) {
+        if (Math.abs(targ - autoSkeleton.getSensorBackDist()) < margin) {
             autoSkeleton.relativeRun(0, 0);
             return true;
         }

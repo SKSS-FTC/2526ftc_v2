@@ -6,7 +6,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
-public class AutoStepChangeMaxSpeed implements NKNAutoStep {
+public class AutoStepChangeMaxSpeed extends NKNAutoStep {
     AutoSkeleton autoSkeleton;
     private final double speed;
 

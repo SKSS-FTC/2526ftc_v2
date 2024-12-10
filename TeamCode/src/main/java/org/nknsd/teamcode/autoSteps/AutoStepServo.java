@@ -9,7 +9,7 @@ import org.nknsd.teamcode.components.handlers.IntakeSpinnerHandler;
 
 import java.util.concurrent.TimeUnit;
 
-public class AutoStepServo implements NKNAutoStep {
+public class AutoStepServo extends NKNAutoStep {
     AutoSkeleton autoSkeleton;
     private final IntakeSpinnerHandler.HandStates power;
     private long timeBegan;
