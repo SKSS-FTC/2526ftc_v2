@@ -76,12 +76,10 @@ public class ShaiHuludHandler implements NKNComponent {
                 setPositions(positions[0]);
                 break;
             case BEGINEXTEND:
-                stateStartTime = runtime.time(TimeUnit.MILLISECONDS);
                 setPositions(positions[1]);
                 state = ShaiStates.WAITINGFOREXTEND;
                 break;
             case WAITINGFOREXTEND:
-                // if (runtime.time(TimeUnit.MILLISECONDS) - stateStartTime >= 4000) { state = ShaiStates.ROTATEDOWN; }
                 if (!extensionMotor.isBusy()){ state = ShaiStates.ROTATEDOWN; }
                 break;
             case ROTATEDOWN:
@@ -106,7 +104,6 @@ public class ShaiHuludHandler implements NKNComponent {
                 state = ShaiStates.WAITFORRETRACT;
                 break;
             case WAITFORRETRACT:
-                // if (runtime.time(TimeUnit.MILLISECONDS) - stateStartTime >= 4000) { state = ShaiStates.EJECT; }
                 if (extensionMotor.getCurrentPosition() < 300){ state = ShaiStates.EJECT;; }
                 break;
             case EJECT:
