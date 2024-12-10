@@ -83,6 +83,7 @@ public class BasicMovementNKNProgram extends NKNProgramTrue {
 
         SpecimenDriver specimenDriver = new SpecimenDriver();
         components.add(specimenDriver);
+        telemetryEnabled.add(specimenDriver);
 
 
         // Controllers
