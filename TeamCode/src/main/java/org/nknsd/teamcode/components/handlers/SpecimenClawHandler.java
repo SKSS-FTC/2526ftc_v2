@@ -11,9 +11,11 @@ import org.nknsd.teamcode.frameworks.NKNComponent;
 public class SpecimenClawHandler implements NKNComponent {
     private final String clawName = "specimenClaw";
     private Servo servo;
+    private ClawPositions target = ClawPositions.GRIP   ; // damn you karsten, you've introduced a merge conflict !!!!
 
     public void setClawPosition(ClawPositions clawPositions) {
         servo.setPosition(clawPositions.position);
+        target = clawPositions;
     }
 
     @Override
@@ -44,12 +46,12 @@ public class SpecimenClawHandler implements NKNComponent {
 
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
-
+        servo.setPosition(target.position);
     }
 
     @Override
     public void doTelemetry(Telemetry telemetry) {
-        // Should add some telemetry
+        telemetry.addData("Claw Position", target.name());
     }
 
     public enum ClawPositions {

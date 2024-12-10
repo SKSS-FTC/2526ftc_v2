@@ -53,7 +53,7 @@ public class AutoSkeleton {
 
         movementPIDx = new PIDModel(kP, kI, kD);
         movementPIDy = new PIDModel(kP, kI, kD);
-        movementPIDturn = new PIDModel(maxSpeed / 16, maxSpeed / (6000), 0.5);
+        movementPIDturn = new PIDModel(maxSpeed / 10, maxSpeed / (800), 0.5);
     }
 
     public void link(WheelHandler wheelHandler, RotationHandler rotationHandler, ExtensionHandler extensionHandler, IntakeSpinnerHandler intakeSpinnerHandler, FlowSensor flowSensor, IMUSensor imuSensor) {

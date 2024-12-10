@@ -26,8 +26,8 @@ public class SpecimenExtensionHandler implements NKNComponent {
 
     public enum SpecimenExtensionPositions {
         RESTING(0),
-        SPECIMEN_READY(1950),
-        SPECIMEN_CLIP(2300);
+        SPECIMEN_READY(1550),
+        SPECIMEN_CLIP(2420);
 
         final int position;
 

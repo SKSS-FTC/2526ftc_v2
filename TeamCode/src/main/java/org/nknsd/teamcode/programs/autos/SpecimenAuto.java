@@ -9,6 +9,7 @@ import org.nknsd.teamcode.autoSteps.AutoStepAbsoluteControl;
 import org.nknsd.teamcode.autoSteps.AutoStepChangeMaxSpeed;
 import org.nknsd.teamcode.autoSteps.AutoStepExtendSpecimenArm;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveForwardWithSensor;
+import org.nknsd.teamcode.autoSteps.AutoStepRelativeMove;
 import org.nknsd.teamcode.autoSteps.AutoStepSpecimenClaw;
 import org.nknsd.teamcode.autoSteps.AutoStepSpecimenRotate;
 import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
@@ -87,7 +88,6 @@ public class SpecimenAuto extends NKNProgramTrue {
         // Specimen Stuff
         SpecimenRotationHandler specimenRotationHandler = new SpecimenRotationHandler();
         components.add(specimenRotationHandler);
-        telemetryEnabled.add(specimenRotationHandler);
 
         SpecimenExtensionHandler specimenExtensionHandler = new SpecimenExtensionHandler();
         components.add(specimenExtensionHandler);
@@ -110,14 +110,19 @@ public class SpecimenAuto extends NKNProgramTrue {
 
     private void assembleList(List<NKNAutoStep> stepList, AutoHeart autoHeart, AutoSkeleton autoSkeleton) {
         // Declare steps
-        AutoStepSleep sleep = new AutoStepSleep(200);
+        AutoStepSleep sleep = new AutoStepSleep(300);
 
         AutoStepAbsoluteControl moveToBar = new AutoStepAbsoluteControl(-0.4332, 1.20, 0);
-        AutoStepMoveForwardWithSensor approachBar = new AutoStepMoveForwardWithSensor(78, -0.2, 1.6); // negative speed because robot backwards and dumb
+        AutoStepMoveForwardWithSensor approachBar = new AutoStepMoveForwardWithSensor(79, -0.15, 0.9); // negative speed because robot backwards and dumb
         AutoStepAbsoluteControl moveToB2 = new AutoStepAbsoluteControl(1.3, 1, 0);
         AutoStepMove moveUp = new AutoStepMove(0, 1);
         AutoStepAbsoluteControl moveTo1stSample = new AutoStepAbsoluteControl(1.6, 2.4861, 0);
         AutoStepMove depositSample = new AutoStepMove(0, -1.801);
+        AutoStepAbsoluteControl moveTo2ndSample = new AutoStepAbsoluteControl(2.15, 2.4861, 0);
+        AutoStepAbsoluteControl moveTo3rdSample = new AutoStepAbsoluteControl(2.46, 2.4861, 0);
+        AutoStepAbsoluteControl prepareFor1stPickup = new AutoStepAbsoluteControl(1.5608, 0.6233, 0);
+        AutoStepMoveForwardWithSensor approachPickup = new AutoStepMoveForwardWithSensor(14, 0.2, .4);
+        AutoStepRelativeMove alignSpecimen = new AutoStepRelativeMove(-0.3, 0, 400);
 
         AutoStepSpecimenRotate rotateToDeposit = new AutoStepSpecimenRotate(SpecimenRotationHandler.SpecimenRotationPositions.BACK);
         AutoStepSpecimenRotate rotateToCollect = new AutoStepSpecimenRotate(SpecimenRotationHandler.SpecimenRotationPositions.FORWARD);
@@ -130,7 +135,7 @@ public class SpecimenAuto extends NKNProgramTrue {
         AutoStepSpecimenClaw release = new AutoStepSpecimenClaw(SpecimenClawHandler.ClawPositions.RELEASE);
 
         AutoStepChangeMaxSpeed slowSpeed = new AutoStepChangeMaxSpeed(0.3);
-        AutoStepChangeMaxSpeed normalSpeed = new AutoStepChangeMaxSpeed(0.5);
+        AutoStepChangeMaxSpeed normalSpeed = new AutoStepChangeMaxSpeed(0.7);
 
 
         // Create path
@@ -158,10 +163,22 @@ public class SpecimenAuto extends NKNProgramTrue {
         stepList.add(depositSample);
 
         // Push 2nd blue
+        stepList.add(moveTo1stSample);
+        stepList.add(moveTo2ndSample);
+        stepList.add(depositSample);
 
         // Push.. 3rd.. blue
+        stepList.add(moveTo2ndSample);
+        stepList.add(moveTo3rdSample);
+        stepList.add(depositSample);
 
         // Grab 2nd specimen
+        stepList.add(prepareFor1stPickup);
+        stepList.add(slowSpeed);
+        stepList.add(approachPickup);
+        stepList.add(alignSpecimen);
+        stepList.add(grip);
+
 
 
         autoHeart.linkSteps(stepList, autoSkeleton);
