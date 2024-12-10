@@ -120,7 +120,7 @@ public class SpecimenAuto extends NKNProgramTrue {
         AutoStepAbsoluteControl moveTo2ndSample = new AutoStepAbsoluteControl(2.15, 2.4861, 0);
         //AutoStepAbsoluteControl moveTo3rdSample = new AutoStepAbsoluteControl(2.4, 2.4861, 0);
         AutoStepAbsoluteControl prepareFor1stPickup = new AutoStepAbsoluteControl(1.6008, 0.5233, 0);
-        AutoStepMoveForwardWithSensor approachPickup = new AutoStepMoveForwardWithSensor(15.2, 0.2, .4);
+        AutoStepMoveForwardWithSensor approachPickup = new AutoStepMoveForwardWithSensor(16, 0.2, .4);
         AutoStepRelativeMove alignSpecimen = new AutoStepRelativeMove(-0.3, 0, 400);
         AutoStepMoveNRotate rotateToEnd = new AutoStepMoveNRotate(0, 0, -90);
         AutoStepMove slightEndAdjust = new AutoStepMove(-.2, 0);
@@ -172,6 +172,8 @@ public class SpecimenAuto extends NKNProgramTrue {
         stepList.add(prepareFor1stPickup);
         stepList.add(slowSpeed);
         stepList.add(approachPickup);
+        //temporary sleep added below by karsten to observe potential issues
+        stepList.add(sleep);
         stepList.add(alignSpecimen);
         stepList.add(sleep);
         stepList.add(grip);

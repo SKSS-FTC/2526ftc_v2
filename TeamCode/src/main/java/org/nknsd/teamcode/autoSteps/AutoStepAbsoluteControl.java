@@ -7,7 +7,6 @@ import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 public class AutoStepAbsoluteControl extends NKNAutoStep {
-    AutoSkeleton autoSkeleton;
     boolean done = false;
     private final double heading;
     private final double xTarg;
