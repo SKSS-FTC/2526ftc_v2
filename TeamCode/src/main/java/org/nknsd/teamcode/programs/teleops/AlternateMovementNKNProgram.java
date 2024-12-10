@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
+import org.nknsd.teamcode.controlSchemes.reals.CollyWheelController;
 import org.nknsd.teamcode.controlSchemes.reals.XandreSpecimenController;
 import org.nknsd.teamcode.drivers.SpecimenDriver;
 import org.nknsd.teamcode.frameworks.NKNComponent;
@@ -29,6 +30,7 @@ public class AlternateMovementNKNProgram extends NKNProgramTrue {
         // Misc
         GamePadHandler gamePadHandler = new GamePadHandler();
         components.add(gamePadHandler);
+        //telemetryEnabled.add(gamePadHandler);
 
         WheelHandler wheelHandler = new WheelHandler();
         components.add(wheelHandler);
@@ -59,10 +61,11 @@ public class AlternateMovementNKNProgram extends NKNProgramTrue {
         // Specimen Handler
         SpecimenRotationHandler specimenRotationHandler = new SpecimenRotationHandler();
         components.add(specimenRotationHandler);
-        telemetryEnabled.add(specimenRotationHandler);
+        //telemetryEnabled.add(specimenRotationHandler);
 
         SpecimenExtensionHandler specimenExtensionHandler = new SpecimenExtensionHandler();
         components.add(specimenExtensionHandler);
+        //telemetryEnabled.add(specimenExtensionHandler);
 
         SpecimenClawHandler specimenClawHandler = new SpecimenClawHandler();
         components.add(specimenClawHandler);
@@ -79,19 +82,22 @@ public class AlternateMovementNKNProgram extends NKNProgramTrue {
 
         SpecimenDriver specimenDriver = new SpecimenDriver();
         components.add(specimenDriver);
+        telemetryEnabled.add(specimenDriver);
 
 
         // Controllers
+        CollyWheelController wheelController = new CollyWheelController();
         KarstenEACController eacController = new KarstenEACController();
         XandreSpecimenController specimenController = new XandreSpecimenController();
 
 
         // Link the components to each other
-        //wheelDriver.link(gamePadHandler, wheelHandler, imuSensor);
+        wheelDriver.link(gamePadHandler, wheelHandler, imuSensor, wheelController);
         rotationHandler.link(potentiometerSensor, extensionHandler);
         extensionHandler.link(rotationHandler);
         eacDriver.link(gamePadHandler, rotationHandler, extensionHandler, intakeSpinnerHandler, eacController);
         specimenDriver.link(specimenExtensionHandler, specimenRotationHandler, specimenClawHandler, gamePadHandler, specimenController);
+        wheelController.link(gamePadHandler);
         eacController.link(gamePadHandler);
         eacController.linkExtensionHandler(extensionHandler);
         specimenController.link(gamePadHandler);

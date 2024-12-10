@@ -147,6 +147,7 @@ public class EACDriver implements NKNComponent {
         } else {
             telemetry.addData("Arm Controller State", "Specimen");
         }
+        telemetry.addData("Sample Controls", controlScheme.getName());
     }
 
     public void link(GamePadHandler gamePadHandler, RotationHandler rotationHandler, ExtensionHandler extensionHandler, IntakeSpinnerHandler servoHandler, EACControlScheme controlScheme) {
