@@ -19,13 +19,6 @@ public class SpecimenDriver implements NKNComponent {
     private SpecimenClawHandler specimenClawHandler;
     private SpecimenControlScheme controlScheme;
 
-    GamePadHandler.GamepadButtons rotateForwardButton = GamePadHandler.GamepadButtons.DPAD_UP;
-    GamePadHandler.GamepadButtons rotateBackwardButton = GamePadHandler.GamepadButtons.DPAD_DOWN;
-    GamePadHandler.GamepadButtons extendButton = GamePadHandler.GamepadButtons.RIGHT_BUMPER;
-    GamePadHandler.GamepadButtons retractButton = GamePadHandler.GamepadButtons.LEFT_BUMPER;
-    GamePadHandler.GamepadButtons grabButton = GamePadHandler.GamepadButtons.A;
-    GamePadHandler.GamepadButtons releaseButton = GamePadHandler.GamepadButtons.B;
-
     Runnable specimenExtend = new Runnable() {
         @Override
         public void run() {
@@ -86,6 +79,13 @@ public class SpecimenDriver implements NKNComponent {
             }
         }
     };
+    Runnable goToRestingAfterRelease = new Runnable(){
+
+        @Override
+        public void run() {
+            specimenRotationHandler.goToPosition(SpecimenRotationHandler.SpecimenRotationPositions.MIDDLE);
+        }
+    };
     Runnable grip = new Runnable() {
         @Override
         public void run() {
@@ -98,9 +98,11 @@ public class SpecimenDriver implements NKNComponent {
             specimenClawHandler.setClawPosition(SpecimenClawHandler.ClawPositions.RELEASE);
         }
     };
+    private Telemetry telemetry;
 
     @Override
     public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
+        this.telemetry = telemetry;
         return true;
     }
 
@@ -111,12 +113,13 @@ public class SpecimenDriver implements NKNComponent {
 
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
-        gamePadHandler.addListener(controlScheme.specimenBackwards(), specimenBackward, "Specimen Rotate Backwards");
-        gamePadHandler.addListener(controlScheme.specimenForward(), specimenForward, "Specimen Rotate Forwards");
-        gamePadHandler.addListener(controlScheme.specimenGrab(), grip, "Specimen Grip");
-        gamePadHandler.addListener(controlScheme.specimenRelease(), release, "Specimen Release");
-        gamePadHandler.addListener(controlScheme.specimenRaise(), specimenExtend, "Specimen Extend");
-        gamePadHandler.addListener(controlScheme.specimenLower(), specimenRetract, "Specimen Lower");
+        gamePadHandler.addListener2(controlScheme.specimenBackwards(), specimenBackward, "Specimen Rotate Backwards");
+        gamePadHandler.addListener2(controlScheme.specimenForward(), specimenForward, "Specimen Rotate Forwards");
+        gamePadHandler.addListener2(controlScheme.specimenGrab(), grip, "Specimen Grip");
+        gamePadHandler.addListener2(controlScheme.specimenRelease(), release, "Specimen Release");
+        gamePadHandler.addListener2(controlScheme.specimenRaise(), specimenExtend, "Specimen Extend");
+        gamePadHandler.addListener2(controlScheme.specimenLower(), specimenRetract, "Specimen Lower");
+        gamePadHandler.addListener2(controlScheme.goToRestingAfterRelease(), goToRestingAfterRelease,"Go To Resting After Release");
     }
 
     @Override

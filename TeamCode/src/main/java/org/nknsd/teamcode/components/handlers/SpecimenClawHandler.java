@@ -11,11 +11,19 @@ import org.nknsd.teamcode.frameworks.NKNComponent;
 public class SpecimenClawHandler implements NKNComponent {
     private final String clawName = "specimenClaw";
     private Servo servo;
-    private ClawPositions target = ClawPositions.GRIP   ; // damn you karsten, you've introduced a merge conflict !!!!
+    public ClawPositions clawPosition = ClawPositions.GRIP;
+    private SpecimenRotationHandler specimenRotationHandler;
+    public SpecimenRotationHandler.SpecimenRotationPositions firstClosedPosition;
 
     public void setClawPosition(ClawPositions clawPositions) {
         servo.setPosition(clawPositions.position);
-        target = clawPositions;
+        clawPosition = clawPositions;
+
+        if (clawPositions == ClawPositions.GRIP) {
+            firstClosedPosition = specimenRotationHandler.targetPosition();
+        } else {
+            firstClosedPosition = null;
+        }
     }
 
     @Override
@@ -46,12 +54,15 @@ public class SpecimenClawHandler implements NKNComponent {
 
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
-        servo.setPosition(target.position);
+        servo.setPosition(clawPosition.position);
     }
 
     @Override
     public void doTelemetry(Telemetry telemetry) {
-        telemetry.addData("Claw Position", target.name());
+        telemetry.addData("Claw Position", clawPosition.name());
+        if (firstClosedPosition != null) {
+            telemetry.addData("Last Pickup Loc", firstClosedPosition.name());
+        }
     }
 
     public enum ClawPositions {
@@ -61,4 +72,5 @@ public class SpecimenClawHandler implements NKNComponent {
         public final double position;
         ClawPositions(double position) { this.position = position;}
     }
+    public void link(SpecimenRotationHandler specimenRotationHandler){this.specimenRotationHandler = specimenRotationHandler;}
 }

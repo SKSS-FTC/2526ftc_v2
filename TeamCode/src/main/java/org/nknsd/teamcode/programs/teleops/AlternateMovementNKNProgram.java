@@ -95,6 +95,9 @@ public class AlternateMovementNKNProgram extends NKNProgramTrue {
         wheelDriver.link(gamePadHandler, wheelHandler, imuSensor, wheelController);
         rotationHandler.link(potentiometerSensor, extensionHandler);
         extensionHandler.link(rotationHandler);
+        specimenClawHandler.link(specimenRotationHandler);
+        specimenExtensionHandler.link(specimenClawHandler, specimenRotationHandler);
+
         eacDriver.link(gamePadHandler, rotationHandler, extensionHandler, intakeSpinnerHandler, eacController);
         specimenDriver.link(specimenExtensionHandler, specimenRotationHandler, specimenClawHandler, gamePadHandler, specimenController);
         wheelController.link(gamePadHandler);
