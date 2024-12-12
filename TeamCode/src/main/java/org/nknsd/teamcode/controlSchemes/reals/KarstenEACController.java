@@ -150,4 +150,14 @@ public class KarstenEACController extends EACControlScheme {
             }
         };
     }
+
+    @Override
+    public Callable<Boolean> resetEAC() {
+        return new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return GamePadHandler.GamepadButtons.BACK.detect(gamePadHandler.getGamePad2());
+            }
+        };
+    }
 }
