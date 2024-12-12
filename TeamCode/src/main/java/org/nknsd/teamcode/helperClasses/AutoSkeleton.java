@@ -7,6 +7,7 @@ import org.nknsd.teamcode.components.handlers.ExtensionHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
+import org.nknsd.teamcode.components.sensors.DistSensor;
 import org.nknsd.teamcode.components.sensors.FlowSensor;
 import org.nknsd.teamcode.components.sensors.IMUSensor;
 import org.nknsd.teamcode.components.handlers.IntakeSpinnerHandler;
@@ -28,6 +29,8 @@ public class AutoSkeleton {
     private SpecimenExtensionHandler specimenExtensionHandler;
     private SpecimenRotationHandler specimenRotationHandler;
     private SpecimenClawHandler specimenClawHandler;
+    private DistSensor sensorForDist;
+    private DistSensor sensorBackDist;
     private double targetRotation = 0;
     private IntakeSpinnerHandler intakeSpinnerHandler;
     private PIDModel movementPIDx;
@@ -51,7 +54,7 @@ public class AutoSkeleton {
 
         movementPIDx = new PIDModel(kP, kI, kD);
         movementPIDy = new PIDModel(kP, kI, kD);
-        movementPIDturn = new PIDModel(maxSpeed / 16, maxSpeed / (16000), 0.5);
+        movementPIDturn = new PIDModel(maxSpeed / 13, maxSpeed / (500), 0.5);
     }
 
     public void link(WheelHandler wheelHandler, RotationHandler rotationHandler, ExtensionHandler extensionHandler, IntakeSpinnerHandler intakeSpinnerHandler, FlowSensor flowSensor, IMUSensor imuSensor) {
@@ -67,6 +70,11 @@ public class AutoSkeleton {
         this.specimenExtensionHandler = specimenExtensionHandler;
         this.specimenRotationHandler = specimenRotationHandler;
         this.specimenClawHandler = specimenClawHandler;
+    }
+
+    public void distSensorLink(DistSensor sensorForDist, DistSensor sensorBackDist) {
+        this.sensorForDist = sensorForDist;
+        this.sensorBackDist = sensorBackDist;
     }
 
     public void setOffset(double[] posOffset, double headingOffset) { //Requires an array of size 2 and a heading within reasonable values
@@ -230,5 +238,17 @@ public class AutoSkeleton {
 
     public void setSpecimenClawTarget(SpecimenClawHandler.ClawPositions clawPosition) {
         specimenClawHandler.setClawPosition(clawPosition);
+    }
+
+    public void setSpecimenRotationTarget(SpecimenRotationHandler.SpecimenRotationPositions rotationPosition) {
+        specimenRotationHandler.goToPosition(rotationPosition);
+    }
+
+    public double getSensorForDist() {
+        return sensorForDist.getDistance();
+    }
+
+    public double getSensorBackDist() {
+        return sensorBackDist.getDistance();
     }
 }

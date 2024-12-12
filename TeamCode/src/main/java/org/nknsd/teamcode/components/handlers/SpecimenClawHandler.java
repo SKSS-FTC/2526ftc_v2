@@ -54,7 +54,7 @@ public class SpecimenClawHandler implements NKNComponent {
 
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
-
+        servo.setPosition(clawPosition.position);
     }
 
     @Override
@@ -63,7 +63,6 @@ public class SpecimenClawHandler implements NKNComponent {
         if (firstClosedPosition != null) {
             telemetry.addData("Last Pickup Loc", firstClosedPosition.name());
         }
-
     }
 
     public enum ClawPositions {

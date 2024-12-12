@@ -8,7 +8,7 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 import java.util.concurrent.TimeUnit;
 
-public class AutoStepRelativeMovement implements NKNAutoStep {
+public class AutoStepRelativeMovement extends NKNAutoStep {
     AutoSkeleton autoSkeleton;
     boolean done = false;
     private final double turning;

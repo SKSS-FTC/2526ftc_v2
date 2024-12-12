@@ -29,8 +29,8 @@ public class SpecimenExtensionHandler implements NKNComponent {
 
     public enum SpecimenExtensionPositions {
         RESTING(0),
-        SPECIMEN_READY(1950),
-        SPECIMEN_CLIP(2300);
+        SPECIMEN_READY(1550),
+        SPECIMEN_CLIP(2320);
 
         final int position;
 
@@ -46,13 +46,6 @@ public class SpecimenExtensionHandler implements NKNComponent {
             motor.setDirection(DcMotor.Direction.REVERSE);
         }
 
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setPower(motorPower);
-        motor.setTargetPosition(SpecimenExtensionPositions.RESTING.position);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        this.telemetry = telemetry;
-
         return true;
     }
 
@@ -63,7 +56,10 @@ public class SpecimenExtensionHandler implements NKNComponent {
 
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
-
+        //motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //this was the line you were supposed to cut!!
+        motor.setPower(motorPower);
+        motor.setTargetPosition(SpecimenExtensionPositions.RESTING.position);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     @Override
@@ -87,7 +83,7 @@ public class SpecimenExtensionHandler implements NKNComponent {
                 extenderPrevious = motor.getCurrentPosition();
             lastResetAttempt = runtime.now(TimeUnit.MILLISECONDS);
         }
-    } //resets encoder when arm is resting and no longer moving
+    }
 
     @Override
     public void doTelemetry(Telemetry telemetry) {

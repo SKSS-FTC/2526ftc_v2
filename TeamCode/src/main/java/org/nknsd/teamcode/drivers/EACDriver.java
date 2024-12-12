@@ -96,6 +96,14 @@ public class EACDriver implements NKNComponent {
             servoHandler.setServoPower(IntakeSpinnerHandler.HandStates.REST);
         }
     };
+    Runnable resetEAC = new Runnable() {
+        @Override
+        public void run() {
+            servoHandler.setServoPower(IntakeSpinnerHandler.HandStates.REST);
+            rotationHandler.setTargetRotationPosition(RotationHandler.RotationPositions.RESTING);
+            extensionHandler.gotoPosition(ExtensionHandler.ExtensionPositions.RESTING);
+        }
+    };
 
 
     @Override
@@ -119,6 +127,7 @@ public class EACDriver implements NKNComponent {
         gamePadHandler.addListener(controlScheme.sampleRelease(), release, "Sample Release");
         gamePadHandler.addListener(controlScheme.sampleNeutral(), neutral, "Sample Neutral");
         gamePadHandler.addListener(controlScheme.swapEACcontrol(), () -> isInEACState = !isInEACState, "Swap EAC & Specimen");
+        gamePadHandler.addListener(controlScheme.resetEAC(), resetEAC, "Reset EAC");
     }
 
     @Override
