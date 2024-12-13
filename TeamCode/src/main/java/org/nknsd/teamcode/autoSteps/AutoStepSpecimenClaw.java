@@ -10,17 +10,10 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 import java.util.concurrent.TimeUnit;
 
 public class AutoStepSpecimenClaw extends NKNAutoStep {
-    AutoSkeleton autoSkeleton;
     private final SpecimenClawHandler.ClawPositions clawPosition;
 
     public AutoStepSpecimenClaw(SpecimenClawHandler.ClawPositions clawPosition) {
         this.clawPosition = clawPosition;
-    }
-
-    @Override
-    public void link(AutoSkeleton autoSkeleton) {
-        this.autoSkeleton = autoSkeleton;
-
     }
 
     public void begin(ElapsedTime runtime, Telemetry telemetry) {

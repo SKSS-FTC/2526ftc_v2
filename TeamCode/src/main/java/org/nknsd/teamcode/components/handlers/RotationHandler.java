@@ -151,7 +151,7 @@ public class RotationHandler implements NKNComponent {
     }
 
     public enum RotationPositions {
-        PICKUP(0.58), PREPICKUP(0.82), HIGH(1.44), RESTING(2.24), SPECIMEN(2.26);
+        PICKUP(0), PREPICKUP(0.374), HIGH(0.85), RESTING(1.35), SPECIMEN(1.1);
 
         public final double target;
 

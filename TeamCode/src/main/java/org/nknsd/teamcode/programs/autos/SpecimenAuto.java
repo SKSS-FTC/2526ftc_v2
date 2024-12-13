@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.nknsd.teamcode.autoSteps.AutoStepAbsoluteControl;
 import org.nknsd.teamcode.autoSteps.AutoStepChangeMaxSpeed;
 import org.nknsd.teamcode.autoSteps.AutoStepExtendSpecimenArm;
+import org.nknsd.teamcode.autoSteps.AutoStepExtendSpecimenArmSynced;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveBackwardWithSensor;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveForwardWithSensor;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveNRotate;
@@ -104,6 +105,8 @@ public class SpecimenAuto extends NKNProgramTrue {
         autoSkeleton.specimenLink(specimenExtensionHandler, specimenRotationHandler, specimenClawHandler);
         autoSkeleton.distSensorLink(sensorForDist, sensorBackDist);
         autoSkeleton.setOffset(new double[]{0.0, 0.0}, 180);
+        specimenClawHandler.link(specimenRotationHandler);
+        specimenExtensionHandler.link(specimenClawHandler, specimenRotationHandler);
         assembleList(stepList, autoHeart, autoSkeleton);
     }
 
@@ -112,7 +115,8 @@ public class SpecimenAuto extends NKNProgramTrue {
         AutoStepSleep sleep = new AutoStepSleep(300);
 
         AutoStepAbsoluteControl moveToBar = new AutoStepAbsoluteControl(-0.4332, 1.15, 0);
-        AutoStepMoveBackwardWithSensor approachBar = new AutoStepMoveBackwardWithSensor(6, .15, 0.6);
+        AutoStepMoveBackwardWithSensor approachBar = new AutoStepMoveBackwardWithSensor(5, .15, 0.6);
+        AutoStepRelativeMove clipApproach = new AutoStepRelativeMove(0,-0.2,100);
         AutoStepAbsoluteControl moveToB2 = new AutoStepAbsoluteControl(1.3, 1, 0);
         AutoStepMove moveUp = new AutoStepMove(0, 1);
         AutoStepAbsoluteControl moveTo1stSample = new AutoStepAbsoluteControl(1.6, 2.4861, 0);
@@ -129,14 +133,14 @@ public class SpecimenAuto extends NKNProgramTrue {
         AutoStepSpecimenRotate rotateToCollect = new AutoStepSpecimenRotate(SpecimenRotationHandler.SpecimenRotationPositions.FORWARD);
 
         AutoStepExtendSpecimenArm extendToReady = new AutoStepExtendSpecimenArm(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_READY);
-        AutoStepExtendSpecimenArm extendToClip = new AutoStepExtendSpecimenArm(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_CLIP);
+        AutoStepExtendSpecimenArmSynced extendToClip = new AutoStepExtendSpecimenArmSynced(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_CLIP);
         AutoStepExtendSpecimenArm extendToRest = new AutoStepExtendSpecimenArm(SpecimenExtensionHandler.SpecimenExtensionPositions.RESTING);
 
         AutoStepSpecimenClaw grip = new AutoStepSpecimenClaw(SpecimenClawHandler.ClawPositions.GRIP);
         AutoStepSpecimenClaw release = new AutoStepSpecimenClaw(SpecimenClawHandler.ClawPositions.RELEASE);
 
-        AutoStepChangeMaxSpeed slowSpeed = new AutoStepChangeMaxSpeed(0.32);
-        AutoStepChangeMaxSpeed normalSpeed = new AutoStepChangeMaxSpeed(0.68);
+        AutoStepChangeMaxSpeed slowSpeed = new AutoStepChangeMaxSpeed(0.3);
+        AutoStepChangeMaxSpeed normalSpeed = new AutoStepChangeMaxSpeed(0.6);
 
 
         // Create path
@@ -149,6 +153,9 @@ public class SpecimenAuto extends NKNProgramTrue {
         stepList.add(approachBar);
         stepList.add(grip);
         stepList.add(extendToClip);
+        stepList.add(sleep);
+        stepList.add(sleep);
+        stepList.add(clipApproach);
         stepList.add(sleep);
         stepList.add(release);
 
@@ -189,9 +196,14 @@ public class SpecimenAuto extends NKNProgramTrue {
         stepList.add(extendToReady);
         stepList.add(approachBar);
         stepList.add(grip);
+
         stepList.add(extendToClip);
         stepList.add(sleep);
+        stepList.add(sleep);
+        stepList.add(clipApproach);
+        stepList.add(sleep);
         stepList.add(release);
+
         stepList.add(rotateToEnd);
         stepList.add(extendToRest);
         stepList.add(sleep);

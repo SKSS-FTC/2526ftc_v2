@@ -14,7 +14,7 @@ import org.nknsd.teamcode.frameworks.NKNProgramTrue;
 
 import java.util.List;
 
-@TeleOp(name = "Advanced Movement Test", group="Tests") @Disabled
+@TeleOp(name = "Advanced Movement Test", group="Tests")
 public class AbsoluteMovementTestProgram extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {

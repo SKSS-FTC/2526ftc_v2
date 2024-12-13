@@ -93,20 +93,20 @@ public class BasketAuto extends NKNProgramTrue {
         AutoStepRelativeMove backMOREAwayFromBasket = new AutoStepRelativeMove(0, -.45, 250);
         AutoStepRelativeMove slightlyBackAway = new AutoStepRelativeMove(0, -.4, 190);
 
-        AutoStepAbsoluteControl pickUpFirstYellow = new AutoStepAbsoluteControl(0.4113, 1.4, -68.3);
+        AutoStepAbsoluteControl pickUpFirstYellow = new AutoStepAbsoluteControl(0.4113, 1.35, -68.3);
         AutoStepRelativeMove moveToPickup = new AutoStepRelativeMove(0, 0.3, 400);
 
-        AutoStepAbsoluteControl pickUpSecondYellow = new AutoStepAbsoluteControl(-0.0716, 1.73, -90);
+        AutoStepAbsoluteControl pickUpSecondYellow = new AutoStepAbsoluteControl(-0.0716, 1.68, -90);
         AutoStepAbsoluteControl alignToPark = new AutoStepAbsoluteControl(-0.05, 2.2, 90);
         AutoStepMove driveInToPark = new AutoStepMove(0.58, 0);
 
         AutoStepMoveNRotate turnToEnd = new AutoStepMoveNRotate(0, 0, 90);
 
-
         AutoStepRotateArm rotateToHigh = new AutoStepRotateArm(RotationHandler.RotationPositions.HIGH);
         AutoStepRotateArm rotateToPickup = new AutoStepRotateArm(RotationHandler.RotationPositions.PICKUP);
         AutoStepRotateArm rotateToRest = new AutoStepRotateArm(RotationHandler.RotationPositions.RESTING);
         AutoStepRotateArm rotateToPrepickup = new AutoStepRotateArm(RotationHandler.RotationPositions.PREPICKUP);
+        AutoStepRotateArm rotateToSpecial = new AutoStepRotateArm(RotationHandler.RotationPositions.SPECIMEN);
 
         AutoStepExtendArm extendToHigh = new AutoStepExtendArm(ExtensionHandler.ExtensionPositions.HIGH_BASKET);
         AutoStepExtendArmSynced retract = new AutoStepExtendArmSynced(ExtensionHandler.ExtensionPositions.RESTING);
@@ -115,8 +115,8 @@ public class BasketAuto extends NKNProgramTrue {
         AutoStepServo gripBlock = new AutoStepServo(IntakeSpinnerHandler.HandStates.GRIP, 400);
         AutoStepServo neutralServo = new AutoStepServo(IntakeSpinnerHandler.HandStates.REST, 0);
 
-        AutoStepChangeMaxSpeed slowSpeed = new AutoStepChangeMaxSpeed(0.55);
-        AutoStepChangeMaxSpeed normalSpeed = new AutoStepChangeMaxSpeed(0.75);
+        AutoStepChangeMaxSpeed slowSpeed = new AutoStepChangeMaxSpeed(0.5);
+        AutoStepChangeMaxSpeed normalSpeed = new AutoStepChangeMaxSpeed(0.69);
 
 
 
@@ -126,6 +126,9 @@ public class BasketAuto extends NKNProgramTrue {
         stepList.add(orientToBasket);
         stepList.add(extendToHigh);
         stepList.add(releaseBlock);
+        stepList.add(sleep);
+        stepList.add(rotateToSpecial);
+        stepList.add(sleep);
         stepList.add(backAwayFromBasket);
         stepList.add(retract);
 
@@ -147,6 +150,9 @@ public class BasketAuto extends NKNProgramTrue {
         stepList.add(orientToBasket);
         stepList.add(extendToHigh);
         stepList.add(releaseBlock);
+        stepList.add(sleep);
+        stepList.add(rotateToSpecial);
+        stepList.add(sleep);
         stepList.add(backMOREAwayFromBasket);
         stepList.add(retract);
 
@@ -166,6 +172,9 @@ public class BasketAuto extends NKNProgramTrue {
         stepList.add(slightlyBackAway);
         stepList.add(extendToHigh);
         stepList.add(releaseBlock);
+        stepList.add(sleep);
+        stepList.add(rotateToSpecial);
+        stepList.add(sleep);
         stepList.add(backAwayFromBasket);
         stepList.add(retract);
         stepList.add(turnToEnd);

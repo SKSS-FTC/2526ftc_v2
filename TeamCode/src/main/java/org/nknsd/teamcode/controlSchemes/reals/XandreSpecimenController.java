@@ -110,4 +110,9 @@ public class XandreSpecimenController extends SpecimenControlScheme {
             }
         };
     }
+
+    @Override
+    public Callable<Boolean> goToRestingAfterRelease() {
+        return () -> false;
+    }
 }

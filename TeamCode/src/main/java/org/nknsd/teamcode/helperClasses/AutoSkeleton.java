@@ -233,7 +233,7 @@ public class AutoSkeleton {
     }
 
     public void setTargetSpecArmExtension(SpecimenExtensionHandler.SpecimenExtensionPositions extensionPosition) {
-        specimenExtensionHandler.gotoPosition(extensionPosition);
+        specimenExtensionHandler.gotoPosition(extensionPosition, true);
     }
 
     public void setSpecimenClawTarget(SpecimenClawHandler.ClawPositions clawPosition) {

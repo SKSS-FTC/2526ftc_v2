@@ -100,20 +100,36 @@ public class SpecimenExtensionHandler implements NKNComponent {
         if (clawHandler.firstClosedPosition == null) {
             motor.setTargetPosition(specimenExtensionPosition.position);
             target = specimenExtensionPosition;
-            telemetry.addData("Extension", "Null Success");
             return true;
 
         } else if (clawHandler.firstClosedPosition != rotationHandler.targetPosition()) {
             motor.setTargetPosition(specimenExtensionPosition.position);
             target = specimenExtensionPosition;
-            telemetry.addData("Extension", "Normal Success");
             return true;
 
         } else {
-            telemetry.addData("Extension", "!!F A I L U R E!!");
             return false;
         }
     }
+
+    public boolean gotoPosition(SpecimenExtensionHandler.SpecimenExtensionPositions specimenExtensionPosition, boolean doSkipSafety) {
+        //HELP
+        // HELP
+        if (clawHandler.firstClosedPosition == null || doSkipSafety) {
+            motor.setTargetPosition(specimenExtensionPosition.position);
+            target = specimenExtensionPosition;
+            return true;
+
+        } else if (clawHandler.firstClosedPosition != rotationHandler.targetPosition()) {
+            motor.setTargetPosition(specimenExtensionPosition.position);
+            target = specimenExtensionPosition;
+            return true;
+
+        } else {
+            return false;
+        }
+    }
+
     public SpecimenExtensionPositions targetPosition() {
         return target;
     }
