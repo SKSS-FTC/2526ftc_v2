@@ -81,7 +81,7 @@ public class FlowSensor implements NKNComponent {
         // inverse of the error. For example, if you move the robot 100 inches and
         // the sensor reports 103 inches, set the linear scalar to 100/103 = 0.971
         flowSensor.setLinearScalar(1.0);
-        flowSensor.setAngularScalar(1.0);
+        flowSensor.setAngularScalar(0.99474993092);
 
         // The IMU on the OTOS includes a gyroscope and accelerometer, which could
         // have an offset. Note that as of firmware version 1.0, the calibration

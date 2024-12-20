@@ -13,37 +13,26 @@ import org.nknsd.teamcode.frameworks.NKNComponent;
 import java.util.concurrent.TimeUnit;
 
 public class ShaiHuludHandler implements NKNComponent {
+    long stateStartTime;
     private DcMotor extensionMotor;
     private Servo wristServo;
     private Servo spikeServo;
-
     private ShaiHuludPosition[] positions = new ShaiHuludPosition[6];
-
     private ShaiStates state = ShaiStates.TUCK;
-
-    long stateStartTime;
 
     @Override
     public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
         extensionMotor = hardwareMap.dcMotor.get("motorShaiHulud");
         wristServo = hardwareMap.servo.get("servoShaiHuludWrist");
         spikeServo = hardwareMap.servo.get("servoShaiHuludSpike");
+        //extensionMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-
-        extensionMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        extensionMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        extensionMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        extensionMotor.setTargetPosition(0);
-
-
-        positions[0] = new ShaiHuludPosition(0, 0.7, 0.4); // tuck
-        positions[1] = new ShaiHuludPosition(2450, 0.6, 0.4); // extend
-        positions[2] = new ShaiHuludPosition(2450,0.28,0.4); // rotate down
-        positions[3] = new ShaiHuludPosition(2450,0.28,0.2); // spike grab
-        positions[4] = new ShaiHuludPosition(0, 0.7, 0.2); // retract
-        positions[5] = new ShaiHuludPosition(0,0.7,0.6); // eject
-
-        setPositions(positions[0]);
+        positions[0] = new ShaiHuludPosition(-600, 0.7, 0.4); // tuck
+        positions[1] = new ShaiHuludPosition(-2400, 0.6, 0.4); // extend
+        positions[2] = new ShaiHuludPosition(-2400, 0.28, 0.4); // rotate down
+        positions[3] = new ShaiHuludPosition(-2400, 0.28, 0.2); // spike grab
+        positions[4] = new ShaiHuludPosition(-600, 0.5, 0.2); // retract     //should be .7
+        positions[5] = new ShaiHuludPosition(-600, 0.5, 0.8); // eject       //should be .7
 
         return true;
     }
@@ -55,8 +44,16 @@ public class ShaiHuludHandler implements NKNComponent {
 
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
-    state = ShaiStates.TUCK;
-    state = ShaiStates.BEGINEXTEND;
+        extensionMotor.setPower(1);
+
+        // extensionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        extensionMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        extensionMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        extensionMotor.setTargetPosition(0);
+
+        setPositions(positions[0]);
+
+        state = ShaiStates.TUCK;
     }
 
     @Override
@@ -80,7 +77,9 @@ public class ShaiHuludHandler implements NKNComponent {
                 state = ShaiStates.WAITINGFOREXTEND;
                 break;
             case WAITINGFOREXTEND:
-                if (!extensionMotor.isBusy()){ state = ShaiStates.ROTATEDOWN; }
+                if (!extensionMotor.isBusy()) {
+                    state = ShaiStates.ROTATEDOWN;
+                }
                 break;
             case ROTATEDOWN:
                 stateStartTime = runtime.time(TimeUnit.MILLISECONDS);
@@ -88,7 +87,9 @@ public class ShaiHuludHandler implements NKNComponent {
                 state = ShaiStates.WAITFORROTATE;
                 break;
             case WAITFORROTATE:
-                if (runtime.time(TimeUnit.MILLISECONDS) - stateStartTime >= 500) { state = ShaiStates.SPIKEGRAB; }
+                if (runtime.time(TimeUnit.MILLISECONDS) - stateStartTime >= 500) {
+                    state = ShaiStates.SPIKEGRAB;
+                }
                 break;
             case SPIKEGRAB:
                 stateStartTime = runtime.time(TimeUnit.MILLISECONDS);
@@ -96,7 +97,9 @@ public class ShaiHuludHandler implements NKNComponent {
                 state = ShaiStates.WAITFORGRAB;
                 break;
             case WAITFORGRAB:
-                if (runtime.time(TimeUnit.MILLISECONDS) - stateStartTime >= 200) { state = ShaiStates.BEGINRETRACT; }
+                if (runtime.time(TimeUnit.MILLISECONDS) - stateStartTime >= 200) {
+                    state = ShaiStates.BEGINRETRACT;
+                }
                 break;
             case BEGINRETRACT:
                 stateStartTime = runtime.time(TimeUnit.MILLISECONDS);
@@ -104,7 +107,9 @@ public class ShaiHuludHandler implements NKNComponent {
                 state = ShaiStates.WAITFORRETRACT;
                 break;
             case WAITFORRETRACT:
-                if (extensionMotor.getCurrentPosition() < 300){ state = ShaiStates.EJECT;; }
+                if (!extensionMotor.isBusy()) {
+                    state = ShaiStates.EJECT;
+                }
                 break;
             case EJECT:
                 stateStartTime = runtime.time(TimeUnit.MILLISECONDS);
@@ -112,17 +117,31 @@ public class ShaiHuludHandler implements NKNComponent {
                 state = ShaiStates.WAITFOREJECT;
                 break;
             case WAITFOREJECT:
-                if (runtime.time(TimeUnit.MILLISECONDS) - stateStartTime >= 300) { state = ShaiStates.BEGINEXTEND; }
+                if (runtime.time(TimeUnit.MILLISECONDS) - stateStartTime >= 300) {
+                    state = ShaiStates.TUCK;
+                }
                 break;
         }
     }
 
     @Override
     public void doTelemetry(Telemetry telemetry) {
+        telemetry.addData("State", state.name());
+        telemetry.addData("Motor Position", extensionMotor.getCurrentPosition());
+    }
+
+    private void setPositions(ShaiHuludPosition shaiHuludPosition) {
+        wristServo.setPosition(shaiHuludPosition.wristPos);
+        spikeServo.setPosition(shaiHuludPosition.spikePos);
+        if (extensionMotor.getTargetPosition() != shaiHuludPosition.motorPos) {
+            extensionMotor.setTargetPosition(shaiHuludPosition.motorPos);
+            extensionMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            extensionMotor.setPower(0.6);
+        }
 
     }
 
-    private enum ShaiStates {
+    public enum ShaiStates {
         TUCK(),
         BEGINEXTEND(),
         WAITINGFOREXTEND(),
@@ -134,17 +153,14 @@ public class ShaiHuludHandler implements NKNComponent {
         WAITFORRETRACT(),
         EJECT(),
         WAITFOREJECT();
-
     }
 
-    private void setPositions(ShaiHuludPosition shaiHuludPosition) {
-        wristServo.setPosition(shaiHuludPosition.wristPos);
-        spikeServo.setPosition(shaiHuludPosition.spikePos);
-        if (extensionMotor.getTargetPosition()!=shaiHuludPosition.motorPos) {
-            extensionMotor.setTargetPosition(shaiHuludPosition.motorPos);
-            extensionMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            extensionMotor.setPower(1);
-        }
+    public ShaiStates getState() {
+        return state;
+    }
+
+    public void setState(ShaiStates state) {
+        this.state = state;
     }
 
     public static class ShaiHuludPosition {
