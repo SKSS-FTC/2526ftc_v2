@@ -8,6 +8,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.nknsd.teamcode.components.handlers.ShaiHuludHandler;
 import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
+import org.nknsd.teamcode.controlSchemes.abstracts.ShaiHuludControlScheme;
 import org.nknsd.teamcode.controlSchemes.abstracts.WheelControlScheme;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 
@@ -15,9 +16,14 @@ public class ShaiHuludDriver implements NKNComponent {
 
     private GamePadHandler gamePadHandler;
     private ShaiHuludHandler shaiHuludHandler;
+    private ShaiHuludControlScheme controlScheme;
 
-    public ShaiHuludDriver() {
-    }
+    private Runnable shExtend = new Runnable() {
+        @Override
+        public void run() {
+            shaiHuludHandler.setState(ShaiHuludHandler.ShaiStates.BEGINEXTEND);
+        }
+    };
 
     @Override
     public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
@@ -31,7 +37,8 @@ public class ShaiHuludDriver implements NKNComponent {
 
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
-
+        // Add event listeners
+        gamePadHandler.addListener(controlScheme.shExtend(), shExtend, "SH Begin Extend");
     }
 
     @Override
@@ -55,9 +62,9 @@ public class ShaiHuludDriver implements NKNComponent {
 
     }
 
-    public void link(GamePadHandler gamePadHandler, ShaiHuludHandler shaiHuludHandler) {
+    public void link(GamePadHandler gamePadHandler, ShaiHuludHandler shaiHuludHandler, ShaiHuludControlScheme controlScheme) {
         this.gamePadHandler = gamePadHandler;
         this.shaiHuludHandler = shaiHuludHandler;
-        //this.controlScheme = controlScheme;
+        this.controlScheme = controlScheme;
     }
 }

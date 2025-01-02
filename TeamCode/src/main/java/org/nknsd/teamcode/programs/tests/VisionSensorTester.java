@@ -9,7 +9,8 @@ import org.nknsd.teamcode.frameworks.NKNProgramTrue;
 
 import java.util.List;
 
-@TeleOp(name = "Vision Tester")@Disabled
+@TeleOp(name = "Vision Tester")
+// @Disabled
 public class VisionSensorTester extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {

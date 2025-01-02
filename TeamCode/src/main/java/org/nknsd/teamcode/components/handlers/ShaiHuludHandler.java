@@ -27,12 +27,12 @@ public class ShaiHuludHandler implements NKNComponent {
         spikeServo = hardwareMap.servo.get("servoShaiHuludSpike");
         //extensionMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        positions[0] = new ShaiHuludPosition(-600, 0.7, 0.4); // tuck
-        positions[1] = new ShaiHuludPosition(-2400, 0.6, 0.4); // extend
-        positions[2] = new ShaiHuludPosition(-2400, 0.28, 0.4); // rotate down
+        positions[0] = new ShaiHuludPosition(-600, 0.7, 0.8); // tuck
+        positions[1] = new ShaiHuludPosition(-2400, 0.6, 0.8); // extend
+        positions[2] = new ShaiHuludPosition(-2400, 0.28, 0.8); // rotate down
         positions[3] = new ShaiHuludPosition(-2400, 0.28, 0.2); // spike grab
-        positions[4] = new ShaiHuludPosition(-600, 0.5, 0.2); // retract     //should be .7
-        positions[5] = new ShaiHuludPosition(-600, 0.5, 0.8); // eject       //should be .7
+        positions[4] = new ShaiHuludPosition(-600, 0.7, 0.2); // retract
+        positions[5] = new ShaiHuludPosition(-600, 0.7, 0.8); // eject
 
         return true;
     }
@@ -160,7 +160,9 @@ public class ShaiHuludHandler implements NKNComponent {
     }
 
     public void setState(ShaiStates state) {
-        this.state = state;
+        if (this.state == ShaiStates.TUCK) { // Safety function, we don't want the driver to mess with the state unless the state is tuck
+            this.state = state;
+        }
     }
 
     public static class ShaiHuludPosition {

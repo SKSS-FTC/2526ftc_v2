@@ -1,5 +1,6 @@
 package org.nknsd.teamcode.controlSchemes.abstracts;
 
+import org.nknsd.teamcode.components.utility.GamePadHandler;
 import org.nknsd.teamcode.frameworks.NKNControlScheme;
 
 import java.util.concurrent.Callable;
@@ -7,16 +8,17 @@ import java.util.concurrent.Callable;
 // NEEDS CONSTRUCTION
 public abstract class ShaiHuludControlScheme extends NKNControlScheme {
 
-    public abstract Callable<Boolean> specimenGrab();
+    public Callable<Boolean> shRetract() {
+        return new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return GamePadHandler.GamepadButtons.LEFT_BUMPER.detect(gamePadHandler.getGamePad1());
+            }
+        };
+    }
 
-    public abstract Callable<Boolean> specimenRelease();
-
-    public abstract Callable<Boolean> specimenForward();
-
-    public abstract Callable<Boolean> specimenBackwards();
-
-    public abstract Callable<Boolean> specimenRaise();
-
-    public abstract Callable<Boolean> specimenLower();
+    public Callable<Boolean> shExtend() {
+        return () -> GamePadHandler.GamepadButtons.RIGHT_BUMPER.detect(gamePadHandler.getGamePad1());
+    }
 }
 
