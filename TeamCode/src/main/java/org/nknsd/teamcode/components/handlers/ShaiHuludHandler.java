@@ -36,12 +36,12 @@ public class ShaiHuludHandler implements NKNComponent {
         extensionMotor.setTargetPosition(0);
 
 
-        positions[0] = new ShaiHuludPosition(0, 0.7, 0.4); // tuck
-        positions[1] = new ShaiHuludPosition(2450, 0.6, 0.4); // extend
-        positions[2] = new ShaiHuludPosition(2450,0.28,0.4); // rotate down
+        positions[0] = new ShaiHuludPosition(0, 0.7, 0.8); // tuck
+        positions[1] = new ShaiHuludPosition(2450, 0.7, 0.8); // extend
+        positions[2] = new ShaiHuludPosition(2450,0.28,0.8); // rotate down
         positions[3] = new ShaiHuludPosition(2450,0.28,0.2); // spike grab
         positions[4] = new ShaiHuludPosition(0, 0.7, 0.2); // retract
-        positions[5] = new ShaiHuludPosition(0,0.7,0.6); // eject
+        positions[5] = new ShaiHuludPosition(0,0.7,0.8); // eject
 
         setPositions(positions[0]);
 
