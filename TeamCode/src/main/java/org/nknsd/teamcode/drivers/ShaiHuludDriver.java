@@ -48,7 +48,7 @@ public class ShaiHuludDriver implements NKNComponent {
 
     @Override
     public String getName() {
-        return "WheelDriver";
+        return "ShaiHuludDriver";
     }
 
 

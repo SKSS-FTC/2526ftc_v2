@@ -138,7 +138,6 @@ public class ShaiHuludHandler implements NKNComponent {
             extensionMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             extensionMotor.setPower(0.6);
         }
-
     }
 
     public enum ShaiStates {
