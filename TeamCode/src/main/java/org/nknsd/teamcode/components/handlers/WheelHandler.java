@@ -16,6 +16,7 @@ public class WheelHandler implements NKNComponent {
     private final String[] invertedNames = new String[]{"motorFL", "motorBL"}; // Names in this array are reversed during initialization
 
     private DcMotor motorFR; private DcMotor motorBR; private DcMotor motorFL; private DcMotor motorBL;
+    private int priority = 0;
 
 
     public WheelHandler(){
@@ -61,33 +62,6 @@ public class WheelHandler implements NKNComponent {
         return true;
     }
 
-    // Key function of the class
-    // Takes in y, x, and turning components of the vector, and converts them to power instructions for omni wheels
-    public void relativeVectorToMotion(double y, double x, double turning) {
-        // some intern should change all instances of rVTM to use x, y, turning instead of y, x, turning
-        turning *= 0.7;
-        motorBR.setPower(y + x - turning);
-        motorBL.setPower(y - x + turning);
-        motorFR.setPower(y - x - turning);
-        motorFL.setPower(y + x + turning);
-    }
-
-    public void absoluteVectorToMotion(double x, double y, double turning, double yaw, Telemetry telemetry) {
-        double angle = (yaw * Math.PI) / 180;
-        double x2 = (Math.cos(angle) * x) - (Math.sin(angle) * y);
-        double y2 = (Math.sin(angle) * x) + (Math.cos(angle) * y);
-
-        relativeVectorToMotion(y2, x2, turning);
-    }
-
-    public void collyMotion(double x, double y, double turning, double yaw, Telemetry telemetry) {
-        double angle = (yaw * Math.PI) / 180;
-        double x2 = (Math.cos(angle) * x);
-        double y2 = (Math.sin(angle) * x);
-
-        relativeVectorToMotion(y2 + y, x2, turning);
-    }
-
     @Override
     public void init_loop(ElapsedTime runtime, Telemetry telemetry) {
     }
@@ -96,34 +70,69 @@ public class WheelHandler implements NKNComponent {
     public void start(ElapsedTime runtime, Telemetry telemetry) {}
 
     @Override
-    public void stop(ElapsedTime runtime, Telemetry telemetry) {}
-
-    public String getName() {
-        return "WheelHandler";
-    }
-
-    @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {}
 
-    public void runMotorFR(double speed) {
-        motorFR.setPower(speed);
-    }
-
-    public void runMotorFL(double speed) {
-        motorFL.setPower(speed);
-    }
-
-    public void runMotorBR(double speed) {
-        motorBR.setPower(speed);
-    }
-
-    public void runMotorBL(double speed) {
-        motorBL.setPower(speed);
-    }
+    @Override
+    public void stop(ElapsedTime runtime, Telemetry telemetry) {}
 
     @Override
     public void doTelemetry(Telemetry telemetry) {
         String msgString = "[" + motorFL.getPower() + ", " + motorFR.getPower() + ", " + motorBL.getPower() + ", " + motorBR.getPower() + "]";
         telemetry.addData("FL, FR, BL, BR", msgString);
+    }
+
+    public String getName() {
+        return "WheelHandler";
+    }
+
+
+    // Key function of the class
+    // Takes in y, x, and turning components of the vector, and converts them to power instructions for omni wheels
+    public void relativeVectorToMotion(double y, double x, double turning) {
+        relativeVectorToMotion(y, x, turning, 0);
+    }
+
+    public void relativeVectorToMotion(double y, double x, double turning, int priority) {
+        if (priority >= this.priority) {
+            // some intern should change all instances of rVTM to use x, y, turning instead of y, x, turning
+            turning *= 0.7;
+            motorBR.setPower(y + x - turning);
+            motorBL.setPower(y - x + turning);
+            motorFR.setPower(y - x - turning);
+            motorFL.setPower(y + x + turning);
+        }
+    }
+
+    public void absoluteVectorToMotion(double x, double y, double turning, double yaw) {
+        absoluteVectorToMotion(x, y, turning, yaw, 0);
+    }
+
+    public void absoluteVectorToMotion(double x, double y, double turning, double yaw, int priority) {
+        double angle = (yaw * Math.PI) / 180;
+        double x2 = (Math.cos(angle) * x) - (Math.sin(angle) * y);
+        double y2 = (Math.sin(angle) * x) + (Math.cos(angle) * y);
+
+        relativeVectorToMotion(y2, x2, turning, priority);
+    }
+
+    @Deprecated //this code does some strange behavior. Keeping it in in case it's still wanted but it's not used anywhere.
+    public void collyMotion(double x, double y, double turning, double yaw, Telemetry telemetry) {
+        double angle = (yaw * Math.PI) / 180;
+        double x2 = (Math.cos(angle) * x);
+        double y2 = (Math.sin(angle) * x);
+
+        relativeVectorToMotion(y2 + y, x2, turning);
+    }
+    // Unless usage is needed this fnct won't be integrated into the priority system.
+
+
+    // The wheel handler has a priority system. Requests to move the wheels require you to send a priority level with them (default 0) and if
+    // it's equal to or higher than the set priority it can move. (Otherwise it can't)
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public int getPriority() {
+        return priority;
     }
 }

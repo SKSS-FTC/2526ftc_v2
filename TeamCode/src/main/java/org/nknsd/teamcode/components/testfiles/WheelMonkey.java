@@ -55,30 +55,6 @@ public class WheelMonkey implements NKNComponent {
             public void runTest() {
 
             }
-        },
-        MOTORBR(1000) {
-            @Override
-            public void runTest() {
-
-            }
-        },
-        MOTORBL(1000) {
-            @Override
-            public void runTest() {
-
-            }
-        },
-        MOTORFR(1000) {
-            @Override
-            public void runTest() {
-
-            }
-        },
-        MOTORFL(1000) {
-            @Override
-            public void runTest() {
-
-            }
         };
 
         public final long durationMilli;
@@ -145,26 +121,6 @@ public class WheelMonkey implements NKNComponent {
 
             case COUNTERCLOCKWISE:
                 wheelHandler.relativeVectorToMotion(0, 0, -0.5f);
-                break;
-
-            case MOTORBR:
-                wheelHandler.relativeVectorToMotion(0, 0, 0);
-                wheelHandler.runMotorBR(0.5);
-                break;
-
-            case MOTORBL:
-                wheelHandler.relativeVectorToMotion(0, 0, 0);
-                wheelHandler.runMotorBL(0.5);
-                break;
-
-            case MOTORFR:
-                wheelHandler.relativeVectorToMotion(0, 0, 0);
-                wheelHandler.runMotorFR(0.5);
-                break;
-
-            case MOTORFL:
-                wheelHandler.relativeVectorToMotion(0, 0, 0);
-                wheelHandler.runMotorFL(0.5);
                 break;
         }
     }
