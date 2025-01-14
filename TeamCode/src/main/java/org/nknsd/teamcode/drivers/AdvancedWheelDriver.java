@@ -111,6 +111,14 @@ public class AdvancedWheelDriver implements NKNComponent {
         if (imuCorrection) {
             yaw += 90;
         }
+
+        if (gamepad.x) {
+            wheelHandler.setPriority(1);
+        } else {
+            wheelHandler.setPriority(0);
+        }
+
+
         wheelHandler.absoluteVectorToMotion(strafeStick.getValue(gamepad) * moveSpeedMultiplier, forwardStick.getValue(gamepad) * moveSpeedMultiplier, turnStick.getValue(gamepad) * moveSpeedMultiplier, yaw);
     }
 
