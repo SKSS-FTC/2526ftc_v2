@@ -93,10 +93,10 @@ public class BasketAuto extends NKNProgramTrue {
         AutoStepRelativeMove backMOREAwayFromBasket = new AutoStepRelativeMove(0, -.45, 250);
         AutoStepRelativeMove slightlyBackAway = new AutoStepRelativeMove(0, -.4, 190);
 
-        AutoStepAbsoluteControl pickUpFirstYellow = new AutoStepAbsoluteControl(0.4113, 1.35, -68.3);
+        AutoStepAbsoluteControl pickUpFirstYellow = new AutoStepAbsoluteControl(0.4113, 1.31, -68.3);
         AutoStepRelativeMove moveToPickup = new AutoStepRelativeMove(0, 0.3, 400);
 
-        AutoStepAbsoluteControl pickUpSecondYellow = new AutoStepAbsoluteControl(-0.0716, 1.68, -90);
+        AutoStepAbsoluteControl pickUpSecondYellow = new AutoStepAbsoluteControl(-0.0716, 1.64, -90);
         AutoStepAbsoluteControl alignToPark = new AutoStepAbsoluteControl(-0.05, 2.2, 90);
         AutoStepMove driveInToPark = new AutoStepMove(0.58, 0);
 

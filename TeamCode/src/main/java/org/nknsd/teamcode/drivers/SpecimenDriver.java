@@ -98,6 +98,12 @@ public class SpecimenDriver implements NKNComponent {
             specimenClawHandler.setClawPosition(SpecimenClawHandler.ClawPositions.RELEASE);
         }
     };
+    Runnable resetSpecExt = new Runnable() {
+        @Override
+        public void run() {
+            specimenExtensionHandler.resetEncoder();
+        }
+    };
     private Telemetry telemetry;
 
     @Override
@@ -120,6 +126,7 @@ public class SpecimenDriver implements NKNComponent {
         gamePadHandler.addListener(controlScheme.specimenRaise(), specimenExtend, "Specimen Extend");
         gamePadHandler.addListener(controlScheme.specimenLower(), specimenRetract, "Specimen Lower");
         gamePadHandler.addListener(controlScheme.goToRestingAfterRelease(), goToRestingAfterRelease,"Go To Resting After Release");
+        gamePadHandler.addListener(controlScheme.resetSpecExt(), resetSpecExt,"Reset Spec Ext");
     }
 
     @Override

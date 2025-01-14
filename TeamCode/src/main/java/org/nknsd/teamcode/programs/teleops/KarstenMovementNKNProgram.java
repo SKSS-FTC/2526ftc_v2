@@ -30,7 +30,7 @@ public class KarstenMovementNKNProgram extends NKNProgramTrue {
         // Misc
         GamePadHandler gamePadHandler = new GamePadHandler();
         components.add(gamePadHandler);
-        //telemetryEnabled.add(gamePadHandler);
+        telemetryEnabled.add(gamePadHandler);
 
         WheelHandler wheelHandler = new WheelHandler();
         components.add(wheelHandler);
@@ -65,7 +65,7 @@ public class KarstenMovementNKNProgram extends NKNProgramTrue {
 
         SpecimenExtensionHandler specimenExtensionHandler = new SpecimenExtensionHandler();
         components.add(specimenExtensionHandler);
-        //telemetryEnabled.add(specimenExtensionHandler);
+        telemetryEnabled.add(specimenExtensionHandler);
 
         SpecimenClawHandler specimenClawHandler = new SpecimenClawHandler();
         components.add(specimenClawHandler);

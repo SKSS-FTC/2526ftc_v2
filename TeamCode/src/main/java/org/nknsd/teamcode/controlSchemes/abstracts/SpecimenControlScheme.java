@@ -23,6 +23,10 @@ public abstract class SpecimenControlScheme extends NKNControlScheme {
         return specimenRelease();
     };
 
+    public Callable<Boolean> resetSpecExt(){
+        return () -> false;
+    };
+
     public void linkSchemes(EACControlScheme eacControlScheme) {
         this.eacControlScheme = eacControlScheme;
     }

@@ -8,6 +8,7 @@ import org.nknsd.teamcode.autoSteps.AutoStepExtendSpecimenArm;
 import org.nknsd.teamcode.autoSteps.AutoStepExtendSpecimenArmSynced;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveBackwardWithSensor;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveForwardWithSensor;
+import org.nknsd.teamcode.autoSteps.AutoStepMoveForwardWithSensorSmart;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveNRotate;
 import org.nknsd.teamcode.autoSteps.AutoStepRelativeMove;
 import org.nknsd.teamcode.autoSteps.AutoStepSpecimenClaw;
@@ -43,7 +44,7 @@ public class SpecimenAuto extends NKNProgramTrue {
 
 
         // Core mover
-        AutoSkeleton autoSkeleton = new AutoSkeleton(0.3, 0.8, 1);
+        AutoSkeleton autoSkeleton = new AutoSkeleton(0.25, 0.8, 1);
 
         AutoHeart autoHeart = new AutoHeart(stepList);
         components.add(autoHeart);
@@ -115,7 +116,7 @@ public class SpecimenAuto extends NKNProgramTrue {
         AutoStepSleep sleep = new AutoStepSleep(300);
 
         AutoStepAbsoluteControl moveToBar = new AutoStepAbsoluteControl(-0.4332, 1.15, 0);
-        AutoStepMoveBackwardWithSensor approachBar = new AutoStepMoveBackwardWithSensor(5, .15, 0.6);
+        AutoStepMoveBackwardWithSensor approachBar = new AutoStepMoveBackwardWithSensor(6.2, .15, 0.6);
         AutoStepRelativeMove clipApproach = new AutoStepRelativeMove(0,-0.2,100);
         AutoStepAbsoluteControl moveToB2 = new AutoStepAbsoluteControl(1.3, 1, 0);
         AutoStepMove moveUp = new AutoStepMove(0, 1);
@@ -124,7 +125,7 @@ public class SpecimenAuto extends NKNProgramTrue {
         AutoStepAbsoluteControl moveTo2ndSample = new AutoStepAbsoluteControl(2.15, 2.4861, 0);
         //AutoStepAbsoluteControl moveTo3rdSample = new AutoStepAbsoluteControl(2.4, 2.4861, 0);
         AutoStepAbsoluteControl prepareFor1stPickup = new AutoStepAbsoluteControl(1.6008, 0.5233, 0);
-        AutoStepMoveForwardWithSensor approachPickup = new AutoStepMoveForwardWithSensor(16, 0.2, .4);
+        AutoStepMoveForwardWithSensorSmart approachPickup = new AutoStepMoveForwardWithSensorSmart(17, 0.2, .4);
         AutoStepRelativeMove alignSpecimen = new AutoStepRelativeMove(-0.3, 0, 400);
         AutoStepMoveNRotate rotateToEnd = new AutoStepMoveNRotate(0, 0, -90);
         AutoStepMove slightEndAdjust = new AutoStepMove(-.2, 0);

@@ -137,4 +137,17 @@ public class SpecimenExtensionHandler implements NKNComponent {
     public void link(SpecimenClawHandler clawHandler, SpecimenRotationHandler rotationHandler) {
         this.clawHandler = clawHandler; this.rotationHandler = rotationHandler;
     }
+
+    // DO NOT RUN UNLESS YOU ARE CONFIDENT
+    public void resetEncoder() {
+        //reset encoder
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        //go to new position
+        target = SpecimenExtensionPositions.RESTING;
+        motor.setTargetPosition(target.position);
+
+        //run to the current position :D
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
 }
