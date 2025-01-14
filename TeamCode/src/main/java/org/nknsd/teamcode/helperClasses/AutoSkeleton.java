@@ -134,7 +134,7 @@ public class AutoSkeleton {
 
         // Check if we're at our target
         if (dist <= movementMargin && Math.abs(turnDist) <= turnMargin) {
-            wheelHandler.absoluteVectorToMotion(0, 0, 0, 0, telemetry);
+            wheelHandler.absoluteVectorToMotion(0, 0, 0, 0);
             telemetry.addData("Done?", "Done");
             return true;
         }
@@ -199,7 +199,7 @@ public class AutoSkeleton {
 
 
         // Run motors
-        wheelHandler.absoluteVectorToMotion(xSpeed, ySpeed, turnSpeed, yaw, telemetry);
+        wheelHandler.absoluteVectorToMotion(xSpeed, ySpeed, turnSpeed, yaw);
 
         return false;
     }
