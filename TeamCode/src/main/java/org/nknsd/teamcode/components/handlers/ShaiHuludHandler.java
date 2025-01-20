@@ -1,13 +1,13 @@
 package org.nknsd.teamcode.components.handlers;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.nknsd.teamcode.components.sensors.hummelvision.LilyVisionHandler;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 
 import java.util.concurrent.TimeUnit;
@@ -19,6 +19,7 @@ public class ShaiHuludHandler implements NKNComponent {
     private Servo spikeServo;
     private ShaiHuludPosition[] positions = new ShaiHuludPosition[6];
     private ShaiStates state = ShaiStates.TUCK;
+    private LilyVisionHandler visionHandler;
 
     @Override
     public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
@@ -59,11 +60,6 @@ public class ShaiHuludHandler implements NKNComponent {
     @Override
     public void stop(ElapsedTime runtime, Telemetry telemetry) {
 
-    }
-
-    @Override
-    public String getName() {
-        return "Shai Hulud Handler";
     }
 
     @Override
@@ -130,6 +126,11 @@ public class ShaiHuludHandler implements NKNComponent {
         telemetry.addData("Motor Position", extensionMotor.getCurrentPosition());
     }
 
+    @Override
+    public String getName() {
+        return "Shai Hulud Handler";
+    }
+
     private void setPositions(ShaiHuludPosition shaiHuludPosition) {
         wristServo.setPosition(shaiHuludPosition.wristPos);
         spikeServo.setPosition(shaiHuludPosition.spikePos);
@@ -138,6 +139,20 @@ public class ShaiHuludHandler implements NKNComponent {
             extensionMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             extensionMotor.setPower(0.6);
         }
+    }
+
+    public ShaiStates getState() {
+        return state;
+    }
+
+    public void setState(ShaiStates state) {
+        if (this.state == ShaiStates.TUCK) { // Safety function, we don't want the driver to mess with the state unless the state is tuck
+            this.state = state;
+        }
+    }
+
+    public void link(LilyVisionHandler visionHandler) {
+        this.visionHandler = visionHandler;
     }
 
     public enum ShaiStates {
@@ -152,16 +167,6 @@ public class ShaiHuludHandler implements NKNComponent {
         WAITFORRETRACT(),
         EJECT(),
         WAITFOREJECT();
-    }
-
-    public ShaiStates getState() {
-        return state;
-    }
-
-    public void setState(ShaiStates state) {
-        if (this.state == ShaiStates.TUCK) { // Safety function, we don't want the driver to mess with the state unless the state is tuck
-            this.state = state;
-        }
     }
 
     public static class ShaiHuludPosition {

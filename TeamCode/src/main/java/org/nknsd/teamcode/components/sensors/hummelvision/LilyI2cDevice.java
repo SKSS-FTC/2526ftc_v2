@@ -51,4 +51,13 @@ public class LilyI2cDevice extends I2cDeviceSynchDevice<I2cDeviceSynch> {
         return output;
     }
 
+    public void setBlockDetectColor(boolean blue) {
+        byte[] out;
+        if (blue) {
+            out = new byte[]{1};
+        } else {
+            out = new byte[]{0};
+        }
+        deviceClient.write(1, out);
+    }
 }
