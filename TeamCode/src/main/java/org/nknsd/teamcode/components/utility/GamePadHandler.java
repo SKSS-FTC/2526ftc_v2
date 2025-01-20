@@ -102,6 +102,11 @@ public class GamePadHandler implements NKNComponent {
             public boolean detect(Gamepad gamepad){
                 return (gamepad.back);
             }
+        }, START {
+            @Override
+            public boolean detect(Gamepad gamepad) {
+                return (gamepad.start);
+            }
         }, LEFT_TRIGGER {
             @Override
             public boolean detect(Gamepad gamepad) {

@@ -40,7 +40,7 @@ public class ShaiHuludMonkey implements NKNComponent {
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
         if (shaiHuludHandler.getState() == ShaiStates.TUCK) {
-            shaiHuludHandler.setState(ShaiStates.BEGINEXTEND);
+            shaiHuludHandler.beginPickup();
         }
     }
 

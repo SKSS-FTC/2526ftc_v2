@@ -21,7 +21,7 @@ public class ShaiHuludDriver implements NKNComponent {
     private Runnable shExtend = new Runnable() {
         @Override
         public void run() {
-            shaiHuludHandler.setState(ShaiHuludHandler.ShaiStates.BEGINEXTEND);
+            shaiHuludHandler.beginPickup();
         }
     };
 
