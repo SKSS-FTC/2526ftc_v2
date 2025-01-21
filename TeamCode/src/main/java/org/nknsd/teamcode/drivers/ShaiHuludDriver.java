@@ -25,6 +25,13 @@ public class ShaiHuludDriver implements NKNComponent {
         }
     };
 
+    private Runnable shRetract = new Runnable() {
+        @Override
+        public void run() {
+            shaiHuludHandler.cancelPickup();
+        }
+    };
+
     @Override
     public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
         return true;
@@ -39,6 +46,7 @@ public class ShaiHuludDriver implements NKNComponent {
     public void start(ElapsedTime runtime, Telemetry telemetry) {
         // Add event listeners
         gamePadHandler.addListener(controlScheme.shExtend(), shExtend, "SH Begin Extend");
+        gamePadHandler.addListener(controlScheme.shRetract(), shRetract, "SH CANCEL BACK UP AHHH");
     }
 
     @Override

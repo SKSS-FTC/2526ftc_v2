@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.State;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.nknsd.teamcode.components.sensors.hummelvision.LilyVisionHandler;
 import org.nknsd.teamcode.components.utility.ColorPicker;
@@ -167,13 +168,15 @@ public class ShaiHuludHandler implements NKNComponent {
             return true;
         }
 
+        wheelHandler.setPriority(PRIORITY);
+
         // Align to target sample
         LilyVisionHandler.VisionData visionData = visionHandler.getVisionData();
         PosPair offset = getOffset(visionData);
 
         if (offset.getDist() < ALIGN_MARGIN) {
             wheelHandler.setPriority(0);
-            wheelHandler.relativeVectorToMotion(0, 0, 0, PRIORITY);
+            wheelHandler.relativeVectorToMotion(0, 0, 0);
             return true;
         }
 
@@ -187,12 +190,17 @@ public class ShaiHuludHandler implements NKNComponent {
             return;
         }
 
-        state = ShaiStates.BEGINEXTEND;
+        state = ShaiStates.ALIGNTOSAMPLE;
     }
 
-    @Override
-    public String getName() {
-        return "Shai Hulud Handler";
+    public void cancelPickup() {
+        state = ShaiStates.TUCK;
+        if (wheelHandler == null) {
+            return;
+        }
+
+        wheelHandler.setPriority(0);
+        wheelHandler.relativeVectorToMotion(0, 0, 0);
     }
 
     private void setPositions(ShaiHuludPosition shaiHuludPosition) {
@@ -203,6 +211,11 @@ public class ShaiHuludHandler implements NKNComponent {
             extensionMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             extensionMotor.setPower(0.6);
         }
+    }
+
+    @Override
+    public String getName() {
+        return "Shai Hulud Handler";
     }
 
     public ShaiStates getState() {

@@ -12,13 +12,13 @@ public abstract class ShaiHuludControlScheme extends NKNControlScheme {
         return new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
-                return GamePadHandler.GamepadButtons.LEFT_BUMPER.detect(gamePadHandler.getGamePad1());
+                return GamePadHandler.GamepadButtons.LEFT_BUMPER.detect(gamePadHandler.getGamePad2()) || GamePadHandler.GamepadButtons.X.detect(gamePadHandler.getGamePad2());
             }
         };
     }
 
     public Callable<Boolean> shExtend() {
-        return () -> GamePadHandler.GamepadButtons.RIGHT_BUMPER.detect(gamePadHandler.getGamePad1());
+        return () -> GamePadHandler.GamepadButtons.RIGHT_BUMPER.detect(gamePadHandler.getGamePad2());
     }
 }
 
