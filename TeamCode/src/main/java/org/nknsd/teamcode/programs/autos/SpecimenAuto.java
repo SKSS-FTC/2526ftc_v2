@@ -44,7 +44,7 @@ public class SpecimenAuto extends NKNProgramTrue {
 
 
         // Core mover
-        AutoSkeleton autoSkeleton = new AutoSkeleton(0.25, 0.8, 1);
+        AutoSkeleton autoSkeleton = new AutoSkeleton(0.3, 0.8, 1);
 
         AutoHeart autoHeart = new AutoHeart(stepList);
         components.add(autoHeart);
@@ -116,8 +116,8 @@ public class SpecimenAuto extends NKNProgramTrue {
         AutoStepSleep sleep = new AutoStepSleep(300);
 
         AutoStepAbsoluteControl moveToBar = new AutoStepAbsoluteControl(-0.4332, 1.15, 0);
-        AutoStepMoveBackwardWithSensor approachBar = new AutoStepMoveBackwardWithSensor(6.2, .15, 0.6);
-        AutoStepRelativeMove clipApproach = new AutoStepRelativeMove(0,-0.2,100);
+        AutoStepMoveBackwardWithSensor approachBar = new AutoStepMoveBackwardWithSensor(6, .1, 0.7);
+        AutoStepRelativeMove clipApproach = new AutoStepRelativeMove(0,-0.24,100);
         AutoStepAbsoluteControl moveToB2 = new AutoStepAbsoluteControl(1.3, 1, 0);
         AutoStepMove moveUp = new AutoStepMove(0, 1);
         AutoStepAbsoluteControl moveTo1stSample = new AutoStepAbsoluteControl(1.6, 2.4861, 0);

@@ -30,7 +30,7 @@ public class KarstenMovementNKNProgram extends NKNProgramTrue {
         // Misc
         GamePadHandler gamePadHandler = new GamePadHandler();
         components.add(gamePadHandler);
-        telemetryEnabled.add(gamePadHandler);
+        //telemetryEnabled.add(gamePadHandler);
 
         WheelHandler wheelHandler = new WheelHandler();
         components.add(wheelHandler);
