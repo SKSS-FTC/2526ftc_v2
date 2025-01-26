@@ -68,6 +68,7 @@ public class SpecimenAuto extends NKNProgramTrue {
 
         DistSensor sensorBackDist = new DistSensor("sensorBackDist");
         components.add(sensorBackDist);
+        telemetryEnabled.add(sensorBackDist);
 
 
         // Wheel Handler
