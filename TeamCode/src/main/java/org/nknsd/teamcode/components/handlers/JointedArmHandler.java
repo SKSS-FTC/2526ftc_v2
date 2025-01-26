@@ -1,0 +1,152 @@
+package org.nknsd.teamcode.components.handlers;
+
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.nknsd.teamcode.components.sensors.PotentiometerSensor;
+import org.nknsd.teamcode.frameworks.NKNComponent;
+import org.nknsd.teamcode.helperClasses.PIDModel;
+
+import java.util.concurrent.TimeUnit;
+
+public class JointedArmHandler implements NKNComponent {
+
+    public static final int MAX_INDEX_OF_ROTATION_POSITIONS = 5;
+    final double threshold = 0.03;
+
+    final double errorCap = 10;
+    final boolean enableErrorClear = true;
+    private final String motorName = "motorArmRotate";
+    public Positions targetPosition = Positions.A;
+    PotentiometerSensor potHandler;
+    private boolean isErrorPositive;
+    double diff;
+    long targetTime = 0;
+    double current;
+    double resError;
+    private DcMotor motor;
+    private ExtensionHandler extensionHandler;
+    final private PIDModel fallenPIDModel = new PIDModel(1.5,0,0);
+    final private PIDModel risenPIDModel = new PIDModel(0.9,0,0);
+    final private PIDModel extendedPIDModel = new PIDModel(1.2,0.007 / 2000,10);
+
+    public JointedArmHandler() {}
+
+    @Override
+    public void stop(ElapsedTime runtime, Telemetry telemetry) {
+
+    }
+
+    @Override
+    public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
+        motor = hardwareMap.dcMotor.get(motorName);
+        motor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        return true;
+    }
+
+    @Override
+    public void init_loop(ElapsedTime runtime, Telemetry telemetry) {
+
+    }
+
+    @Override
+    public void start(ElapsedTime runtime, Telemetry telemetry) {
+
+    }
+
+    @Override
+    public String getName() {
+        return "JointedArmRotator :D";
+    }
+
+    @Override
+    public void loop(ElapsedTime runtime, Telemetry telemetry) {
+        long currentTime = runtime.time(TimeUnit.MILLISECONDS);
+        if (currentTime >= targetTime) {
+            current = potHandler.getPotVoltage();
+            double armPower = controlLoop(current, runtime);
+
+            motor.setPower(armPower);
+        }
+    }
+
+    @Override
+    public void doTelemetry(Telemetry telemetry) {
+
+    }
+
+    public void setTargetRotationPosition(RotationPositions targetRotationPosition) {
+        if (extensionHandler.targetPosition() == ExtensionHandler.ExtensionPositions.RESTING) {
+            this.targetRotationPosition = targetRotationPosition;
+
+        } else if (targetRotationPosition == RotationPositions.PICKUP && this.targetRotationPosition == RotationPositions.PREPICKUP) {
+            this.targetRotationPosition = targetRotationPosition;
+
+        } else if (targetRotationPosition == RotationPositions.PREPICKUP && this.targetRotationPosition == RotationPositions.PICKUP) {
+            this.targetRotationPosition = targetRotationPosition;
+        }
+    }
+
+    private boolean oppositeSigns(double one, double two) {
+        return one * two < 0; // If the two have DIFFERENT signs, multiplying them will give us a negative number
+    }
+
+    private double controlLoop(double current, ElapsedTime runtime) {
+        diff = (targetRotationPosition.target - current);
+
+        //
+        if ((isErrorPositive && diff < 0) || (!isErrorPositive && diff > 0)){
+            fallenPIDModel.resetError();
+            risenPIDModel.resetError();
+            extendedPIDModel.resetError();
+        }
+        if (diff > 0){
+            isErrorPositive = true;
+        }else{
+            isErrorPositive = false;
+        }
+        // If there, stop
+        if (Math.abs(diff) <= threshold) {
+            return 0;
+        }
+
+        // Calculate motor force based on which pid we need to use
+        if(extensionHandler.targetPosition() == ExtensionHandler.ExtensionPositions.HIGH_BASKET){
+            fallenPIDModel.resetError();
+            risenPIDModel.resetError();
+            return extendedPIDModel.calculate(current, targetRotationPosition.target, runtime);
+
+        } else if (potHandler.getPotVoltage() < RotationPositions.HIGH.target) {
+            extendedPIDModel.resetError();
+            risenPIDModel.resetError();
+            return fallenPIDModel.calculate(current, targetRotationPosition.target, runtime);
+        } else {
+            extendedPIDModel.resetError();
+            fallenPIDModel.resetError();
+            return risenPIDModel.calculate(current, targetRotationPosition.target, runtime);
+        }
+    }
+
+    public boolean isAtTargetPosition() {
+        //Math.abs(targetPosition.motorVal - motor.getCurrentPosition()) <= threshold * 2;
+        //return ;
+    }
+
+    public enum Positions {
+        A(0, 0, 0, 0);
+
+        public final double motorVal, joint1Val, joint2Val, gripVal;
+
+        Positions(double motorVal, double joint1Val, double joint2Val, double gripVal) {
+            this.motorVal = motorVal;
+            this.joint1Val = joint1Val;
+            this.joint2Val = joint2Val;
+            this.gripVal = gripVal;
+        }
+    }
+}
