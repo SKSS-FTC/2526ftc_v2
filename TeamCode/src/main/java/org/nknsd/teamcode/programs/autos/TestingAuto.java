@@ -22,7 +22,7 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 import java.util.LinkedList;
 import java.util.List;
 
-@Autonomous(name = "Auto Test [Don't run]")@Disabled
+@Autonomous(name = "Auto Test [Don't run]")
 public class TestingAuto extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
@@ -31,7 +31,7 @@ public class TestingAuto extends NKNProgramTrue {
 
 
         // Core mover
-        AutoSkeleton autoSkeleton = new AutoSkeleton(0.4, 0.8, 1.5);
+        AutoSkeleton autoSkeleton = new AutoSkeleton(0.6, 0.3, 0.8, 1.5);
 
         AutoHeart autoHeart = new AutoHeart(stepList);
         components.add(autoHeart);
@@ -91,6 +91,9 @@ public class TestingAuto extends NKNProgramTrue {
         stepList.add(sleep);
         stepList.add(sleep);
         stepList.add(left1);
+        stepList.add(sleep);
+        stepList.add(sleep);
+        stepList.add(down1);
 
         autoHeart.linkSteps(stepList, autoSkeleton);
     }

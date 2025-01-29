@@ -16,7 +16,7 @@ import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.helperClasses.PIDModel;
 
 public class AutoSkeleton {
-    private double maxSpeed;                  // Maximum speed the robot can move at
+    private double maxSpeed, minSpeed;                  // Maximum speed the robot can move at
     private final double movementMargin;            // Margin determines how close to the target we have to be before we are there
     private final double turnMargin;
     private WheelHandler wheelHandler;              // Class which handles wheel motions
@@ -33,28 +33,22 @@ public class AutoSkeleton {
     private DistSensor sensorBackDist;
     private double targetRotation = 0;
     private IntakeSpinnerHandler intakeSpinnerHandler;
-    private PIDModel movementPIDx;
-    private PIDModel movementPIDy;
-    private PIDModel movementPIDturn;
-    private boolean xDirPos = true;
-    private boolean yDirPos = true;
-    private boolean turnDirPos = true;
     private double[] offset;
     private double headingOffset;
 
 
-    public AutoSkeleton(double maxSpeed, double movementMargin, double turnMargin) {
+    public AutoSkeleton(double maxSpeed, double minSpeed, double movementMargin, double turnMargin) {
         this.maxSpeed = maxSpeed;
         this.movementMargin = movementMargin;
         this.turnMargin = turnMargin;
+        this.minSpeed = minSpeed;
 
-        double kP = 0.5;
-        double kI = maxSpeed / (TILE_LENGTH * TILE_LENGTH * 4000); //I is REALLY FREAKING SMALL
-        double kD = 7;
+        // Default offset
+        offset = new double[]{0, 0};
+    }
 
-        movementPIDx = new PIDModel(kP, kI, kD);
-        movementPIDy = new PIDModel(kP, kI, kD);
-        movementPIDturn = new PIDModel(maxSpeed / 13, maxSpeed / (500), 0.5);
+    public AutoSkeleton(double maxSpeed, double movementMargin, double turnMargin) {
+        this(maxSpeed, 0.2, movementMargin, turnMargin);
     }
 
     public void link(WheelHandler wheelHandler, RotationHandler rotationHandler, ExtensionHandler extensionHandler, IntakeSpinnerHandler intakeSpinnerHandler, FlowSensor flowSensor, IMUSensor imuSensor) {
@@ -84,18 +78,10 @@ public class AutoSkeleton {
 
     public void setTargetPosition(double x, double y) {
         targetPositions[0] = x; targetPositions[1] = y;
-        movementPIDx.resetError(); movementPIDy.resetError();
-
-        FlowSensor.PoseData pos = flowSensor.getOdometryData().pos;
-        xDirPos = pos.x < x;
-        yDirPos = pos.y < y;
     }
 
     public void setTargetRotation(double turning) {
         targetRotation = turning;
-
-        FlowSensor.PoseData pos = flowSensor.getOdometryData().pos;
-        turnDirPos = pos.heading < targetRotation;
     }
 
     public void setTargetArmRotation(RotationHandler.RotationPositions rotationPosition) {
@@ -112,6 +98,8 @@ public class AutoSkeleton {
     public boolean isSpecExtensionDone() {
         return specimenExtensionHandler.isExtensionDone();
     }
+
+    /* DISABLED OLD PID CODE BECAUSE MAYBE P BETTER?
 
     public boolean runToPosition(Telemetry telemetry, ElapsedTime runtime) {
         // Get position
@@ -211,6 +199,109 @@ public class AutoSkeleton {
 
         return false;
     }
+     DISABLED OLD PID CODE BECAUSE MAYBE P BETTER? */
+
+    private double clamp(double val, double min, double max) {
+        double result = val;
+        if (Math.abs(val) < min) {
+            result = min * (val / Math.abs(val)); // Multiply minimum by the sign of val (val / |val| = 1 or -1, depending on if val is pos or not)
+        } else if (Math.abs(val) > max) {
+            result = max * (val / Math.abs(val)); // Same logic
+        }
+
+        return result;
+    }
+
+    public boolean runToPosition(Telemetry telemetry, ElapsedTime runtime) {
+        // Step 1: Get Position
+        FlowSensor.PoseData pos = flowSensor.getOdometryData().pos;
+        double x = pos.x + offset[0];
+        double y = pos.y + offset[1];
+        double yaw = imuSensor.getYaw();
+        //btw, heading offset gets applied again later :)
+        x = (Math.cos(headingOffset) * x) - (Math.sin(headingOffset) * y);
+        y = (Math.sin(headingOffset) * x) + (Math.cos(headingOffset) * y);
+
+        telemetry.addData("Cur X", x);
+        telemetry.addData("Cur Y", y);
+
+
+        // Step 2: Calculating distance
+        double xTarg = targetPositions[0] * TILE_LENGTH;
+        double yTarg = targetPositions[1] * TILE_LENGTH;
+
+        double xDist = (xTarg - x);
+        double yDist = (yTarg - y);
+        double turnDist = targetRotation - yaw;
+        double dist = Math.sqrt((xDist * xDist) + (yDist * yDist));
+
+        telemetry.addData("Targ X", xTarg);
+        telemetry.addData("Targ Y", yTarg);
+
+        telemetry.addData("X Dist", xDist);
+        telemetry.addData("Y Dist", yDist);
+        telemetry.addData("Turn Dist", turnDist);
+
+
+        // Step 3: Check if we're within distance
+        if (dist <= movementMargin && Math.abs(turnDist) <= turnMargin) {
+            wheelHandler.absoluteVectorToMotion(0, 0, 0, 0, telemetry);
+            telemetry.addData("Done?", "Done");
+            return true;
+        }
+
+        // Step 4: Calculate force to use
+        // Ok now we apply headingOffset
+        // If we applied the offset to our position, it'd be.. bad..
+        // It'd think that the one meter we travelled was 1 meter in the other direction
+        // This will hopefully work
+        // Apply rotation offset
+
+        double xSpeed = 0;
+        double ySpeed = 0;
+        double turnSpeed = 0;
+        if (Math.abs(xDist) > movementMargin / 1.3) { // we need to reduce movement margin to account for the rare scenarios when x & y are both within margin but combined they are not
+            xSpeed = xDist * (maxSpeed / TILE_LENGTH) * (4 / 3); // This function makes xSpeed reach maxSpeed at 3/4 tile length away
+            xSpeed = (Math.cos(headingOffset) * xSpeed) - (Math.sin(headingOffset) * ySpeed); // Rotate based off heading's OFFSET
+            xSpeed = clamp(xSpeed, minSpeed, maxSpeed); // Clamp to acceptable values
+
+        } else {
+            telemetry.addData("X", "Done");
+        }
+
+
+        if (Math.abs(yDist) > movementMargin / 1.3) {
+            ySpeed = yDist * (maxSpeed / TILE_LENGTH) * (4 / 3);
+            ySpeed = (Math.sin(headingOffset) * xSpeed) + (Math.cos(headingOffset) * ySpeed);
+            ySpeed = clamp(ySpeed, minSpeed, maxSpeed);
+
+        } else {
+            telemetry.addData("Y", "Done");
+        }
+
+
+        if (Math.abs(turnDist) > turnMargin) {
+            turnSpeed = turnDist * (maxSpeed / 90) * (4 / 3); // We arbitrarily scale turnSpeed to 90*
+            turnSpeed = clamp(turnSpeed, minSpeed, maxSpeed);
+
+        } else {
+            telemetry.addData("Turn", "Done");
+        }
+
+
+
+        telemetry.addData("Speed X", xSpeed);
+        telemetry.addData("Speed Y", ySpeed);
+        telemetry.addData("Speed Turning", turnSpeed);
+
+        telemetry.addData("Max Speed", maxSpeed);
+        telemetry.addData("Min Speed", minSpeed);
+
+        // Run motors
+        wheelHandler.absoluteVectorToMotion(xSpeed, ySpeed, turnSpeed, yaw, telemetry);
+
+        return false;
+    }
 
     public void runMotorsDirectly(double y, double x, double turning) {
         wheelHandler.relativeVectorToMotion(y, x, turning);
@@ -227,6 +318,11 @@ public class AutoSkeleton {
     public void setMaxSpeed(double maxSpeed) {
         this.maxSpeed = maxSpeed;
     }
+
+    public void setMinSpeed(double minSpeed) {
+        this.minSpeed = minSpeed;
+    }
+
 
     public void relativeRun(double x, double y) {
         wheelHandler.relativeVectorToMotion(y, x, 0);

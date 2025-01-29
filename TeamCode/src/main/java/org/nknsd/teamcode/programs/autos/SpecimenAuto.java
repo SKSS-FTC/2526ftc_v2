@@ -11,6 +11,7 @@ import org.nknsd.teamcode.autoSteps.AutoStepMoveBackwardWithSensor;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveForwardWithSensor;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveForwardWithSensorSmart;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveNRotate;
+import org.nknsd.teamcode.autoSteps.AutoStepMoveSidewaysWithSensor;
 import org.nknsd.teamcode.autoSteps.AutoStepRelativeMove;
 import org.nknsd.teamcode.autoSteps.AutoStepSpecimenClaw;
 import org.nknsd.teamcode.autoSteps.AutoStepSpecimenRotate;
@@ -129,7 +130,7 @@ public class SpecimenAuto extends NKNProgramTrue {
         //AutoStepAbsoluteControl moveTo3rdSample = new AutoStepAbsoluteControl(2.4, 2.4861, 0);
         AutoStepAbsoluteControl prepareFor1stPickup = new AutoStepAbsoluteControl(1.6008, 0.5233, 0);
         AutoStepMoveForwardWithSensorSmart approachPickup = new AutoStepMoveForwardWithSensorSmart(17, 0.2, .4);
-        AutoStepRelativeMove alignSpecimen = new AutoStepRelativeMove(-0.3, 0, 400);
+        AutoStepMoveSidewaysWithSensor alignSpecimen = new AutoStepMoveSidewaysWithSensor(17, 0.2, 0.4, -0.3,400);
         AutoStepMoveNRotate rotateToEnd = new AutoStepMoveNRotate(0, -.5, -90);
         AutoStepMove slightEndAdjust = new AutoStepMove(-.2, 0);
 
