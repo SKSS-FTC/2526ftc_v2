@@ -32,6 +32,11 @@ public class AutoStepExtendSpecAndOrientBackDist extends NKNAutoStep {
 
     }
 
+    public void begin() {
+        autoSkeleton.setTargetSpecArmExtension(extensionPosition);
+
+    }
+
     @Override
     public void run(Telemetry telemetry, ElapsedTime runtime) {
        if (Math.abs(targ - autoSkeleton.getSensorForDist()) > margin) {

@@ -35,6 +35,7 @@ public class AutoSkeleton {
     private IntakeSpinnerHandler intakeSpinnerHandler;
     private double[] offset;
     private double headingOffset;
+    private int priority = 0;
 
 
     public AutoSkeleton(double maxSpeed, double minSpeed, double movementMargin, double turnMargin) {
@@ -245,7 +246,7 @@ public class AutoSkeleton {
 
         // Step 3: Check if we're within distance
         if (dist <= movementMargin && Math.abs(turnDist) <= turnMargin) {
-            wheelHandler.absoluteVectorToMotion(0, 0, 0, 0, telemetry);
+            wheelHandler.absoluteVectorToMotion(0, 0, 0, 0, priority);
             telemetry.addData("Done?", "Done");
             return true;
         }
@@ -298,17 +299,17 @@ public class AutoSkeleton {
         telemetry.addData("Min Speed", minSpeed);
 
         // Run motors
-        wheelHandler.absoluteVectorToMotion(xSpeed, ySpeed, turnSpeed, yaw, telemetry);
+        wheelHandler.absoluteVectorToMotion(xSpeed, ySpeed, turnSpeed, yaw, priority);
 
         return false;
     }
 
     public void runMotorsDirectly(double y, double x, double turning) {
-        wheelHandler.relativeVectorToMotion(y, x, turning);
+        wheelHandler.relativeVectorToMotion(y, x, turning, priority);
     }
 
     public void freeze() {
-        wheelHandler.relativeVectorToMotion(0, 0, 0);
+        wheelHandler.relativeVectorToMotion(0, 0, 0, priority);
     }
 
     public void setServoPower(IntakeSpinnerHandler.HandStates handState) {
@@ -325,7 +326,7 @@ public class AutoSkeleton {
 
 
     public void relativeRun(double x, double y) {
-        wheelHandler.relativeVectorToMotion(y, x, 0);
+        wheelHandler.relativeVectorToMotion(y, x, 0, priority);
     }
 
     public void setTargetSpecArmExtension(SpecimenExtensionHandler.SpecimenExtensionPositions extensionPosition) {
@@ -346,5 +347,9 @@ public class AutoSkeleton {
 
     public double getSensorBackDist() {
         return sensorBackDist.getDistance();
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 }

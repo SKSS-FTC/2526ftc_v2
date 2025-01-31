@@ -9,6 +9,8 @@ import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
 import org.nknsd.teamcode.components.handlers.WheelHandler;
+import org.nknsd.teamcode.components.sensors.DistSensor;
+import org.nknsd.teamcode.components.sensors.FlowSensor;
 import org.nknsd.teamcode.components.sensors.IMUSensor;
 import org.nknsd.teamcode.components.sensors.PotentiometerSensor;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
@@ -18,8 +20,10 @@ import org.nknsd.teamcode.controlSchemes.reals.KarstenSpecimenController;
 import org.nknsd.teamcode.drivers.AdvancedWheelDriver;
 import org.nknsd.teamcode.drivers.EACDriver;
 import org.nknsd.teamcode.drivers.SpecimenDriver;
+import org.nknsd.teamcode.drivers.SpecimenFancyDepositDriver;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 import java.util.List;
 
@@ -43,6 +47,9 @@ public class KarstenMovementNKNProgram extends NKNProgramTrue {
 
         IMUSensor imuSensor = new IMUSensor();
         components.add(imuSensor);
+
+        DistSensor sensorForDist = new DistSensor("sensorForDist");
+        DistSensor sensorBackDist = new DistSensor("sensorBackDist");
 
 
         // Arm
@@ -90,6 +97,11 @@ public class KarstenMovementNKNProgram extends NKNProgramTrue {
         KarstenEACController eacController = new KarstenEACController();
         KarstenSpecimenController specimenController = new KarstenSpecimenController();
 
+        // Fancy Depositing my boi
+        SpecimenFancyDepositDriver specimenFancyDepositDriver = new SpecimenFancyDepositDriver();
+        telemetryEnabled.add(specimenFancyDepositDriver);
+        AutoSkeleton autoSkeleton = new AutoSkeleton(1, 1, 1);
+
 
         // Link the components to each other
         wheelDriver.link(gamePadHandler, wheelHandler, imuSensor, wheelController);
@@ -97,6 +109,11 @@ public class KarstenMovementNKNProgram extends NKNProgramTrue {
         extensionHandler.link(rotationHandler);
         specimenClawHandler.link(specimenRotationHandler);
         specimenExtensionHandler.link(specimenClawHandler, specimenRotationHandler);
+
+        specimenFancyDepositDriver.link(specimenExtensionHandler, gamePadHandler, wheelController, wheelHandler, autoSkeleton);
+        autoSkeleton.link(wheelHandler, rotationHandler, extensionHandler, intakeSpinnerHandler, new FlowSensor(), imuSensor);
+        autoSkeleton.distSensorLink(sensorForDist, sensorBackDist);
+        autoSkeleton.specimenLink(specimenExtensionHandler, specimenRotationHandler, specimenClawHandler);
 
         eacDriver.link(gamePadHandler, rotationHandler, extensionHandler, intakeSpinnerHandler, eacController);
         specimenDriver.link(specimenExtensionHandler, specimenRotationHandler, specimenClawHandler, gamePadHandler, specimenController);

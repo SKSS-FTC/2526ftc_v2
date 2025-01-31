@@ -9,6 +9,10 @@ public abstract class WheelControlScheme extends NKNControlScheme {
     public abstract Callable<Boolean> gearUp();
     public abstract Callable<Boolean> gearDown();
     public abstract Callable<Boolean> resetAngle();
+    public Callable<Boolean> specFancyDeposit(){
+        return () -> false;
+    };
+
     public Callable<Boolean> initDisableAutoFix() {
         return new Callable<Boolean>() {
             @Override
