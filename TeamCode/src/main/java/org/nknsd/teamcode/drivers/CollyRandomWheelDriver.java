@@ -112,12 +112,7 @@ public class CollyRandomWheelDriver implements NKNComponent {
             yaw += 90;
         }
 
-        if (GamePadHandler.GamepadButtons.Y.detect(gamepad)) {
-            wheelHandler.relativeVectorToMotion(strafeStick.getValue(gamepad) * moveSpeedMultiplier, forwardStick.getValue(gamepad) * moveSpeedMultiplier, turnStick.getValue(gamepad) * moveSpeedMultiplier);
-        } else {
-            wheelHandler.absoluteVectorToMotion(strafeStick.getValue(gamepad) * moveSpeedMultiplier, forwardStick.getValue(gamepad) * moveSpeedMultiplier, turnStick.getValue(gamepad) * moveSpeedMultiplier, yaw, telemetry);
-        }
-
+        wheelHandler.absoluteVectorToMotion(strafeStick.getValue(gamepad) * moveSpeedMultiplier, forwardStick.getValue(gamepad) * moveSpeedMultiplier, turnStick.getValue(gamepad) * moveSpeedMultiplier, yaw);
     }
 
     @Override

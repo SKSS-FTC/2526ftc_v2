@@ -23,8 +23,8 @@ public class FlowSensorTestProgram extends NKNProgramTrue {
         //telemetryEnabled.add(gamePadHandler);
 
         // Wheel Handler
-        WheelHandler wheelHandler = new WheelHandler();
-        components.add(wheelHandler);
+//        WheelHandler wheelHandler = new WheelHandler();
+//        components.add(wheelHandler);
         //telemetryEnabled.add(wheelHandler);
 
         // Flow Sensory Handler
@@ -38,13 +38,13 @@ public class FlowSensorTestProgram extends NKNProgramTrue {
         telemetryEnabled.add(imuSensor);
 
         // Wheel Driver
-        WheelDriver wheelDriver = new WheelDriver(0, 1, 10, GamePadHandler.GamepadSticks.LEFT_JOYSTICK_Y, GamePadHandler.GamepadSticks.LEFT_JOYSTICK_X, GamePadHandler.GamepadSticks.RIGHT_JOYSTICK_X);
-        components.add(wheelDriver);
-        telemetryEnabled.add(wheelDriver);
+//        WheelDriver wheelDriver = new WheelDriver(0, 1, 10, GamePadHandler.GamepadSticks.LEFT_JOYSTICK_Y, GamePadHandler.GamepadSticks.LEFT_JOYSTICK_X, GamePadHandler.GamepadSticks.RIGHT_JOYSTICK_X);
+//        components.add(wheelDriver);
+//        telemetryEnabled.add(wheelDriver);
 
         CollyWheelController wheelController = new CollyWheelController();
         wheelController.link(gamePadHandler);
 
-        wheelDriver.link(gamePadHandler, wheelHandler, wheelController);
+//        wheelDriver.link(gamePadHandler, wheelHandler, wheelController);
     }
 }

@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.nknsd.teamcode.autoSteps.AutoStepExtendArmSynced;
 import org.nknsd.teamcode.autoSteps.AutoStepExtendArmWithFlowAdjusting;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveNRotate;
+import org.nknsd.teamcode.autoSteps.AutoStepRelativeMovement;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.autoSteps.AutoStepAbsoluteControl;
@@ -38,7 +39,7 @@ public class BasketAuto extends NKNProgramTrue {
 
 
         // Core mover
-        AutoSkeleton autoSkeleton = new AutoSkeleton(0.8, 0.2, 1.5);
+        AutoSkeleton autoSkeleton = new AutoSkeleton(0.75, 0.2, 1.4);
 
         AutoHeart autoHeart = new AutoHeart(stepList);
         components.add(autoHeart);
@@ -90,12 +91,14 @@ public class BasketAuto extends NKNProgramTrue {
 
         AutoStepMove moveSlightForward = new AutoStepMove(0, 0.2);
         AutoStepAbsoluteControl orientToBasket = new AutoStepAbsoluteControl(-0.88, 0.32, -135);
+
         AutoStepRelativeMove backAwayFromBasket = new AutoStepRelativeMove(0, -.45, 200);
         AutoStepRelativeMove backMOREAwayFromBasket = new AutoStepRelativeMove(0, -.45, 250);
         AutoStepRelativeMove slightlyBackAway = new AutoStepRelativeMove(0, -.4, 190);
 
         AutoStepAbsoluteControl pickUpFirstYellow = new AutoStepAbsoluteControl(0.4176, 1.3968, -68.8);
         AutoStepRelativeMove moveToPickup = new AutoStepRelativeMove(0, 0.3, 400);
+        AutoStepMove dodgeWall = new AutoStepMove(0, -0.5);
 
         AutoStepAbsoluteControl pickUpSecondYellow = new AutoStepAbsoluteControl(0.0242, 1.6314, -90);
         AutoStepAbsoluteControl alignToPark = new AutoStepAbsoluteControl(-0.05, 2.2, 90);
