@@ -8,13 +8,13 @@ import org.nknsd.teamcode.components.sensors.PotentiometerSensor;
 import org.nknsd.teamcode.components.testfiles.RotationMonkey;
 import org.nknsd.teamcode.components.handlers.ExtensionHandler;
 import org.nknsd.teamcode.components.handlers.RotationHandler;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 
 
 import java.util.List;
 
 @TeleOp(name = "Rotator Monkey", group="Tests") @Disabled
-public class RotatorMonkeyProgram extends NKNProgramTrue {
+public class RotatorMonkeyProgram extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Create extension handler so that the rotator can be linked to it

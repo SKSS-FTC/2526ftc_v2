@@ -6,7 +6,6 @@ import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
 import org.nknsd.teamcode.controlSchemes.reals.CollyWheelController;
-import org.nknsd.teamcode.controlSchemes.reals.KarstenSpecimenController;
 import org.nknsd.teamcode.controlSchemes.reals.XandreEACController;
 import org.nknsd.teamcode.controlSchemes.reals.XandreSpecimenController;
 import org.nknsd.teamcode.drivers.SpecimenDriver;
@@ -20,13 +19,12 @@ import org.nknsd.teamcode.components.handlers.RotationHandler;
 import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.drivers.AdvancedWheelDriver;
 import org.nknsd.teamcode.drivers.EACDriver;
-import org.nknsd.teamcode.controlSchemes.reals.KarstenEACController;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 
 import java.util.List;
 
 @TeleOp(name = "Xandre & Colly OpMode")
-public class XandreMovementNKNProgram extends NKNProgramTrue {
+public class XandreMovementNKNProgram extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Misc

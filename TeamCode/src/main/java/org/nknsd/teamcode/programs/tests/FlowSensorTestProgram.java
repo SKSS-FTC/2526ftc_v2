@@ -6,15 +6,13 @@ import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.components.sensors.FlowSensor;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
 import org.nknsd.teamcode.components.sensors.IMUSensor;
-import org.nknsd.teamcode.drivers.WheelDriver;
-import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.controlSchemes.reals.CollyWheelController;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 
 import java.util.List;
 
 @TeleOp(name = "Flow Sensor Test", group="Tests")
-public class FlowSensorTestProgram extends NKNProgramTrue {
+public class FlowSensorTestProgram extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Gamepad Handler
@@ -23,8 +21,8 @@ public class FlowSensorTestProgram extends NKNProgramTrue {
         //telemetryEnabled.add(gamePadHandler);
 
         // Wheel Handler
-        WheelHandler wheelHandler = new WheelHandler();
-        components.add(wheelHandler);
+//        WheelHandler wheelHandler = new WheelHandler();
+//        components.add(wheelHandler);
         //telemetryEnabled.add(wheelHandler);
 
         // Flow Sensory Handler
@@ -38,13 +36,13 @@ public class FlowSensorTestProgram extends NKNProgramTrue {
         telemetryEnabled.add(imuSensor);
 
         // Wheel Driver
-        WheelDriver wheelDriver = new WheelDriver(0, 1, 10, GamePadHandler.GamepadSticks.LEFT_JOYSTICK_Y, GamePadHandler.GamepadSticks.LEFT_JOYSTICK_X, GamePadHandler.GamepadSticks.RIGHT_JOYSTICK_X);
-        components.add(wheelDriver);
-        telemetryEnabled.add(wheelDriver);
+//        WheelDriver wheelDriver = new WheelDriver(0, 1, 10, GamePadHandler.GamepadSticks.LEFT_JOYSTICK_Y, GamePadHandler.GamepadSticks.LEFT_JOYSTICK_X, GamePadHandler.GamepadSticks.RIGHT_JOYSTICK_X);
+//        components.add(wheelDriver);
+//        telemetryEnabled.add(wheelDriver);
 
         CollyWheelController wheelController = new CollyWheelController();
         wheelController.link(gamePadHandler);
 
-        wheelDriver.link(gamePadHandler, wheelHandler, wheelController);
+//        wheelDriver.link(gamePadHandler, wheelHandler, wheelController);
     }
 }

@@ -6,12 +6,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.components.handlers.IntakeSpinnerHandler;
 import org.nknsd.teamcode.components.testfiles.ServoMonkey;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 
 import java.util.List;
 
 @TeleOp(name = "Servo Monkey", group="Tests") @Disabled
-public class ServoMonkeyProgram extends NKNProgramTrue {
+public class ServoMonkeyProgram extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         IntakeSpinnerHandler intakeSpinnerHandler = new IntakeSpinnerHandler();

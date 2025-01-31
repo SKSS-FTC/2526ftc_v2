@@ -6,11 +6,10 @@ import org.nknsd.teamcode.autoSteps.AutoStepAbsoluteControl;
 import org.nknsd.teamcode.autoSteps.AutoStepChangeMaxSpeed;
 import org.nknsd.teamcode.autoSteps.AutoStepExtendSpecAndOrientBackDist;
 import org.nknsd.teamcode.autoSteps.AutoStepExtendSpecimenArm;
-import org.nknsd.teamcode.autoSteps.AutoStepExtendSpecimenArmSynced;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveBackwardWithSensor;
-import org.nknsd.teamcode.autoSteps.AutoStepMoveForwardWithSensor;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveForwardWithSensorSmart;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveNRotate;
+import org.nknsd.teamcode.autoSteps.AutoStepMoveSidewaysWithSensor;
 import org.nknsd.teamcode.autoSteps.AutoStepRelativeMove;
 import org.nknsd.teamcode.autoSteps.AutoStepSpecimenClaw;
 import org.nknsd.teamcode.autoSteps.AutoStepSpecimenRotate;
@@ -30,14 +29,14 @@ import org.nknsd.teamcode.components.sensors.PotentiometerSensor;
 import org.nknsd.teamcode.components.handlers.RotationHandler;
 import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.components.utility.AutoHeart;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 import java.util.LinkedList;
 import java.util.List;
 
 @Autonomous(name = "Score Specimen on Bar (IN DEV)")
-public class SpecimenAuto extends NKNProgramTrue {
+public class SpecimenAuto extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Step List
@@ -45,7 +44,7 @@ public class SpecimenAuto extends NKNProgramTrue {
 
 
         // Core mover
-        AutoSkeleton autoSkeleton = new AutoSkeleton(0.3, 0.8, 1);
+        AutoSkeleton autoSkeleton = new AutoSkeleton(0.75, 0.2, 1.4);
 
         AutoHeart autoHeart = new AutoHeart(stepList);
         components.add(autoHeart);
@@ -116,9 +115,9 @@ public class SpecimenAuto extends NKNProgramTrue {
 
     private void assembleList(List<NKNAutoStep> stepList, AutoHeart autoHeart, AutoSkeleton autoSkeleton) {
         // Declare steps
-        AutoStepSleep sleep = new AutoStepSleep(300);
+        AutoStepSleep sleep = new AutoStepSleep(200);
 
-        AutoStepAbsoluteControl moveToBar = new AutoStepAbsoluteControl(-0.4332, 1.35, 0);
+        AutoStepAbsoluteControl moveToBar = new AutoStepAbsoluteControl(-0.4332, 1.15, 0);
         AutoStepMoveBackwardWithSensor approachBar = new AutoStepMoveBackwardWithSensor(3.5, .1, 0.5);
         AutoStepRelativeMove clipApproach = new AutoStepRelativeMove(0,-0.24,100);
         AutoStepAbsoluteControl moveToB2 = new AutoStepAbsoluteControl(1.3, 1, 0);
@@ -129,7 +128,7 @@ public class SpecimenAuto extends NKNProgramTrue {
         //AutoStepAbsoluteControl moveTo3rdSample = new AutoStepAbsoluteControl(2.4, 2.4861, 0);
         AutoStepAbsoluteControl prepareFor1stPickup = new AutoStepAbsoluteControl(1.6008, 0.5233, 0);
         AutoStepMoveForwardWithSensorSmart approachPickup = new AutoStepMoveForwardWithSensorSmart(17, 0.2, .4);
-        AutoStepRelativeMove alignSpecimen = new AutoStepRelativeMove(-0.3, 0, 400);
+        AutoStepMoveSidewaysWithSensor alignSpecimen = new AutoStepMoveSidewaysWithSensor(17, 0.2, 0.4, -0.3,400);
         AutoStepMoveNRotate rotateToEnd = new AutoStepMoveNRotate(0, -.5, -90);
         AutoStepMove slightEndAdjust = new AutoStepMove(-.2, 0);
 
@@ -143,8 +142,8 @@ public class SpecimenAuto extends NKNProgramTrue {
         AutoStepSpecimenClaw grip = new AutoStepSpecimenClaw(SpecimenClawHandler.ClawPositions.GRIP);
         AutoStepSpecimenClaw release = new AutoStepSpecimenClaw(SpecimenClawHandler.ClawPositions.RELEASE);
 
-        AutoStepChangeMaxSpeed slowSpeed = new AutoStepChangeMaxSpeed(0.3);
-        AutoStepChangeMaxSpeed normalSpeed = new AutoStepChangeMaxSpeed(0.6);
+        AutoStepChangeMaxSpeed slowSpeed = new AutoStepChangeMaxSpeed(0.5);
+        AutoStepChangeMaxSpeed normalSpeed = new AutoStepChangeMaxSpeed(0.7);
 
 
         // Create path
@@ -157,7 +156,6 @@ public class SpecimenAuto extends NKNProgramTrue {
         stepList.add(approachBar);
         stepList.add(grip);
         stepList.add(extendToClip);
-        stepList.add(sleep);
         stepList.add(sleep);
         stepList.add(clipApproach);
         stepList.add(sleep);
@@ -203,7 +201,6 @@ public class SpecimenAuto extends NKNProgramTrue {
         stepList.add(grip);
 
         stepList.add(extendToClip);
-        stepList.add(sleep);
         stepList.add(sleep);
         stepList.add(clipApproach);
         stepList.add(sleep);

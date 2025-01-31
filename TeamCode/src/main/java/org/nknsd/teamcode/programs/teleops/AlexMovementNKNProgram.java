@@ -19,12 +19,12 @@ import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.drivers.EACDriver;
 import org.nknsd.teamcode.drivers.WheelDriver;
 import org.nknsd.teamcode.controlSchemes.reals.CollyWheelController;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 
 import java.util.List;
 
 @TeleOp(name = "Alex OpMode (Robot Oriented)")
-public class AlexMovementNKNProgram extends NKNProgramTrue {
+public class AlexMovementNKNProgram extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Misc

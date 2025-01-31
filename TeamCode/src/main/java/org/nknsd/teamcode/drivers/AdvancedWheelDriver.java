@@ -89,7 +89,7 @@ public class AdvancedWheelDriver implements NKNComponent {
     public void start(ElapsedTime runtime, Telemetry telemetry) {
         gamePadHandler.addListener(controlScheme.gearDown(), speedDown, "Speed Down");
         gamePadHandler.addListener(controlScheme.gearUp(), speedUp, "Speed Up");
-        gamePadHandler.addListener(controlScheme.resetAngle(), () -> {}, "Reset Angle");
+        gamePadHandler.addListener(controlScheme.resetAngle(), resetImu, "Reset Angle");
 
         gamePadHandler.removeListener("Disable Autonomous IMU Yaw Correction");
     }
@@ -111,7 +111,8 @@ public class AdvancedWheelDriver implements NKNComponent {
         if (imuCorrection) {
             yaw += 90;
         }
-        wheelHandler.absoluteVectorToMotion(strafeStick.getValue(gamepad) * moveSpeedMultiplier, forwardStick.getValue(gamepad) * moveSpeedMultiplier, turnStick.getValue(gamepad) * moveSpeedMultiplier, yaw, telemetry);
+
+        wheelHandler.absoluteVectorToMotion(strafeStick.getValue(gamepad) * moveSpeedMultiplier, forwardStick.getValue(gamepad) * moveSpeedMultiplier, turnStick.getValue(gamepad) * moveSpeedMultiplier, yaw);
     }
 
     @Override

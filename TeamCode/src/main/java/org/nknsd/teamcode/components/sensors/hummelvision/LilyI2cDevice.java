@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
 import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties;
 import com.qualcomm.robotcore.hardware.configuration.annotations.I2cDeviceType;
 
+import org.nknsd.teamcode.components.utility.ColorPicker;
+
 
 @I2cDeviceType
 @DeviceProperties(
@@ -51,4 +53,25 @@ public class LilyI2cDevice extends I2cDeviceSynchDevice<I2cDeviceSynch> {
         return output;
     }
 
+    public void setBlockDetectColor(ColorPicker.Colors color) {
+        byte[] out;
+        switch (color) {
+            case YELLOW:
+                out = new byte[]{1};
+                break;
+
+            case RED:
+                out = new byte[]{2};
+                break;
+
+            case BLUE:
+                out = new byte[]{3};
+                break;
+
+            default:
+                out = new byte[]{0};
+        }
+
+        deviceClient.write(1, out);
+    }
 }

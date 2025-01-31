@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.nknsd.teamcode.components.utility.ColorPicker;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 
 
@@ -27,7 +28,7 @@ public class LilyVisionHandler implements NKNComponent {
         }
     }
 
-    private LilyI2cDevice visionDevice;
+    private LilyI2cDevice visionDevice; private ColorPicker colorPicker;
 
     @Override
     public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
@@ -57,7 +58,7 @@ public class LilyVisionHandler implements NKNComponent {
 
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
-
+        visionDevice.setBlockDetectColor(colorPicker.currentColor());
     }
 
     @Override
@@ -131,9 +132,10 @@ public class LilyVisionHandler implements NKNComponent {
             blueY = data[11];
         }
 
+        return new VisionData(yellowX, -yellowY, redX, -redY, blueX, -blueY);
+    }
 
-
-        return new VisionData(yellowX, yellowY, redX,
-                redY, blueX, blueY);
+    public void link(ColorPicker colorPicker) {
+        this.colorPicker = colorPicker;
     }
 }
