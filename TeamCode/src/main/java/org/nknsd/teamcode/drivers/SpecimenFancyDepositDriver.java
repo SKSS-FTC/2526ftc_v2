@@ -5,14 +5,14 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.nknsd.teamcode.controlSchemes.abstracts.SpecimenControlScheme;
-import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
+import org.nknsd.teamcode.controlSchemes.abstracts.SpecimenControlScheme;
+import org.nknsd.teamcode.frameworks.NKNComponent;
 
-public class SpecimenDriver implements NKNComponent {
+public class SpecimenFancyDepositDriver implements NKNComponent {
     private GamePadHandler gamePadHandler;
     private SpecimenExtensionHandler specimenExtensionHandler;
     private SpecimenRotationHandler specimenRotationHandler;

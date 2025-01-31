@@ -50,6 +50,15 @@ public class CollyRandomWheelDriver implements NKNComponent {
             imuCorrection = false;
         }
     };
+
+    Runnable resetImu = new Runnable() {
+        @Override
+        public void run() {
+            imuSensor.resetIMU();
+            imuCorrection = false;
+        }
+    };
+
     private Gamepad gamepad;
     private IMUSensor imuSensor;
 
@@ -80,7 +89,7 @@ public class CollyRandomWheelDriver implements NKNComponent {
     public void start(ElapsedTime runtime, Telemetry telemetry) {
         gamePadHandler.addListener(controlScheme.gearDown(), speedDown, "Speed Down");
         gamePadHandler.addListener(controlScheme.gearUp(), speedUp, "Speed Up");
-        gamePadHandler.addListener(controlScheme.resetAngle(), () -> {}, "Reset Angle");
+        gamePadHandler.addListener(controlScheme.resetAngle(), resetImu, "Reset Angle");
 
         gamePadHandler.removeListener("Disable Autonomous IMU Yaw Correction");
     }

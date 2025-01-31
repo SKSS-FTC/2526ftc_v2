@@ -3,21 +3,16 @@ package org.nknsd.teamcode.autoSteps;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
-import org.nknsd.teamcode.components.handlers.IntakeSpinnerHandler;
 
-import java.util.concurrent.TimeUnit;
-
-public class AutoStepServo extends NKNAutoStep {
+public class AutoStepExtendSpecimenArmSynced extends NKNAutoStep {
+    private final SpecimenExtensionHandler.SpecimenExtensionPositions extensionPosition;
     AutoSkeleton autoSkeleton;
-    private final IntakeSpinnerHandler.HandStates power;
-    private long timeBegan;
-    private final long duration;
 
-    public AutoStepServo(IntakeSpinnerHandler.HandStates handState, long duration) {
-        this.duration = duration;
-        this.power = handState;
+    public AutoStepExtendSpecimenArmSynced(SpecimenExtensionHandler.SpecimenExtensionPositions extensionPosition) {
+        this.extensionPosition = extensionPosition;
     }
 
     @Override
@@ -27,8 +22,7 @@ public class AutoStepServo extends NKNAutoStep {
     }
 
     public void begin(ElapsedTime runtime, Telemetry telemetry) {
-        autoSkeleton.setServoPower(power);
-        timeBegan = runtime.now(TimeUnit.MILLISECONDS);
+        autoSkeleton.setTargetSpecArmExtension(extensionPosition);
     }
 
     @Override
@@ -36,11 +30,11 @@ public class AutoStepServo extends NKNAutoStep {
 
     @Override
     public boolean isDone(ElapsedTime runtime) {
-        return runtime.now(TimeUnit.MILLISECONDS) - timeBegan > duration;
+        return true;
     }
 
     @Override
     public String getName() {
-        return "Running servo at " + power + " for " + duration;
+        return "Extending to " + extensionPosition.name();
     }
 }

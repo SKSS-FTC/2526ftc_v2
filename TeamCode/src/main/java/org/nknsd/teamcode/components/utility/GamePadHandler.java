@@ -34,6 +34,8 @@ public class GamePadHandler implements NKNComponent {
                 telemetry.addData("Error", e);
             }
         }
+
+        telemetry.update();
     }
 
     @Override

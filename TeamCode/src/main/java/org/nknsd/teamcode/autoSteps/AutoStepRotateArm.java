@@ -9,7 +9,7 @@ import org.nknsd.teamcode.components.handlers.RotationHandler;
 
 import java.util.concurrent.TimeUnit;
 
-public class AutoStepRotateArm implements NKNAutoStep {
+public class AutoStepRotateArm extends NKNAutoStep {
     private final RotationHandler.RotationPositions rotationPosition;
     AutoSkeleton autoSkeleton;
     private long timeBegan;

@@ -11,12 +11,15 @@ import org.nknsd.teamcode.frameworks.NKNComponent;
 import java.util.concurrent.TimeUnit;
 
 public class SpecimenExtensionHandler implements NKNComponent {
+    private SpecimenClawHandler clawHandler;
+    private SpecimenRotationHandler rotationHandler;
     private final String extenderName = "motorSpecimenExtend";
     private final boolean doInvertMotor = true;
     private final double motorPower = 1;
-    private DcMotor motor;          // extender motor
+    private DcMotor motor;
     int extenderPrevious = 0;
     private double lastResetAttempt = 200;
+    private Telemetry telemetry;
 
     private SpecimenExtensionPositions target = SpecimenExtensionPositions.RESTING;
 
@@ -26,8 +29,8 @@ public class SpecimenExtensionHandler implements NKNComponent {
 
     public enum SpecimenExtensionPositions {
         RESTING(0),
-        SPECIMEN_READY(1950),
-        SPECIMEN_CLIP(2300);
+        SPECIMEN_READY(1220),
+        SPECIMEN_CLIP(2270);
 
         final int position;
 
@@ -43,11 +46,6 @@ public class SpecimenExtensionHandler implements NKNComponent {
             motor.setDirection(DcMotor.Direction.REVERSE);
         }
 
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setPower(motorPower);
-        motor.setTargetPosition(SpecimenExtensionPositions.RESTING.position);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
         return true;
     }
 
@@ -58,7 +56,10 @@ public class SpecimenExtensionHandler implements NKNComponent {
 
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
-
+        //motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //this was the line you were supposed to cut!!
+        motor.setPower(motorPower);
+        motor.setTargetPosition(SpecimenExtensionPositions.RESTING.position);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     @Override
@@ -82,7 +83,7 @@ public class SpecimenExtensionHandler implements NKNComponent {
                 extenderPrevious = motor.getCurrentPosition();
             lastResetAttempt = runtime.now(TimeUnit.MILLISECONDS);
         }
-    } //resets encoder when arm is resting and no longer moving
+    }
 
     @Override
     public void doTelemetry(Telemetry telemetry) {
@@ -90,19 +91,63 @@ public class SpecimenExtensionHandler implements NKNComponent {
         telemetry.addData("Ext Target Position", motor.getTargetPosition());
         telemetry.addData("Ext State", target.name());
     }
+
+    // There's a return boolean here because it's a copy of the other extension handler's code.
+    // It currently isn't used, but if we want to have skippable extensionPositions values we'll need it
     public boolean gotoPosition(SpecimenExtensionHandler.SpecimenExtensionPositions specimenExtensionPosition) {
+        // This code sucks. When I eventually get around to fixing things, FIX THIS.
+        // God I am way too busy
+        if (clawHandler.firstClosedPosition == null) {
             motor.setTargetPosition(specimenExtensionPosition.position);
             target = specimenExtensionPosition;
-
             return true;
-    }
-    public void resetEncoder() {
-        if (target == SpecimenExtensionPositions.RESTING) {
-            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        } else if (clawHandler.firstClosedPosition != rotationHandler.targetPosition()) {
+            motor.setTargetPosition(specimenExtensionPosition.position);
+            target = specimenExtensionPosition;
+            return true;
+
+        } else {
+            return false;
         }
     }
+
+    public boolean gotoPosition(SpecimenExtensionHandler.SpecimenExtensionPositions specimenExtensionPosition, boolean doSkipSafety) {
+        //HELP
+        // HELP
+        if (clawHandler.firstClosedPosition == null || doSkipSafety) {
+            motor.setTargetPosition(specimenExtensionPosition.position);
+            target = specimenExtensionPosition;
+            return true;
+
+        } else if (clawHandler.firstClosedPosition != rotationHandler.targetPosition()) {
+            motor.setTargetPosition(specimenExtensionPosition.position);
+            target = specimenExtensionPosition;
+            return true;
+
+        } else {
+            return false;
+        }
+    }
+
     public SpecimenExtensionPositions targetPosition() {
         return target;
+    }
+
+    public void link(SpecimenClawHandler clawHandler, SpecimenRotationHandler rotationHandler) {
+        this.clawHandler = clawHandler; this.rotationHandler = rotationHandler;
+    }
+
+    // DO NOT RUN UNLESS YOU ARE CONFIDENT
+    public void resetEncoder() {
+        //reset encoder
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        //go to new position
+        target = SpecimenExtensionPositions.RESTING;
+        motor.setTargetPosition(target.position);
+
+        //run to the current position :D
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 }

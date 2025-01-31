@@ -25,6 +25,10 @@ public abstract class EACControlScheme extends NKNControlScheme {
 
     public abstract Callable<Boolean> sampleRetract();
 
+    public Callable<Boolean> resetEAC() {
+        return () -> false;
+    }
+
     public void linkExtensionHandler(ExtensionHandler extensionHandler) {
         this.extensionHandler = extensionHandler;
     }

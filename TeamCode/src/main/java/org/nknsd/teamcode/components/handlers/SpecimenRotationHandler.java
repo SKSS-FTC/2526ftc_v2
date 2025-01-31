@@ -11,7 +11,8 @@ import org.nknsd.teamcode.frameworks.NKNComponent;
 public class SpecimenRotationHandler implements NKNComponent {
     private final String rotatorName = "specimenRotate";
     private Servo servo;
-    private SpecimenRotationPositions target = SpecimenRotationPositions.FORWARD;
+    private SpecimenRotationPositions target = SpecimenRotationPositions.MIDDLE;
+
     public enum SpecimenRotationPositions{
         BACK(0.15),
         MIDDLE(.6),
@@ -49,10 +50,9 @@ public class SpecimenRotationHandler implements NKNComponent {
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
 
     }
-
     @Override
     public void doTelemetry(Telemetry telemetry) {
-    telemetry.addData("specimenRotationPosition", servo.getPosition());
+    telemetry.addData("specimenRotationPosition", target.name());
     }
     public boolean goToPosition(SpecimenRotationHandler.SpecimenRotationPositions specimenRotationPosition){
         servo.setPosition(specimenRotationPosition.position);

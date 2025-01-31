@@ -6,8 +6,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
-public class AutoStepAbsoluteControl implements NKNAutoStep {
-    AutoSkeleton autoSkeleton;
+public class AutoStepAbsoluteControl extends NKNAutoStep {
     boolean done = false;
     private final double heading;
     private final double xTarg;

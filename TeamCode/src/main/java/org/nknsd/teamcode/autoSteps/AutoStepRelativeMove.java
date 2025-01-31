@@ -8,7 +8,7 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 import java.util.concurrent.TimeUnit;
 
-public class AutoStepRelativeMove implements NKNAutoStep {
+public class AutoStepRelativeMove extends NKNAutoStep {
     AutoSkeleton autoSkeleton;
     private final long time;
     private long startTime;

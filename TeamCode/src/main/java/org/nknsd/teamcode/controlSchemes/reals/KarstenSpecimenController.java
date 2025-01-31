@@ -110,4 +110,14 @@ public class KarstenSpecimenController extends SpecimenControlScheme {
             }
         };
     }
+
+    @Override
+    public Callable<Boolean> resetSpecExt() {
+        return new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return GamePadHandler.GamepadButtons.DPAD_RIGHT.detect(gamePadHandler.getGamePad2()) && GamePadHandler.GamepadButtons.A.detect(gamePadHandler.getGamePad2());
+            }
+        };
+    }
 }

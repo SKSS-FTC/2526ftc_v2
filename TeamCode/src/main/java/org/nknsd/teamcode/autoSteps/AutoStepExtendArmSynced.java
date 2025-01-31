@@ -3,28 +3,19 @@ package org.nknsd.teamcode.autoSteps;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.nknsd.teamcode.components.handlers.ExtensionHandler;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
-import java.util.concurrent.TimeUnit;
+public class AutoStepExtendArmSynced extends NKNAutoStep {
+    private final ExtensionHandler.ExtensionPositions extensionPosition;
 
-public class AutoStepSleep extends NKNAutoStep {
-    AutoSkeleton autoSkeleton;
-    private final long time;
-    private long startTime;
-
-    public AutoStepSleep(long time) {
-        this.time = time;
-    }
-
-    @Override
-    public void link(AutoSkeleton autoSkeleton) {
-        this.autoSkeleton = autoSkeleton;
-
+    public AutoStepExtendArmSynced(ExtensionHandler.ExtensionPositions extensionPosition) {
+        this.extensionPosition = extensionPosition;
     }
 
     public void begin(ElapsedTime runtime, Telemetry telemetry) {
-        startTime = runtime.now(TimeUnit.MILLISECONDS);
+        autoSkeleton.setTargetArmExtension(extensionPosition);
     }
 
     @Override
@@ -32,11 +23,11 @@ public class AutoStepSleep extends NKNAutoStep {
 
     @Override
     public boolean isDone(ElapsedTime runtime) {
-        return runtime.now(TimeUnit.MILLISECONDS) - startTime > time;
+        return true;
     }
 
     @Override
     public String getName() {
-        return "Adjusting target";
+        return "Extending to " + extensionPosition.name();
     }
 }
