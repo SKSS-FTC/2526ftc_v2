@@ -25,7 +25,7 @@ public class SpecimenFancyDepositDriver implements NKNComponent {
     private WheelControlScheme controlScheme;
     private WheelHandler wheelHandler;
     private AutoSkeleton autoSkeleton;
-    private AutoStepExtendSpecAndOrientBackDist fancyDepositStep = new AutoStepExtendSpecAndOrientBackDist(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_CLIP, 3.5, .07, 0.5);;
+    private AutoStepExtendSpecAndOrientBackDist fancyDepositStep = new AutoStepExtendSpecAndOrientBackDist(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_CLIP, 4.1, .1, 0.5);
 
     private boolean isFancyDepositing = false;
 
@@ -33,10 +33,17 @@ public class SpecimenFancyDepositDriver implements NKNComponent {
     Runnable specFancyDeposit = new Runnable() {
         @Override
         public void run() {
-            fancyDepositStep.begin();
-            isFancyDepositing = true;
-            wheelHandler.setPriority(0);
-            autoSkeleton.setPriority(0);
+            if (isFancyDepositing) {
+                wheelHandler.setPriority(0);
+                autoSkeleton.setPriority(0);
+                isFancyDepositing = false;
+            }
+            else {
+                fancyDepositStep.begin();
+                isFancyDepositing = true;
+                wheelHandler.setPriority(2);
+                autoSkeleton.setPriority(2);
+            }
         }
     };
 

@@ -22,13 +22,13 @@ import org.nknsd.teamcode.drivers.EACDriver;
 import org.nknsd.teamcode.drivers.SpecimenDriver;
 import org.nknsd.teamcode.drivers.SpecimenFancyDepositDriver;
 import org.nknsd.teamcode.frameworks.NKNComponent;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 import java.util.List;
 
 @TeleOp(name = "Karsten & Colly OpMode")
-public class KarstenMovementNKNProgram extends NKNProgramTrue {
+public class KarstenMovementNKNProgram extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Misc
@@ -49,7 +49,11 @@ public class KarstenMovementNKNProgram extends NKNProgramTrue {
         components.add(imuSensor);
 
         DistSensor sensorForDist = new DistSensor("sensorForDist");
+        components.add(sensorForDist);
+        telemetryEnabled.add(sensorForDist);
         DistSensor sensorBackDist = new DistSensor("sensorBackDist");
+        components.add(sensorBackDist);
+        telemetryEnabled.add(sensorBackDist);
 
 
         // Arm
@@ -72,7 +76,7 @@ public class KarstenMovementNKNProgram extends NKNProgramTrue {
 
         SpecimenExtensionHandler specimenExtensionHandler = new SpecimenExtensionHandler();
         components.add(specimenExtensionHandler);
-        telemetryEnabled.add(specimenExtensionHandler);
+        //telemetryEnabled.add(specimenExtensionHandler);
 
         SpecimenClawHandler specimenClawHandler = new SpecimenClawHandler();
         components.add(specimenClawHandler);
@@ -97,10 +101,15 @@ public class KarstenMovementNKNProgram extends NKNProgramTrue {
         KarstenEACController eacController = new KarstenEACController();
         KarstenSpecimenController specimenController = new KarstenSpecimenController();
 
+
         // Fancy Depositing my boi
         SpecimenFancyDepositDriver specimenFancyDepositDriver = new SpecimenFancyDepositDriver();
+        components.add(specimenFancyDepositDriver);
         telemetryEnabled.add(specimenFancyDepositDriver);
-        AutoSkeleton autoSkeleton = new AutoSkeleton(1, 1, 1);
+        AutoSkeleton autoSkeleton = new AutoSkeleton(0.75, 0.2, 1.4);
+        autoSkeleton.setOffset(new double[]{0, 0}, 180);
+
+
 
 
         // Link the components to each other
