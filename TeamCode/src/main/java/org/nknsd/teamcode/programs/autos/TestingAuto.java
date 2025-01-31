@@ -31,7 +31,7 @@ public class TestingAuto extends NKNProgramTrue {
 
 
         // Core mover
-        AutoSkeleton autoSkeleton = new AutoSkeleton(0.6, 0.3, 0.8, 1.5);
+        AutoSkeleton autoSkeleton = new AutoSkeleton(0.7, 0.3, 0.3, 1.5);
 
         AutoHeart autoHeart = new AutoHeart(stepList);
         components.add(autoHeart);

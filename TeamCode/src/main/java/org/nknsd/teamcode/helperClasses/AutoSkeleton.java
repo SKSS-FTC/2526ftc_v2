@@ -261,7 +261,7 @@ public class AutoSkeleton {
         double ySpeed = 0;
         double turnSpeed = 0;
         if (Math.abs(xDist) > movementMargin / 1.3) { // we need to reduce movement margin to account for the rare scenarios when x & y are both within margin but combined they are not
-            xSpeed = xDist * (maxSpeed / TILE_LENGTH) * (4 / 3); // This function makes xSpeed reach maxSpeed at 3/4 tile length away
+            xSpeed = xDist * (maxSpeed / TILE_LENGTH) * (6 / 3); // This function makes xSpeed reach maxSpeed at 3/4 tile length away
             xSpeed = (Math.cos(headingOffset) * xSpeed) - (Math.sin(headingOffset) * ySpeed); // Rotate based off heading's OFFSET
             xSpeed = clamp(xSpeed, minSpeed, maxSpeed); // Clamp to acceptable values
 
