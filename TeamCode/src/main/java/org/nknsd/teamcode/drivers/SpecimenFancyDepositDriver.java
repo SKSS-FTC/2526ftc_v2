@@ -25,7 +25,7 @@ public class SpecimenFancyDepositDriver implements NKNComponent {
     private WheelControlScheme controlScheme;
     private WheelHandler wheelHandler;
     private AutoSkeleton autoSkeleton;
-    private AutoStepExtendSpecAndOrientBackDist fancyDepositStep = new AutoStepExtendSpecAndOrientBackDist(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_CLIP, 4.1, .1, 0.5);
+    private AutoStepExtendSpecAndOrientBackDist fancyDepositStep = new AutoStepExtendSpecAndOrientBackDist(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_CLIP, 7.5, .1, 0.2);
 
     private boolean isFancyDepositing = false;
 
