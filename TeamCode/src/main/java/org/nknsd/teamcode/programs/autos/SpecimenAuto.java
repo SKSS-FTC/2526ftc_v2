@@ -118,7 +118,7 @@ public class SpecimenAuto extends NKNProgram {
         AutoStepSleep sleep = new AutoStepSleep(200);
 
         AutoStepAbsoluteControl moveToBar = new AutoStepAbsoluteControl(-0.4332, 1.15, 0);
-        AutoStepMoveBackwardWithSensor approachBar = new AutoStepMoveBackwardWithSensor(3.5, .1, 0.5);
+        AutoStepMoveBackwardWithSensor approachBar = new AutoStepMoveBackwardWithSensor(7.5, .1, 0.5);
         AutoStepRelativeMove clipApproach = new AutoStepRelativeMove(0,-0.24,100);
         AutoStepAbsoluteControl moveToB2 = new AutoStepAbsoluteControl(1.3, 1, 0);
         AutoStepMove moveUp = new AutoStepMove(0, 1);
@@ -136,7 +136,7 @@ public class SpecimenAuto extends NKNProgram {
         AutoStepSpecimenRotate rotateToCollect = new AutoStepSpecimenRotate(SpecimenRotationHandler.SpecimenRotationPositions.FORWARD);
 
         AutoStepExtendSpecimenArm extendToReady = new AutoStepExtendSpecimenArm(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_READY);
-        AutoStepExtendSpecAndOrientBackDist extendToClip = new AutoStepExtendSpecAndOrientBackDist(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_CLIP, 3.5, .07, 0.5);
+        AutoStepExtendSpecAndOrientBackDist extendToClip = new AutoStepExtendSpecAndOrientBackDist(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_CLIP, 7.5, .07, 0.5);
         AutoStepExtendSpecimenArm extendToRest = new AutoStepExtendSpecimenArm(SpecimenExtensionHandler.SpecimenExtensionPositions.RESTING);
 
         AutoStepSpecimenClaw grip = new AutoStepSpecimenClaw(SpecimenClawHandler.ClawPositions.GRIP);
