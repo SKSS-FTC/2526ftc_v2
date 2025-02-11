@@ -7,11 +7,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.nknsd.teamcode.components.handlers.JointedArmHandler;
 import org.nknsd.teamcode.components.handlers.ShaiHuludHandler;
+import org.nknsd.teamcode.components.handlers.TheBowlHandler;
 import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
 import org.nknsd.teamcode.controlSchemes.abstracts.ShaiHuludControlScheme;
 import org.nknsd.teamcode.controlSchemes.abstracts.WheelControlScheme;
 import org.nknsd.teamcode.frameworks.NKNComponent;
+
+import java.util.concurrent.TimeUnit;
 
 public class ShaiHuludDriver implements NKNComponent {
 
@@ -54,6 +57,7 @@ public class ShaiHuludDriver implements NKNComponent {
             jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.DEPOSIT);
         }
     };
+    private TheBowlHandler bowlHandler;
 
     @Override
     public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
@@ -87,11 +91,48 @@ public class ShaiHuludDriver implements NKNComponent {
     }
 
 
+    private long bowlStartTime, bowlDelayStart;
+    private final static long BOWL_DELAY = 500, BOWL_LENGTH = 3000;
+    private BowlStates currentBowlState = BowlStates.STOPPED;
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
         if (debug) {
             jointedArmHandler.runStuff(gamePadHandler);
+            if (GamePadHandler.GamepadButtons.BACK.detect(gamePadHandler.getGamePad2())) {
+                bowlDelayStart = runtime.now(TimeUnit.MILLISECONDS);
+                currentBowlState = BowlStates.WAITING_TO_START;
+            }
         }
+
+        if (shaiHuludHandler.getState() == ShaiHuludHandler.ShaiStates.EJECT && currentBowlState == BowlStates.STOPPED) {
+            bowlDelayStart = runtime.now(TimeUnit.MILLISECONDS);
+            currentBowlState = BowlStates.WAITING_TO_START;
+        }
+
+        if (runtime.now(TimeUnit.MILLISECONDS) > bowlDelayStart + BOWL_DELAY && currentBowlState == BowlStates.WAITING_TO_START) {
+            bowlStartTime = runtime.now(TimeUnit.MILLISECONDS);
+            currentBowlState = BowlStates.ACTIVE;
+        }
+
+        if (runtime.now(TimeUnit.MILLISECONDS) > bowlStartTime + BOWL_LENGTH && currentBowlState == BowlStates.ACTIVE) {
+            currentBowlState = BowlStates.STOPPED;
+        }
+
+        switch (currentBowlState) {
+            case ACTIVE:
+                bowlHandler.setServoPower(TheBowlHandler.States.BOWLIN);
+                break;
+
+            case STOPPED:
+                bowlHandler.setServoPower(TheBowlHandler.States.not_bowlin);
+                break;
+        }
+    }
+
+    private enum BowlStates {
+        WAITING_TO_START,
+        ACTIVE,
+        STOPPED;
     }
 
     @Override
@@ -99,10 +140,11 @@ public class ShaiHuludDriver implements NKNComponent {
 
     }
 
-    public void link(GamePadHandler gamePadHandler, ShaiHuludHandler shaiHuludHandler, JointedArmHandler jointedArmHandler, ShaiHuludControlScheme controlScheme) {
+    public void link(GamePadHandler gamePadHandler, ShaiHuludHandler shaiHuludHandler, JointedArmHandler jointedArmHandler, TheBowlHandler bowlHandler, ShaiHuludControlScheme controlScheme) {
         this.gamePadHandler = gamePadHandler;
         this.shaiHuludHandler = shaiHuludHandler;
         this.jointedArmHandler = jointedArmHandler;
+        this.bowlHandler = bowlHandler;
         this.controlScheme = controlScheme;
     }
 

@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.nknsd.teamcode.components.handlers.JointedArmHandler;
 import org.nknsd.teamcode.components.handlers.ShaiHuludHandler;
+import org.nknsd.teamcode.components.handlers.TheBowlHandler;
 import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.components.sensors.IMUSensor;
 import org.nknsd.teamcode.components.sensors.hummelvision.LilyVisionHandler;
@@ -53,6 +54,10 @@ public class ShaiHuludNKNProgram extends NKNProgramTrue {
         components.add(jointedArmHandler);
         telemetryEnabled.add(jointedArmHandler);
 
+        TheBowlHandler bowlHandler = new TheBowlHandler();
+        components.add(bowlHandler);
+        telemetryEnabled.add(bowlHandler);
+
 
         // Driver
         AdvancedWheelDriver wheelDriver = new AdvancedWheelDriver(0, 1, 5, GamePadHandler.GamepadSticks.LEFT_JOYSTICK_Y, GamePadHandler.GamepadSticks.LEFT_JOYSTICK_X, GamePadHandler.GamepadSticks.RIGHT_JOYSTICK_X);
@@ -77,7 +82,7 @@ public class ShaiHuludNKNProgram extends NKNProgramTrue {
 //        shaiHuludHandler.linkWheels(wheelHandler);
 
         wheelDriver.link(gamePadHandler, wheelHandler, imuSensor, wheelController);
-        shaiHuludDriver.link(gamePadHandler, shaiHuludHandler, jointedArmHandler, shaiHuludController);
+        shaiHuludDriver.link(gamePadHandler, shaiHuludHandler, jointedArmHandler, bowlHandler, shaiHuludController);
 
         wheelController.link(gamePadHandler);
         shaiHuludController.link(gamePadHandler);
