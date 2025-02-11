@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.nknsd.teamcode.components.sensors.PotentiometerSensor;
+import org.nknsd.teamcode.components.utility.GamePadHandler;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.helperClasses.PIDModel;
 
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class JointedArmHandler implements NKNComponent {
     public static final int MAX_INDEX_OF_ROTATION_POSITIONS = 5;
     final double motorThreshold = 0, servoThreshold = 0;
-    public Positions targetPosition = Positions.A;
+    public Positions targetPosition = Positions.REST;
     private DcMotor motor; private Servo joint1, joint2, grip;
 
     @Override
@@ -27,12 +28,13 @@ public class JointedArmHandler implements NKNComponent {
 
     @Override
     public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
-        motor = hardwareMap.dcMotor.get("");
+        motor = hardwareMap.dcMotor.get("clawArm");
         motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        joint1 = hardwareMap.servo.get("");
-        joint2 = hardwareMap.servo.get("");
-        grip = hardwareMap.servo.get("");
+        joint1 = hardwareMap.servo.get("clawElbow");
+        joint2 = hardwareMap.servo.get("clawWrist");
+        grip = hardwareMap.servo.get("clawFinger");
 
         return true;
     }
@@ -44,7 +46,6 @@ public class JointedArmHandler implements NKNComponent {
 
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
-
     }
 
     @Override
@@ -52,21 +53,36 @@ public class JointedArmHandler implements NKNComponent {
         return "JointedArmRotator :D";
     }
 
+    private boolean oneTimeThing = false;
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
+        if (runtime.now(TimeUnit.MILLISECONDS) > 500 && !oneTimeThing) {
+            motor.setPower(0.5);
 
+            motor.setTargetPosition(0);
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            setTargetPosition(Positions.REST);
+
+            oneTimeThing = true;
+        }
     }
 
     @Override
     public void doTelemetry(Telemetry telemetry) {
-
+        telemetry.addData("JointedArm: Motor Val", motor.getCurrentPosition());
+        telemetry.addData("JointedArm: Motor Target", targetPosition.motorVal);
+        telemetry.addData("JointedArm: Joint1", joint1.getPosition());
+        telemetry.addData("JointedArm: Joint2", joint2.getPosition());
+        telemetry.addData("JointedArm: Grip", grip.getPosition());
     }
 
     public void setTargetPosition(Positions position) {
         motor.setTargetPosition(position.motorVal);
-        joint1.setPosition(position.joint1Val);
-        joint2.setPosition(position.joint2Val);
-        grip.setPosition(position.gripVal);
+//        joint1.setPosition(position.joint1Val);
+//        joint2.setPosition(position.joint2Val);
+//        grip.setPosition(position.gripVal);
+        targetPosition = position;
     }
 
     public boolean isAtTargetPosition() {
@@ -79,7 +95,9 @@ public class JointedArmHandler implements NKNComponent {
     }
 
     public enum Positions {
-        A(0, 0, 0, 0);
+        REST(0, 0.5183, 0.01, 0.5),
+        COLLECTION(136, 0.2778, 0.26, 0.5),
+        DEPOSIT(2267, 0.8194, 0.6994, 0.5);
 
         public final int motorVal;
         public final double joint1Val, joint2Val, gripVal;
@@ -89,6 +107,48 @@ public class JointedArmHandler implements NKNComponent {
             this.joint1Val = joint1Val;
             this.joint2Val = joint2Val;
             this.gripVal = gripVal;
+        }
+    }
+
+    private boolean delayButtons = false;
+    public void runStuff(GamePadHandler gamePadHandler) {
+        boolean a = GamePadHandler.GamepadButtons.A.detect(gamePadHandler.getGamePad2());
+        boolean b = GamePadHandler.GamepadButtons.B.detect(gamePadHandler.getGamePad2());
+        boolean right = GamePadHandler.GamepadButtons.DPAD_RIGHT.detect(gamePadHandler.getGamePad2());
+        boolean left = GamePadHandler.GamepadButtons.DPAD_LEFT.detect(gamePadHandler.getGamePad2());
+        boolean up = GamePadHandler.GamepadButtons.DPAD_UP.detect(gamePadHandler.getGamePad2());
+        boolean down = GamePadHandler.GamepadButtons.DPAD_DOWN.detect(gamePadHandler.getGamePad2());
+
+        if (delayButtons) {
+            delayButtons = (a || b || right || left || up || down);
+            return;
+        }
+
+        if (a) {
+            joint1.setPosition(joint1.getPosition() + 0.01);
+            delayButtons = true;
+        }
+        if (b) {
+            joint1.setPosition(joint1.getPosition() - 0.01);
+            delayButtons = true;
+        }
+
+        if (right) {
+            joint2.setPosition(joint2.getPosition() + 0.01);
+            delayButtons = true;
+        }
+        if (left) {
+            joint2.setPosition(joint2.getPosition() - 0.01);
+            delayButtons = true;
+        }
+
+        if (up) {
+            grip.setPosition(grip.getPosition() + 0.005);
+            delayButtons = true;
+        }
+        if (down) {
+            grip.setPosition(grip.getPosition() - 0.005);
+            delayButtons = true;
         }
     }
 }

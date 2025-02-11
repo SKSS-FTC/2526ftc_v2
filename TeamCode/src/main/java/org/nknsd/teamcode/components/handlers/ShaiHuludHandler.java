@@ -33,12 +33,12 @@ public class ShaiHuludHandler implements NKNComponent {
         spikeServo = hardwareMap.servo.get("servoShaiHuludSpike");
         //extensionMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        positions[0] = new ShaiHuludPosition(-600, 0.7, 0.8); // tuck
-        positions[1] = new ShaiHuludPosition(-2400, 0.6, 0.8); // extend
-        positions[2] = new ShaiHuludPosition(-2400, 0.28, 0.8); // rotate down
-        positions[3] = new ShaiHuludPosition(-2400, 0.28, 0.2); // spike grab
-        positions[4] = new ShaiHuludPosition(-600, 0.7, 0.2); // retract
-        positions[5] = new ShaiHuludPosition(-600, 0.7, 0.8); // eject
+        positions[0] = new ShaiHuludPosition(-300, 0.7, 0.6); // tuck
+        positions[1] = new ShaiHuludPosition(-1800, 0.7, 0.6); // extend
+        positions[2] = new ShaiHuludPosition(-1800, 0.28, 0.6); // rotate down
+        positions[3] = new ShaiHuludPosition(-1800, 0.28, 0.2); // spike grab
+        positions[4] = new ShaiHuludPosition(-300, 0.7, 0.2); // retract
+        positions[5] = new ShaiHuludPosition(0, 0.7, 0.9); // eject
 
         return true;
     }
@@ -52,14 +52,10 @@ public class ShaiHuludHandler implements NKNComponent {
     public void start(ElapsedTime runtime, Telemetry telemetry) {
         extensionMotor.setPower(1);
 
-        // extensionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        extensionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         extensionMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         extensionMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         extensionMotor.setTargetPosition(0);
-
-        setPositions(positions[0]);
-
-        state = ShaiStates.TUCK;
     }
 
     @Override
@@ -134,7 +130,7 @@ public class ShaiHuludHandler implements NKNComponent {
                 break;
 
             case WAITFOREJECT:
-                if (runtime.time(TimeUnit.MILLISECONDS) - stateStartTime >= 300) {
+                if (runtime.time(TimeUnit.MILLISECONDS) - stateStartTime >= 600) {
                     state = ShaiStates.TUCK;
                 }
                 break;
@@ -143,8 +139,8 @@ public class ShaiHuludHandler implements NKNComponent {
 
     @Override
     public void doTelemetry(Telemetry telemetry) {
-        telemetry.addData("State", state.name());
-        telemetry.addData("Motor Position", extensionMotor.getCurrentPosition());
+        telemetry.addData("SH State", state.name());
+        telemetry.addData("SH Motor Position", extensionMotor.getCurrentPosition());
     }
 
     private PosPair getOffset(LilyVisionHandler.VisionData visionData) {
@@ -170,16 +166,22 @@ public class ShaiHuludHandler implements NKNComponent {
 
         wheelHandler.setPriority(PRIORITY);
 
-        // Align to target sample
+        // Get data on where the sample is
         LilyVisionHandler.VisionData visionData = visionHandler.getVisionData();
         PosPair offset = getOffset(visionData);
 
+        // If there is no sample, do not continue
+
+        // If we press the stop button, do not continue
+
+        // Check if we're aligned
         if (offset.getDist() < ALIGN_MARGIN) {
             wheelHandler.setPriority(0);
             wheelHandler.relativeVectorToMotion(0, 0, 0);
             return true;
         }
 
+        // Set speed to move closer to sample
         PosPair moveSpeed = offset.scale(1);
         wheelHandler.relativeVectorToMotion(moveSpeed.y, moveSpeed.x, 0, PRIORITY);
         return false;

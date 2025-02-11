@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.nknsd.teamcode.components.handlers.JointedArmHandler;
 import org.nknsd.teamcode.components.handlers.ShaiHuludHandler;
 import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
@@ -15,8 +16,9 @@ import org.nknsd.teamcode.frameworks.NKNComponent;
 public class ShaiHuludDriver implements NKNComponent {
 
     private GamePadHandler gamePadHandler;
-    private ShaiHuludHandler shaiHuludHandler;
+    private ShaiHuludHandler shaiHuludHandler; JointedArmHandler jointedArmHandler;
     private ShaiHuludControlScheme controlScheme;
+    private boolean debug = false;
 
     private Runnable shExtend = new Runnable() {
         @Override
@@ -29,6 +31,27 @@ public class ShaiHuludDriver implements NKNComponent {
         @Override
         public void run() {
             shaiHuludHandler.cancelPickup();
+        }
+    };
+
+    private Runnable jaRest = new Runnable() {
+        @Override
+        public void run() {
+           jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.REST);
+        }
+    };
+
+    private Runnable jaCollect = new Runnable() {
+        @Override
+        public void run() {
+            jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.COLLECTION);
+        }
+    };
+
+    private Runnable jaDeposit = new Runnable() {
+        @Override
+        public void run() {
+            jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.DEPOSIT);
         }
     };
 
@@ -47,6 +70,10 @@ public class ShaiHuludDriver implements NKNComponent {
         // Add event listeners
         gamePadHandler.addListener(controlScheme.shExtend(), shExtend, "SH Begin Extend");
         gamePadHandler.addListener(controlScheme.shRetract(), shRetract, "SH CANCEL BACK UP AHHH");
+
+        gamePadHandler.addListener(controlScheme.jaRest(), jaRest, "JA Rest");
+        gamePadHandler.addListener(controlScheme.jaCollect(), jaCollect, "JA Collect");
+        gamePadHandler.addListener(controlScheme.jaDeposit(), jaDeposit, "JA Deposit");
     }
 
     @Override
@@ -62,7 +89,9 @@ public class ShaiHuludDriver implements NKNComponent {
 
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
-
+        if (debug) {
+            jointedArmHandler.runStuff(gamePadHandler);
+        }
     }
 
     @Override
@@ -70,9 +99,14 @@ public class ShaiHuludDriver implements NKNComponent {
 
     }
 
-    public void link(GamePadHandler gamePadHandler, ShaiHuludHandler shaiHuludHandler, ShaiHuludControlScheme controlScheme) {
+    public void link(GamePadHandler gamePadHandler, ShaiHuludHandler shaiHuludHandler, JointedArmHandler jointedArmHandler, ShaiHuludControlScheme controlScheme) {
         this.gamePadHandler = gamePadHandler;
         this.shaiHuludHandler = shaiHuludHandler;
+        this.jointedArmHandler = jointedArmHandler;
         this.controlScheme = controlScheme;
+    }
+
+    public void enableDebug() {
+        debug = true;
     }
 }

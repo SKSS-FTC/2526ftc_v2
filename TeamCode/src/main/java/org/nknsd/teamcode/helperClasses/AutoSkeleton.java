@@ -245,7 +245,7 @@ public class AutoSkeleton {
 
         // Step 3: Check if we're within distance
         if (dist <= movementMargin && Math.abs(turnDist) <= turnMargin) {
-            wheelHandler.absoluteVectorToMotion(0, 0, 0, 0, telemetry);
+            wheelHandler.absoluteVectorToMotion(0, 0, 0, 0);
             telemetry.addData("Done?", "Done");
             return true;
         }
@@ -298,7 +298,7 @@ public class AutoSkeleton {
         telemetry.addData("Min Speed", minSpeed);
 
         // Run motors
-        wheelHandler.absoluteVectorToMotion(xSpeed, ySpeed, turnSpeed, yaw, telemetry);
+        wheelHandler.absoluteVectorToMotion(xSpeed, ySpeed, turnSpeed, yaw);
 
         return false;
     }
