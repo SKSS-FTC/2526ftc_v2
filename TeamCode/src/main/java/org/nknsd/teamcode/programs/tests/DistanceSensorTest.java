@@ -13,11 +13,14 @@ import java.util.List;
 public class DistanceSensorTest extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
-        DistSensor forwardSensor = new DistSensor("sensorForDist");
         DistSensor backwardSensor = new DistSensor("sensorBackDist");
-        components.add(forwardSensor);
+        DistSensor leftSensor = new DistSensor("sensorLeftDist");
+        DistSensor rightSensor = new DistSensor("sensorRightDist");
         components.add(backwardSensor);
-        telemetryEnabled.add(forwardSensor);
+        components.add(leftSensor);
+        components.add(rightSensor);
         telemetryEnabled.add(backwardSensor);
+        telemetryEnabled.add(leftSensor);
+        telemetryEnabled.add(rightSensor);
     }
 }
