@@ -47,15 +47,23 @@ public class DistHubSensor implements NKNComponent {
 
     }
 
+    // Dist Hub will perform the telemetry operation for all linked sensors automatically! Isn't that nice?
     @Override
     public void doTelemetry(Telemetry telemetry) {
         for (DistSensor sensor : sensors.values()) {
             sensor.doTelemetry(telemetry);
         }
+
+        // This line is a little clunky and could be improved
+        // The intent was for this Forward Dist only to run if we have the left and right but not the forward (because the forward would be called already if we had forward)
+        if (sensors.containsKey(SensorNames.LEFT) && sensors.containsKey(SensorNames.RIGHT) && !sensors.containsKey(SensorNames.FORWARD)) {
+            telemetry.addData("Forward Dist", getForwardDist());
+        }
     }
 
     // This is the format for a getter for a sensor name
     // We can access a particular name in the SensorNames hashmap, but if it doesn't exist, it throws a NullPointerException
+    // These are here for convenience essentially
     public double getBackDist() throws NullPointerException {
         return getDist(SensorNames.BACK);
     }

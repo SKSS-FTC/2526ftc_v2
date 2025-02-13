@@ -79,9 +79,9 @@ public class JointedArmHandler implements NKNComponent {
 
     public void setTargetPosition(Positions position) {
         motor.setTargetPosition(position.motorVal);
-//        joint1.setPosition(position.joint1Val);
-//        joint2.setPosition(position.joint2Val);
-//        grip.setPosition(position.gripVal);
+        joint1.setPosition(position.joint1Val);
+        joint2.setPosition(position.joint2Val);
+        grip.setPosition(position.gripVal);
         targetPosition = position;
     }
 

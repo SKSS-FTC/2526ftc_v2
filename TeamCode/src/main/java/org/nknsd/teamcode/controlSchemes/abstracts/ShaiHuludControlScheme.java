@@ -22,18 +22,18 @@ public abstract class ShaiHuludControlScheme extends NKNControlScheme {
     }
 
     public Callable<Boolean> jaRest() {
-        //return () -> GamePadHandler.GamepadButtons.DPAD_DOWN.detect(gamePadHandler.getGamePad2());
-        return () -> GamePadHandler.GamepadButtons.X.detect(gamePadHandler.getGamePad2());
+        return () -> GamePadHandler.GamepadButtons.DPAD_DOWN.detect(gamePadHandler.getGamePad2());
+        //return () -> GamePadHandler.GamepadButtons.X.detect(gamePadHandler.getGamePad2());
     }
 
     public Callable<Boolean> jaCollect() {
-        //return () -> GamePadHandler.GamepadButtons.A.detect(gamePadHandler.getGamePad2());
-        return () -> GamePadHandler.GamepadButtons.Y.detect(gamePadHandler.getGamePad2());
+        return () -> GamePadHandler.GamepadButtons.A.detect(gamePadHandler.getGamePad2());
+        //return () -> GamePadHandler.GamepadButtons.Y.detect(gamePadHandler.getGamePad2());
     }
 
     public Callable<Boolean> jaDeposit() {
-        //return () -> GamePadHandler.GamepadButtons.DPAD_UP.detect(gamePadHandler.getGamePad2());
-        return () -> GamePadHandler.GamepadButtons.START.detect(gamePadHandler.getGamePad2());
+        return () -> GamePadHandler.GamepadButtons.DPAD_UP.detect(gamePadHandler.getGamePad2());
+        //return () -> GamePadHandler.GamepadButtons.START.detect(gamePadHandler.getGamePad2());
     }
 }
 

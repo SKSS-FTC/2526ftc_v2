@@ -33,12 +33,12 @@ public class ShaiHuludHandler implements NKNComponent {
         spikeServo = hardwareMap.servo.get("servoShaiHuludSpike");
         //extensionMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        positions[0] = new ShaiHuludPosition(-300, 0.7, 0.6); // tuck
-        positions[1] = new ShaiHuludPosition(-1800, 0.7, 0.6); // extend
+        positions[0] = new ShaiHuludPosition(-300, 0.8, 0.6); // tuck
+        positions[1] = new ShaiHuludPosition(-1800, 0.8, 0.6); // extend
         positions[2] = new ShaiHuludPosition(-1800, 0.28, 0.6); // rotate down
         positions[3] = new ShaiHuludPosition(-1800, 0.28, 0.2); // spike grab
-        positions[4] = new ShaiHuludPosition(-300, 0.7, 0.2); // retract
-        positions[5] = new ShaiHuludPosition(0, 0.7, 0.9); // eject
+        positions[4] = new ShaiHuludPosition(-300, 0.8, 0.2); // retract
+        positions[5] = new ShaiHuludPosition(0, 0.8, 0.9); // eject
 
         return true;
     }

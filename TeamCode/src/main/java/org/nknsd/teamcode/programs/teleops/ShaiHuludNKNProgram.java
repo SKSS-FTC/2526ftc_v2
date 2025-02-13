@@ -87,7 +87,5 @@ public class ShaiHuludNKNProgram extends NKNProgramTrue {
         wheelController.link(gamePadHandler);
         shaiHuludController.link(gamePadHandler);
         generic2PController.link(gamePadHandler);
-
-        shaiHuludDriver.enableDebug();
     }
 }

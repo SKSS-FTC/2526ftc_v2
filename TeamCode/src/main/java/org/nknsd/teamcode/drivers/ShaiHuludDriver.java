@@ -92,7 +92,7 @@ public class ShaiHuludDriver implements NKNComponent {
 
 
     private long bowlStartTime, bowlDelayStart;
-    private final static long BOWL_DELAY = 500, BOWL_LENGTH = 3000;
+    private final static long BOWL_DELAY = 500, BOWL_LENGTH = 1000;
     private BowlStates currentBowlState = BowlStates.STOPPED;
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
