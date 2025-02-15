@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## NOTICE
 
 This repository contains the public FTC SDK for the INTO THE DEEP (2024-2025) competition season.
@@ -1600,3 +1601,8 @@ Changes include:
  * The API for the Legacy Module and Core Device Interface Module have been updated.
    - Support for encoders with the Legacy Module is now working.
  * The hardware loop has been updated for better performance.
+=======
+#EagleBots 13532
+
+This is the repository for the FTC team EagleBots, #13532
+>>>>>>> origin/Colin's_Stuff

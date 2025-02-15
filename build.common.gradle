@@ -21,7 +21,11 @@ apply plugin: 'com.android.application'
 
 android {
 
+<<<<<<< HEAD
     compileSdkVersion 30
+=======
+    compileSdkVersion 34
+>>>>>>> origin/Colin's_Stuff
 
     signingConfigs {
         release {
@@ -102,8 +106,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     packagingOptions {
@@ -114,4 +118,3 @@ android {
 
 repositories {
 }
-

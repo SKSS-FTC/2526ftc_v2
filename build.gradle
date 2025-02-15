@@ -11,8 +11,17 @@ buildscript {
     }
     dependencies {
         // Note for FTC Teams: Do not modify this yourself.
+<<<<<<< HEAD
         classpath 'com.android.tools.build:gradle:8.7.0'
+=======
+        classpath 'com.android.tools.build:gradle:8.6.1'
+>>>>>>> origin/Colin's_Stuff
     }
+}
+
+plugins {
+    id "java"
+    id "com.diffplug.spotless" version "6.25.0"
 }
 
 // This is now required because aapt2 has to be downloaded from the
@@ -26,4 +35,48 @@ allprojects {
 
 repositories {
     mavenCentral()
+}
+
+compileJava.dependsOn(spotlessApply)
+spotless {
+    java {
+        target fileTree(".") {
+            include "**/*.java"
+            exclude "**/build/**", "**/build-*/**", "FtcRobotController/**"
+        }
+        removeUnusedImports()
+        importOrder()
+        cleanthat()
+        googleJavaFormat()
+        endWithNewline()
+        licenseHeader("// Copyright (c) 2024-2025 FTC 13532\n// All rights reserved.\n\n")
+    }
+    groovyGradle {
+        target fileTree(".") {
+            include "**/*.gradle"
+            exclude "**/build/**", "**/build-*/**"
+        }
+        greclipse()
+        indentWithSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    format "misc", {
+        target fileTree(".") {
+            include "**/*.md", "**/.gitignore"
+            exclude "**/build/**", "**/build-*/**", "FtcRobotController/**"
+        }
+        trimTrailingWhitespace()
+        indentWithSpaces(2)
+        endWithNewline()
+    }
+}
+
+tasks.named("build") {
+    dependsOn("spotlessApply")
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
