@@ -21,11 +21,7 @@ apply plugin: 'com.android.application'
 
 android {
 
-<<<<<<< HEAD
-    compileSdkVersion 30
-=======
     compileSdkVersion 34
->>>>>>> origin/Colin's_Stuff
 
     signingConfigs {
         release {
