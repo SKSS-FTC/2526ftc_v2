@@ -40,6 +40,7 @@ public class ShaiHuludNKNProgram extends NKNProgramTrue {
 
         LilyVisionHandler lilyVisionHandler = new LilyVisionHandler();
         components.add(lilyVisionHandler);
+        telemetryEnabled.add(lilyVisionHandler);
 
 
         // Handlers
@@ -79,7 +80,7 @@ public class ShaiHuludNKNProgram extends NKNProgramTrue {
         colorPicker.link(gamePadHandler, generic2PController);
         lilyVisionHandler.link(colorPicker);
         shaiHuludHandler.link(lilyVisionHandler, colorPicker);
-//        shaiHuludHandler.linkWheels(wheelHandler);
+        shaiHuludHandler.linkWheels(wheelHandler);
 
         wheelDriver.link(gamePadHandler, wheelHandler, imuSensor, wheelController);
         shaiHuludDriver.link(gamePadHandler, shaiHuludHandler, jointedArmHandler, bowlHandler, shaiHuludController);

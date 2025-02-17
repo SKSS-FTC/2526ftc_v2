@@ -79,25 +79,28 @@ public class JointedArmHandler implements NKNComponent {
 
     public void setTargetPosition(Positions position) {
         motor.setTargetPosition(position.motorVal);
+        grip.setPosition(position.gripVal); // same as below but just for better operation
+        joint2.setPosition(position.joint2Val); // joint 2 is before 1 because the robot hits itself if joint 1 moves first (or i'm just insane but don't change it because it works)
         joint1.setPosition(position.joint1Val);
-        joint2.setPosition(position.joint2Val);
-        grip.setPosition(position.gripVal);
         targetPosition = position;
     }
 
     public boolean isAtTargetPosition() {
         // Checks each of the four different vals, comparing it to the positions of the components and their respective thresholds
-        if (Math.abs(targetPosition.motorVal - motor.getCurrentPosition()) <= motorThreshold * 2) return false;
-        if (Math.abs(targetPosition.joint1Val - joint1.getPosition()) <= servoThreshold * 2) return false;
-        if (Math.abs(targetPosition.joint2Val - joint2.getPosition()) <= servoThreshold * 2) return false;
-        return (Math.abs(targetPosition.gripVal - grip.getPosition()) <= servoThreshold * 2);
+        return(Math.abs(targetPosition.motorVal - motor.getCurrentPosition()) <= motorThreshold * 2);
+//        if (Math.abs(targetPosition.joint1Val - joint1.getPosition()) <= servoThreshold * 2) return false;
+//        if (Math.abs(targetPosition.joint2Val - joint2.getPosition()) <= servoThreshold * 2) return false;
+//        return (Math.abs(targetPosition.gripVal - grip.getPosition()) <= servoThreshold * 2);
 
     }
 
     public enum Positions {
-        REST(0, 0.5183, 0.01, 0.5),
-        COLLECTION(136, 0.2778, 0.26, 0.5),
-        DEPOSIT(2267, 0.8194, 0.6994, 0.5);
+        REST(0, 0.6, 1, 0.71),
+        COLLECTION(0, 0.375, 0.789, 0.63),
+        COLLECTING(0,0.375,0.789,0.71), //Someone else see if there is a better way to do this because I am not competent enough to know
+        SPECIMEN_COLLECTION(0,0.6,1,0.71), // same as REST, please put correct values in before usage
+        SPECIMEN_DEPOSIT(0,0.6,1,0.71), // same as REST, please put correct values in before usage
+        DEPOSIT(2267, 0.8194, 0.6994, 0.71);
 
         public final int motorVal;
         public final double joint1Val, joint2Val, gripVal;

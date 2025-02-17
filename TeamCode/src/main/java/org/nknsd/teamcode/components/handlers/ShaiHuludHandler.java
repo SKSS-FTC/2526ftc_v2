@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.State;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.nknsd.teamcode.components.sensors.hummelvision.LilyVisionHandler;
 import org.nknsd.teamcode.components.utility.ColorPicker;
@@ -25,6 +24,7 @@ public class ShaiHuludHandler implements NKNComponent {
     private LilyVisionHandler visionHandler; private ColorPicker colorPicker; private WheelHandler wheelHandler;
     private final double ALIGN_MARGIN = 0.5;
     private final int PRIORITY = 1;
+    private Gamepad gamepad; private Telemetry telemetry;
 
     @Override
     public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
@@ -39,6 +39,9 @@ public class ShaiHuludHandler implements NKNComponent {
         positions[3] = new ShaiHuludPosition(-1800, 0.28, 0.2); // spike grab
         positions[4] = new ShaiHuludPosition(-300, 0.8, 0.2); // retract
         positions[5] = new ShaiHuludPosition(0, 0.8, 0.9); // eject
+
+        gamepad = gamepad2; //super botched way to implement the e-stop for the shai hulud movement
+        this.telemetry = telemetry;
 
         return true;
     }
@@ -72,7 +75,13 @@ public class ShaiHuludHandler implements NKNComponent {
 
             case ALIGNTOSAMPLE:
                 if (alignToSample()) {
-                    state = ShaiStates.BEGINEXTEND;
+                    wheelHandler.setPriority(0);
+                    wheelHandler.relativeVectorToMotion(0, 0, 0);
+                    if (continueExtension) {
+                        state = ShaiStates.BEGINEXTEND;
+                    } else {
+                        state = ShaiStates.TUCK;
+                    }
                 }
                 break;
 
@@ -159,31 +168,43 @@ public class ShaiHuludHandler implements NKNComponent {
         }
     }
 
+    private boolean continueExtension = false;
+    private final PosPair noSample = new PosPair(Integer.MAX_VALUE, -Integer.MAX_VALUE);
     private boolean alignToSample() {
-        if (wheelHandler == null) {
-            return true;
-        }
-
-        wheelHandler.setPriority(PRIORITY);
-
         // Get data on where the sample is
         LilyVisionHandler.VisionData visionData = visionHandler.getVisionData();
         PosPair offset = getOffset(visionData);
+        offset.doTelemetry(telemetry, "offset");
 
         // If there is no sample, do not continue
-
-        // If we press the stop button, do not continue
-
-        // Check if we're aligned
-        if (offset.getDist() < ALIGN_MARGIN) {
-            wheelHandler.setPriority(0);
-            wheelHandler.relativeVectorToMotion(0, 0, 0);
+        if (offset.equalTo(noSample)) {
+            telemetry.addData("Exit", "NO-SAMPLE");
             return true;
         }
 
+        // If we press the stop button, do not continue
+        if (gamepad.b) {
+            telemetry.addData("Exit", "STOP-BUTTON");
+            return true;
+        }
+
+        // Check if we're aligned
+        if (offset.getDist() < ALIGN_MARGIN) {
+            continueExtension = true;
+            telemetry.addData("Exit", "ALIGN-DONE");
+            return true;
+        }
+
+        // Now that we know we have to move, claim priority over the wheel handler
+        wheelHandler.setPriority(PRIORITY);
+
         // Set speed to move closer to sample
-        PosPair moveSpeed = offset.scale(1);
+        PosPair moveSpeed = offset.scale(0.005);
+
         wheelHandler.relativeVectorToMotion(moveSpeed.y, moveSpeed.x, 0, PRIORITY);
+        telemetry.addData("X", moveSpeed.x);
+        telemetry.addData("Y", moveSpeed.y);
+        telemetry.addData("Exit", "ALIGN-PROGRESS");
         return false;
     }
 
@@ -192,6 +213,12 @@ public class ShaiHuludHandler implements NKNComponent {
             return;
         }
 
+        if (wheelHandler == null || gamepad.y) {
+            state = ShaiStates.BEGINEXTEND;
+            return;
+        }
+
+        continueExtension = false; // Reset continueExtension so that it can be set back to true when needed
         state = ShaiStates.ALIGNTOSAMPLE;
     }
 

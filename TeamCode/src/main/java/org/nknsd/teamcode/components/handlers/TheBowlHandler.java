@@ -61,7 +61,7 @@ public class TheBowlHandler implements NKNComponent {
     }
 
     public enum States {
-        BOWLIN(1),
+        BOWLIN(0.3),
         not_bowlin(0);
 
         public final double power;

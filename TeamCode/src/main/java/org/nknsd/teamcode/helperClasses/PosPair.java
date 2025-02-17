@@ -1,5 +1,7 @@
 package org.nknsd.teamcode.helperClasses;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class PosPair {
     public final double x;
     public final double y;
@@ -29,5 +31,14 @@ public class PosPair {
 
     public PosPair scale(double scalar) {
         return new PosPair(scalar * x, scalar * y);
+    }
+
+    public void doTelemetry(Telemetry telemetry) {
+        doTelemetry(telemetry, "");
+    }
+
+    public void doTelemetry(Telemetry telemetry, String name) {
+        telemetry.addData(name + "-X", x);
+        telemetry.addData(name + "-Y", y);
     }
 }
