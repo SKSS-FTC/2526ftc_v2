@@ -57,6 +57,18 @@ public class ShaiHuludDriver implements NKNComponent {
             jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.DEPOSIT);
         }
     };
+    private Runnable jaClose = new Runnable() {
+        @Override
+        public void run() {
+            jointedArmHandler.setClawPosition(JointedArmHandler.Positions.GRAB_CLOSE);
+        }
+    };
+    private Runnable jaOpen = new Runnable() {
+        @Override
+        public void run() {
+            jointedArmHandler.setClawPosition(JointedArmHandler.Positions.GRAB_OPEN);
+        }
+    };
     private TheBowlHandler bowlHandler;
 
     @Override
@@ -78,6 +90,8 @@ public class ShaiHuludDriver implements NKNComponent {
         gamePadHandler.addListener(controlScheme.jaRest(), jaRest, "JA Rest");
         gamePadHandler.addListener(controlScheme.jaCollect(), jaCollect, "JA Collect");
         gamePadHandler.addListener(controlScheme.jaDeposit(), jaDeposit, "JA Deposit");
+        gamePadHandler.addListener(controlScheme.jaClose(), jaClose, "JA Close");
+        gamePadHandler.addListener(controlScheme.jaOpen(), jaOpen, "JA Open");
     }
 
     @Override
