@@ -22,7 +22,7 @@ public class ShaiHuludHandler implements NKNComponent {
     private ShaiHuludPosition[] positions = new ShaiHuludPosition[6];
     private ShaiStates state = ShaiStates.TUCK;
     private LilyVisionHandler visionHandler; private ColorPicker colorPicker; private WheelHandler wheelHandler;
-    private final double ALIGN_MARGIN = 10;
+    private final double ALIGN_MARGIN = 8;
     private final int PRIORITY = 1;
     private Gamepad gamepad; private Telemetry telemetry;
 
@@ -92,23 +92,27 @@ public class ShaiHuludHandler implements NKNComponent {
 
             case ALIGNTOSAMPLE:
                 if (alignToSample()) {
-                    wheelHandler.setPriority(0);
-                    wheelHandler.relativeVectorToMotion(0, 0, 0);
                     if (continueExtension) {
                         state = ShaiStates.BEGINEXTEND;
                     } else {
+                        wheelHandler.setPriority(0);
+                        wheelHandler.relativeVectorToMotion(0, 0, 0);
                         state = ShaiStates.TUCK;
                     }
                 }
                 break;
 
             case BEGINEXTEND:
+                alignToSample();
                 setPositions(positions[1]);
                 state = ShaiStates.WAITINGFOREXTEND;
                 break;
 
             case WAITINGFOREXTEND:
+                alignToSample();
                 if (!extensionMotor.isBusy()) {
+                    wheelHandler.setPriority(0);
+                    wheelHandler.relativeVectorToMotion(0, 0, 0);
                     state = ShaiStates.ROTATEDOWN;
                 }
                 break;
@@ -209,14 +213,14 @@ public class ShaiHuludHandler implements NKNComponent {
         if (offset.getDist() < ALIGN_MARGIN) {
             continueExtension = true;
             telemetry.addData("Exit", "ALIGN-DONE");
-            //return true;
+            return true;
         }
 
         // Now that we know we have to move, claim priority over the wheel handler
         wheelHandler.setPriority(PRIORITY);
 
         // Set speed to move closer to sample
-        PosPair moveSpeed = offset.scale(0.005);
+        PosPair moveSpeed = offset.scale(0.005).dropLowValues(0.13).clampValuesToMin(0.15);
 
         wheelHandler.relativeVectorToMotion(moveSpeed.y, moveSpeed.x, 0, PRIORITY);
         telemetry.addData("X", moveSpeed.x);
