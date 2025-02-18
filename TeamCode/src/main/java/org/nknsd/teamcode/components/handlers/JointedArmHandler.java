@@ -104,7 +104,7 @@ public class JointedArmHandler implements NKNComponent {
         SPECIMEN_COLLECTION(0,0.6,1,0.71), // same as REST, please put correct values in before usage
         SPECIMEN_DEPOSIT(0,0.6,1,0.71), // same as REST, please put correct values in before usage
 
-        DEPOSIT(2267, 0.8194, 0.2, 0.71),
+        DEPOSIT(2267, 0.8194, 0.8, 0.71),
         GRAB_OPEN(0,0,0,0.63),
         GRAB_CLOSE(0,0,0,0.71);
 

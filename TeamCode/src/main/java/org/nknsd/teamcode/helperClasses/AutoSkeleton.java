@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.nknsd.teamcode.components.handlers.ExtensionHandler;
+import org.nknsd.teamcode.components.handlers.JointedArmHandler;
+import org.nknsd.teamcode.components.handlers.ShaiHuludHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
@@ -29,6 +31,8 @@ public class AutoSkeleton {
     private SpecimenExtensionHandler specimenExtensionHandler;
     private SpecimenRotationHandler specimenRotationHandler;
     private SpecimenClawHandler specimenClawHandler;
+    private ShaiHuludHandler shaiHuludHandler;
+    private JointedArmHandler jointedArmHandler;
     private DistSensor sensorForDist;
     private DistSensor sensorBackDist;
     private double targetRotation = 0;
@@ -70,6 +74,10 @@ public class AutoSkeleton {
         this.sensorForDist = sensorForDist;
         this.sensorBackDist = sensorBackDist;
     }
+    public void shaiHuludLink(ShaiHuludHandler shaiHuludHandler, JointedArmHandler jointedArmHandler){
+        this.shaiHuludHandler = shaiHuludHandler;
+        this.jointedArmHandler = jointedArmHandler;
+    }
 
     public void setOffset(double[] posOffset, double headingOffset) { //Requires an array of size 2 and a heading within reasonable values
         offset = posOffset;
@@ -98,6 +106,8 @@ public class AutoSkeleton {
     public boolean isSpecExtensionDone() {
         return specimenExtensionHandler.isExtensionDone();
     }
+    public boolean isJointedArmExtensionDone() {return jointedArmHandler.isAtTargetPosition(); }
+    public boolean isShaiHuludResting() {return shaiHuludHandler.getState() == ShaiHuludHandler.ShaiStates.TUCK;}
 
     /* DISABLED OLD PID CODE BECAUSE MAYBE P BETTER?
 
@@ -339,7 +349,12 @@ public class AutoSkeleton {
     public void setSpecimenRotationTarget(SpecimenRotationHandler.SpecimenRotationPositions rotationPosition) {
         specimenRotationHandler.goToPosition(rotationPosition);
     }
-
+    public void setJointedArmPosition(JointedArmHandler.Positions jointedArmPosition) {
+        jointedArmHandler.setTargetPosition(jointedArmPosition);
+    }
+    public void startShaiHuludExtension(){
+        shaiHuludHandler.beginPickup();
+    }
     public double getSensorForDist() {
         return sensorForDist.getDistance();
     }
@@ -347,4 +362,5 @@ public class AutoSkeleton {
     public double getSensorBackDist() {
         return sensorBackDist.getDistance();
     }
+
 }
