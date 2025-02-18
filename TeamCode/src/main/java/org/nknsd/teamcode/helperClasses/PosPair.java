@@ -33,6 +33,43 @@ public class PosPair {
         return new PosPair(scalar * x, scalar * y);
     }
 
+    public PosPair dropLowValues(double dropOff) {
+        double newX, newY;
+
+        if (Math.abs(x) < dropOff) {
+            newX = 0;
+        } else {
+            newX = x;
+        }
+
+        if (Math.abs(y) < dropOff) {
+            newY = 0;
+        } else {
+            newY = y;
+        }
+
+        return new PosPair(x, y);
+    }
+
+    // Returns a new PosPair with an x clamped to a given minimum
+    public PosPair clampValuesToMin(double min) {
+        double newX, newY;
+
+        if (Math.abs(x) < min) {
+            newX = (x / Math.abs(x)) * min;
+        } else {
+            newX = x;
+        }
+
+        if (Math.abs(y) < min) {
+            newY = (y / Math.abs(y)) * min;
+        } else {
+            newY = y;
+        }
+
+        return new PosPair(newX, newY);
+    }
+
     public void doTelemetry(Telemetry telemetry) {
         doTelemetry(telemetry, "");
     }
