@@ -35,7 +35,7 @@ public class PosPair {
 
     // Returns a new PosPair
     public PosPair minValues(double min) {
-
+        return new PosPair(0, 0);
     }
 
     public void doTelemetry(Telemetry telemetry) {
