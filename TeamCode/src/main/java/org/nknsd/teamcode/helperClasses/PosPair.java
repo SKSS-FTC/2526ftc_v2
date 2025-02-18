@@ -33,6 +33,11 @@ public class PosPair {
         return new PosPair(scalar * x, scalar * y);
     }
 
+    // Returns a new PosPair
+    public PosPair minValues(double min) {
+
+    }
+
     public void doTelemetry(Telemetry telemetry) {
         doTelemetry(telemetry, "");
     }

@@ -22,7 +22,7 @@ public class ShaiHuludHandler implements NKNComponent {
     private ShaiHuludPosition[] positions = new ShaiHuludPosition[6];
     private ShaiStates state = ShaiStates.TUCK;
     private LilyVisionHandler visionHandler; private ColorPicker colorPicker; private WheelHandler wheelHandler;
-    private final double ALIGN_MARGIN = 0.5;
+    private final double ALIGN_MARGIN = 10;
     private final int PRIORITY = 1;
     private Gamepad gamepad; private Telemetry telemetry;
 
@@ -51,14 +51,10 @@ public class ShaiHuludHandler implements NKNComponent {
 
     }
 
+    private long startTime;
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
-        extensionMotor.setPower(1);
-
-        extensionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        extensionMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        extensionMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        extensionMotor.setTargetPosition(0);
+        startTime = runtime.now(TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -66,8 +62,29 @@ public class ShaiHuludHandler implements NKNComponent {
 
     }
 
+    private boolean oneTimeThing = false;
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
+        // Code to run once after a delay
+        if (!oneTimeThing && runtime.now(TimeUnit.MILLISECONDS) > 3000 + startTime) {
+            extensionMotor.setPower(1);
+
+            extensionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            extensionMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            extensionMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            extensionMotor.setTargetPosition(0);
+
+            oneTimeThing = true;
+        }
+
+        if (!oneTimeThing && !(runtime.now(TimeUnit.MILLISECONDS) > 2000 + startTime)) {
+            return;
+        }
+        // OK so the code for this 'oneTimeThing' is super botched
+        // Basically, if its less than 2s, then we can move the servo (no continue)
+        // And if it's more than 3s, we can start the motor
+
+        // Main Loop Code
         switch (state) {
             case TUCK:
                 setPositions(positions[0]);
@@ -192,7 +209,7 @@ public class ShaiHuludHandler implements NKNComponent {
         if (offset.getDist() < ALIGN_MARGIN) {
             continueExtension = true;
             telemetry.addData("Exit", "ALIGN-DONE");
-            return true;
+            //return true;
         }
 
         // Now that we know we have to move, claim priority over the wheel handler
