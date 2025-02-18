@@ -35,5 +35,14 @@ public abstract class ShaiHuludControlScheme extends NKNControlScheme {
         return () -> GamePadHandler.GamepadButtons.DPAD_UP.detect(gamePadHandler.getGamePad2());
         //return () -> GamePadHandler.GamepadButtons.START.detect(gamePadHandler.getGamePad2());
     }
+    public Callable<Boolean> jaClose() {
+        return () -> GamePadHandler.GamepadButtons.DPAD_LEFT.detect(gamePadHandler.getGamePad2());
+        //return () -> GamePadHandler.GamepadButtons.START.detect(gamePadHandler.getGamePad2());
+    }
+    public Callable<Boolean> jaOpen() {
+        return () -> GamePadHandler.GamepadButtons.DPAD_RIGHT.detect(gamePadHandler.getGamePad2());
+        //return () -> GamePadHandler.GamepadButtons.START.detect(gamePadHandler.getGamePad2());
+    }
+
 }
 

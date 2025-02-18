@@ -84,6 +84,9 @@ public class JointedArmHandler implements NKNComponent {
         joint1.setPosition(position.joint1Val);
         targetPosition = position;
     }
+    public void setClawPosition(Positions position){
+        grip.setPosition(position.gripVal);
+    }
 
     public boolean isAtTargetPosition() {
         // Checks each of the four different vals, comparing it to the positions of the components and their respective thresholds
@@ -100,7 +103,10 @@ public class JointedArmHandler implements NKNComponent {
         COLLECTING(0,0.375,0.789,0.71), //Someone else see if there is a better way to do this because I am not competent enough to know
         SPECIMEN_COLLECTION(0,0.6,1,0.71), // same as REST, please put correct values in before usage
         SPECIMEN_DEPOSIT(0,0.6,1,0.71), // same as REST, please put correct values in before usage
-        DEPOSIT(2267, 0.8194, 0.6994, 0.71);
+        DEPOSIT(2267, 0.8194, 0.6994, 0.71),
+
+        GRAB_OPEN(0,0,0,0.63),
+        GRAB_CLOSE(0,0,0,0.71);
 
         public final int motorVal;
         public final double joint1Val, joint2Val, gripVal;
