@@ -22,21 +22,24 @@ public abstract class ShaiHuludControlScheme extends NKNControlScheme {
     }
 
     public Callable<Boolean> jaRest() {
-        return () -> GamePadHandler.GamepadButtons.DPAD_DOWN.detect(gamePadHandler.getGamePad2());
-        //return () -> GamePadHandler.GamepadButtons.X.detect(gamePadHandler.getGamePad2());
+        //return () -> GamePadHandler.GamepadButtons.DPAD_DOWN.detect(gamePadHandler.getGamePad2());
+        return () -> GamePadHandler.GamepadButtons.X.detect(gamePadHandler.getGamePad2());
     }
 
     public Callable<Boolean> jaCollect() {
         return () -> GamePadHandler.GamepadButtons.A.detect(gamePadHandler.getGamePad2());
         //return () -> GamePadHandler.GamepadButtons.Y.detect(gamePadHandler.getGamePad2());
-    }
 
+    }
+    public abstract Callable<Boolean> jaSpecimenCollect();
+    public abstract Callable<Boolean> jaSpecimenDeposit();
     private boolean delayJADeposit = false;
     public Callable<Boolean> jaDeposit() {
         return new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
-                boolean button = GamePadHandler.GamepadButtons.DPAD_UP.detect(gamePadHandler.getGamePad2());
+                //boolean button = GamePadHandler.GamepadButtons.DPAD_UP.detect(gamePadHandler.getGamePad2());
+                boolean button = false;
 
                 if (!delayJADeposit && button) {
                     delayJADeposit = true;

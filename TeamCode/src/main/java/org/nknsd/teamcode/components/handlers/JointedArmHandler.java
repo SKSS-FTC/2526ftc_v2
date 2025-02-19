@@ -101,8 +101,8 @@ public class JointedArmHandler implements NKNComponent {
     public enum Positions {
         REST(0, 0.8, 1, 0.71),
         COLLECTION(0, 0.375, 0.789, 0.63),
-        SPECIMEN_COLLECTION(0,0.6,1,0.71), // same as REST, please put correct values in before usage
-        SPECIMEN_DEPOSIT(0,0.6,1,0.71), // same as REST, please put correct values in before usage
+        SPECIMEN_COLLECTION(0,0.4,0.5,0.71), // values incorrect
+        SPECIMEN_DEPOSIT(1000,0.6,0.3,0.71), // values incorrect
 
         DEPOSIT(2267, 0.8194, 0.8, 0.71),
         GRAB_OPEN(0,0,0,0.63),

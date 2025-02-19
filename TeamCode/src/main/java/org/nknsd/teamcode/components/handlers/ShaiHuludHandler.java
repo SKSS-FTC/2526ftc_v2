@@ -19,7 +19,7 @@ public class ShaiHuludHandler implements NKNComponent {
     private DcMotor extensionMotor;
     private Servo wristServo;
     private Servo spikeServo;
-    private ShaiHuludPosition[] positions = new ShaiHuludPosition[6];
+    private ShaiHuludPosition[] positions = new ShaiHuludPosition[7];
     private ShaiStates state = ShaiStates.TUCK;
     private LilyVisionHandler visionHandler; private ColorPicker colorPicker; private WheelHandler wheelHandler;
     private final double ALIGN_MARGIN = 8;
@@ -39,6 +39,7 @@ public class ShaiHuludHandler implements NKNComponent {
         positions[3] = new ShaiHuludPosition(-1800, 0.28, 0.2); // spike grab
         positions[4] = new ShaiHuludPosition(-300, 0.8, 0.2); // retract
         positions[5] = new ShaiHuludPosition(0, 0.8, 0.9); // eject
+        positions[6] = new ShaiHuludPosition(-300,0.4,0.6); // specimen grab
 
         gamepad = gamepad2; //super botched way to implement the e-stop for the shai hulud movement
         this.telemetry = telemetry;
@@ -164,6 +165,10 @@ public class ShaiHuludHandler implements NKNComponent {
                     state = ShaiStates.TUCK;
                 }
                 break;
+
+            case SPECIMEN:
+                setPositions(positions[6]);
+                break;
         }
     }
 
@@ -230,7 +235,7 @@ public class ShaiHuludHandler implements NKNComponent {
     }
 
     public void beginPickup() {
-        if (state != ShaiStates.TUCK) {
+        if (!( state ==ShaiStates.TUCK || state == ShaiStates.SPECIMEN)) {
             return;
         }
 
@@ -249,8 +254,14 @@ public class ShaiHuludHandler implements NKNComponent {
             return;
         }
 
+
         wheelHandler.setPriority(0);
         wheelHandler.relativeVectorToMotion(0, 0, 0);
+    }
+    public void specimenPickup() {
+        if(state == ShaiStates.TUCK){
+            state = ShaiStates.SPECIMEN;
+        }
     }
 
     private void setPositions(ShaiHuludPosition shaiHuludPosition) {
@@ -274,7 +285,7 @@ public class ShaiHuludHandler implements NKNComponent {
 
     @Deprecated
     public void setState(ShaiStates state) {
-        if (this.state == ShaiStates.TUCK) { // Safety function, we don't want the driver to mess with the state unless the state is tuck
+        if (this.state == ShaiStates.TUCK || this.state == ShaiStates.SPECIMEN) { // Safety function, we don't want the driver to mess with the state unless the state is tuck or specimen
             this.state = state;
         }
     }
@@ -300,7 +311,8 @@ public class ShaiHuludHandler implements NKNComponent {
         BEGINRETRACT,
         WAITFORRETRACT,
         EJECT,
-        WAITFOREJECT;
+        WAITFOREJECT,
+        SPECIMEN;
     }
 
     public static class ShaiHuludPosition {

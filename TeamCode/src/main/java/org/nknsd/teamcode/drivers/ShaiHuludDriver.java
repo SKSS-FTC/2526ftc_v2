@@ -21,7 +21,7 @@ public class ShaiHuludDriver implements NKNComponent {
     private GamePadHandler gamePadHandler;
     private ShaiHuludHandler shaiHuludHandler; JointedArmHandler jointedArmHandler;
     private ShaiHuludControlScheme controlScheme;
-    private boolean debug = false;
+    private boolean debug = true;
 
     private Runnable shExtend = new Runnable() {
         @Override
@@ -57,6 +57,19 @@ public class ShaiHuludDriver implements NKNComponent {
             jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.DEPOSIT);
         }
     };
+    private Runnable jaSpecimenCollect = new Runnable() {
+        @Override
+        public void run() {
+            jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.SPECIMEN_COLLECTION);
+            shaiHuludHandler.specimenPickup();
+        }
+    };
+    private Runnable jaSpecimenDeposit = new Runnable() {
+        @Override
+        public void run() {
+            jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.SPECIMEN_DEPOSIT);
+        }
+    };
     private Runnable jaClose = new Runnable() {
         @Override
         public void run() {
@@ -87,11 +100,17 @@ public class ShaiHuludDriver implements NKNComponent {
         gamePadHandler.addListener(controlScheme.shExtend(), shExtend, "SH Begin Extend");
         gamePadHandler.addListener(controlScheme.shRetract(), shRetract, "SH CANCEL BACK UP AHHH");
 
+        if (debug) {
+            return;
+        }
         gamePadHandler.addListener(controlScheme.jaRest(), jaRest, "JA Rest");
         gamePadHandler.addListener(controlScheme.jaCollect(), jaCollect, "JA Collect");
         gamePadHandler.addListener(controlScheme.jaDeposit(), jaDeposit, "JA Deposit");
         gamePadHandler.addListener(controlScheme.jaClose(), jaClose, "JA Close");
         gamePadHandler.addListener(controlScheme.jaOpen(), jaOpen, "JA Open");
+        gamePadHandler.addListener(controlScheme.jaSpecimenCollect(), jaSpecimenCollect, "JA SPEC COLLECT");
+        gamePadHandler.addListener(controlScheme.jaSpecimenDeposit(), jaSpecimenDeposit, "JA SPEC DEPOSIT");
+
     }
 
     @Override

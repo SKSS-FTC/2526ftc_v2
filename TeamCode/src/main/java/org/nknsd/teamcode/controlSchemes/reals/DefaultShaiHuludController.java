@@ -13,4 +13,13 @@ public class DefaultShaiHuludController extends ShaiHuludControlScheme {
     }
 
 
+    @Override
+    public Callable<Boolean> jaSpecimenCollect() {
+        return() -> GamePadHandler.GamepadButtons.DPAD_DOWN.detect(gamePadHandler.getGamePad2());
+    }
+
+    @Override
+    public Callable<Boolean> jaSpecimenDeposit() {
+        return() -> GamePadHandler.GamepadButtons.DPAD_UP.detect(gamePadHandler.getGamePad2());
+    }
 }
