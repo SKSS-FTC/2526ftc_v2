@@ -78,4 +78,23 @@ public class PosPair {
         telemetry.addData(name + "-X", x);
         telemetry.addData(name + "-Y", y);
     }
+
+    /**
+     * Adds PosPair p to this, and returns the result as a new PosPair
+     * @param p the PosPair to add
+     * @return the PosPair which is the result of adding the two
+     */
+    public PosPair add(PosPair p) {
+        return new PosPair(x + p.x, y + p.y);
+    }
+
+    /**
+     * Adds an x and y value pair to this PosPair and returns as a new PosPair
+     * @param x the x value to add
+     * @param y the y value to add
+     * @return the PosPair which is the result of adding x & y to this pos
+     */
+    public PosPair add(double x, double y) {
+        return new PosPair(this.x + x, this.y + y);
+    }
 }

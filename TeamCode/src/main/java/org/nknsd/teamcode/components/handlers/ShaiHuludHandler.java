@@ -38,7 +38,7 @@ public class ShaiHuludHandler implements NKNComponent {
         positions[2] = new ShaiHuludPosition(-1800, 0.28, 0.6); // rotate down
         positions[3] = new ShaiHuludPosition(-1800, 0.28, 0.2); // spike grab
         positions[4] = new ShaiHuludPosition(-300, 0.8, 0.2); // retract
-        positions[5] = new ShaiHuludPosition(0, 0.8, 0.9); // eject
+        positions[5] = new ShaiHuludPosition(0, 0.8, 1); // eject
         positions[6] = new ShaiHuludPosition(-300,0.4,0.6); // specimen grab
 
         gamepad = gamepad2; //super botched way to implement the e-stop for the shai hulud movement
@@ -161,7 +161,7 @@ public class ShaiHuludHandler implements NKNComponent {
                 break;
 
             case WAITFOREJECT:
-                if (runtime.time(TimeUnit.MILLISECONDS) - stateStartTime >= 600) {
+                if (runtime.time(TimeUnit.MILLISECONDS) - stateStartTime >= 800) {
                     state = ShaiStates.TUCK;
                 }
                 break;
@@ -179,15 +179,16 @@ public class ShaiHuludHandler implements NKNComponent {
     }
 
     private PosPair getOffset(LilyVisionHandler.VisionData visionData) {
+        PosPair offsetMod = new PosPair(0, 1);
         switch (colorPicker.currentColor()) {
             case RED:
-                return new PosPair(visionData.redX, visionData.redY);
+                return offsetMod.add(visionData.redX, visionData.redY);
 
             case BLUE:
-                return new PosPair(visionData.blueX, visionData.blueY);
+                return offsetMod.add(visionData.blueX, visionData.blueY);
 
             case YELLOW:
-                return new PosPair(visionData.yellowX, visionData.yellowY);
+                return offsetMod.add(visionData.yellowX, visionData.yellowY);
 
             default:
                 return new PosPair(0, 0);
