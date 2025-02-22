@@ -13,6 +13,12 @@ public class EventPair {
         this.name = name;
     }
 
+    public EventPair(Callable<Boolean> listener, String name) {
+        this.listener = listener;
+        this.event = new Runnable() {@Override public void run() {}};
+        this.name = name;
+    }
+
     public boolean isEqualTo(String name) {
         return this.name.equals(name);
     }

@@ -25,6 +25,7 @@ public class ShaiHuludHandler implements NKNComponent {
     private final double ALIGN_MARGIN = 8;
     private final int PRIORITY = 1;
     private Gamepad gamepad; private Telemetry telemetry;
+    private boolean skipStates = true;
 
     @Override
     public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
@@ -33,13 +34,15 @@ public class ShaiHuludHandler implements NKNComponent {
         spikeServo = hardwareMap.servo.get("servoShaiHuludSpike");
         //extensionMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        positions[0] = new ShaiHuludPosition(-300, 0.8, 0.6); // tuck
-        positions[1] = new ShaiHuludPosition(-1800, 0.8, 0.6); // extend
+        extensionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        positions[0] = new ShaiHuludPosition(-300, 0.8, 1); // tuck
+        positions[1] = new ShaiHuludPosition(-1800, 0.8, 1); // extend
         positions[2] = new ShaiHuludPosition(-1800, 0.28, 0.6); // rotate down
         positions[3] = new ShaiHuludPosition(-1800, 0.28, 0.2); // spike grab
         positions[4] = new ShaiHuludPosition(-300, 0.8, 0.2); // retract
         positions[5] = new ShaiHuludPosition(0, 0.8, 1); // eject
-        positions[6] = new ShaiHuludPosition(-300,0.4,0.6); // specimen grab
+        positions[6] = new ShaiHuludPosition(0,0.6,0.6); // specimen grab
 
         gamepad = gamepad2; //super botched way to implement the e-stop for the shai hulud movement
         this.telemetry = telemetry;
@@ -64,16 +67,17 @@ public class ShaiHuludHandler implements NKNComponent {
     }
 
     private boolean oneTimeThing = false;
+    private long grabbyCounter = 0; // This is a timer used in the grabby state to control its behavior.
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
         // Code to run once after a delay
         if (!oneTimeThing && runtime.now(TimeUnit.MILLISECONDS) > 3000 + startTime) {
-            extensionMotor.setPower(1);
-
             extensionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
             extensionMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            extensionMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            extensionMotor.setPower(1);
             extensionMotor.setTargetPosition(0);
+            extensionMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             oneTimeThing = true;
         }
@@ -84,6 +88,11 @@ public class ShaiHuludHandler implements NKNComponent {
         // OK so the code for this 'oneTimeThing' is super botched
         // Basically, if its less than 2s, then we can move the servo (no continue)
         // And if it's more than 3s, we can start the motor
+
+        // Under manual control, must skip states
+        if (skipStates) {
+            return;
+        }
 
         // Main Loop Code
         switch (state) {
@@ -96,8 +105,10 @@ public class ShaiHuludHandler implements NKNComponent {
                     if (continueExtension) {
                         state = ShaiStates.BEGINEXTEND;
                     } else {
-                        wheelHandler.setPriority(0);
-                        wheelHandler.relativeVectorToMotion(0, 0, 0);
+                        if (wheelHandler != null) {
+                            wheelHandler.setPriority(0);
+                            wheelHandler.relativeVectorToMotion(0, 0, 0);
+                        }
                         state = ShaiStates.TUCK;
                     }
                 }
@@ -112,8 +123,10 @@ public class ShaiHuludHandler implements NKNComponent {
             case WAITINGFOREXTEND:
                 alignToSample();
                 if (!extensionMotor.isBusy()) {
-                    wheelHandler.setPriority(0);
-                    wheelHandler.relativeVectorToMotion(0, 0, 0);
+                    if (wheelHandler != null) {
+                        wheelHandler.setPriority(0);
+                        wheelHandler.relativeVectorToMotion(0, 0, 0);
+                    }
                     state = ShaiStates.ROTATEDOWN;
                 }
                 break;
@@ -169,7 +182,39 @@ public class ShaiHuludHandler implements NKNComponent {
             case SPECIMEN:
                 setPositions(positions[6]);
                 break;
+
+            case PREGRABBY:
+                state = ShaiStates.GRABBY;
+                grabbyCounter = runtime.now(TimeUnit.MILLISECONDS);
+                break;
+
+            case GRABBY:
+                long now = runtime.now(TimeUnit.MILLISECONDS);
+
+                // Time to eject
+                if (grabbyCounter < now + 300) {
+                    ejectSpike();
+                }
+
+                // Time to reset
+                else if (grabbyCounter < now + 600) {
+                    neutralSpike();
+                }
+
+                // Time to rotate down and grab
+                if (grabbyCounter < now + 900) {
+                    state = ShaiStates.BEGINEXTEND;
+                }
+                break;
         }
+    }
+
+    private void ejectSpike() {
+        spikeServo.setPosition(1);
+    }
+
+    private void neutralSpike() {
+        spikeServo.setPosition(0.6);
     }
 
     @Override
@@ -198,6 +243,9 @@ public class ShaiHuludHandler implements NKNComponent {
     private boolean continueExtension = false;
     private final PosPair noSample = new PosPair(Integer.MAX_VALUE, -Integer.MAX_VALUE);
     private boolean alignToSample() {
+        // Check to amke sure there's a wheel handler to use
+        if (wheelHandler == null) return true;
+
         // Get data on where the sample is
         LilyVisionHandler.VisionData visionData = visionHandler.getVisionData();
         PosPair offset = getOffset(visionData);
@@ -206,12 +254,6 @@ public class ShaiHuludHandler implements NKNComponent {
         // If there is no sample, do not continue
         if (offset.equalTo(noSample)) {
             telemetry.addData("Exit", "NO-SAMPLE");
-            return true;
-        }
-
-        // If we press the stop button, do not continue
-        if (gamepad.b) {
-            telemetry.addData("Exit", "STOP-BUTTON");
             return true;
         }
 
@@ -236,7 +278,7 @@ public class ShaiHuludHandler implements NKNComponent {
     }
 
     public void beginPickup() {
-        if (!( state ==ShaiStates.TUCK || state == ShaiStates.SPECIMEN)) {
+        if (!state.exitState) { // Safety function, we don't want the driver to mess with the state unless the state is tuck or specimen (or pause)
             return;
         }
 
@@ -265,6 +307,10 @@ public class ShaiHuludHandler implements NKNComponent {
         }
     }
 
+    public void beginFalseGrab() {
+        state = ShaiStates.PREGRABBY;
+    }
+
     private void setPositions(ShaiHuludPosition shaiHuludPosition) {
         wristServo.setPosition(shaiHuludPosition.wristPos);
         spikeServo.setPosition(shaiHuludPosition.spikePos);
@@ -286,7 +332,7 @@ public class ShaiHuludHandler implements NKNComponent {
 
     @Deprecated
     public void setState(ShaiStates state) {
-        if (this.state == ShaiStates.TUCK || this.state == ShaiStates.SPECIMEN) { // Safety function, we don't want the driver to mess with the state unless the state is tuck or specimen
+        if (state.exitState) { // Safety function, we don't want the driver to mess with the state unless the state is tuck or specimen (or pause)
             this.state = state;
         }
     }
@@ -300,8 +346,32 @@ public class ShaiHuludHandler implements NKNComponent {
         this.wheelHandler = wheelHandler;
     }
 
+    public void pause() {
+        if (state != ShaiStates.ALIGNTOSAMPLE && state != ShaiStates.BEGINEXTEND && state != ShaiStates.WAITINGFOREXTEND) {
+            // We're not allowed to pause from these three states
+            return;
+        }
+        state = ShaiStates.PAUSE;
+    }
+
+    // Toggle ON manual retract
+    public void manualRetract() {
+        extensionMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        extensionMotor.setPower(0.3);
+        skipStates = true;
+    }
+
+    // Toggle OFF manual retract
+    public void endManualRetract() {
+        extensionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        extensionMotor.setTargetPosition(0);
+        extensionMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        extensionMotor.setPower(1);
+        skipStates = false;
+    }
+
     public enum ShaiStates {
-        TUCK,
+        TUCK(true),
         ALIGNTOSAMPLE,
         BEGINEXTEND,
         WAITINGFOREXTEND,
@@ -313,7 +383,19 @@ public class ShaiHuludHandler implements NKNComponent {
         WAITFORRETRACT,
         EJECT,
         WAITFOREJECT,
-        SPECIMEN;
+        SPECIMEN(true),
+        PAUSE(true),
+        PREGRABBY, // Immediately triggers grabby, so that other programs can reference it (directly referencing grabby won't work, obviously
+        GRABBY; // This state lets another program initiate a brand new rotate-down grab.
+
+        public final boolean exitState; // Represents if a state is a free-for-all that other states can choose to jump from or not.
+        ShaiStates(boolean exitState) {
+            this.exitState = exitState;
+        }
+
+        ShaiStates() {
+            this.exitState = false;
+        }
     }
 
     public static class ShaiHuludPosition {

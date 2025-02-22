@@ -24,7 +24,7 @@ public class CollyRandomWheelDriver implements NKNComponent {
     private WheelControlScheme controlScheme;
 
     private double moveSpeedMultiplier;
-    private boolean imuCorrection = true;
+    private boolean imuCorrection = false; // Disabled because new robot does NOT correct for any autonomous stuff
 
     Runnable speedUp = new Runnable() {
         @Override

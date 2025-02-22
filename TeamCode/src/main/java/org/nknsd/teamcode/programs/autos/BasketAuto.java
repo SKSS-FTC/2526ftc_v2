@@ -1,6 +1,7 @@
 package org.nknsd.teamcode.programs.autos;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.nknsd.teamcode.autoSteps.AutoStepExtendArmSynced;
 import org.nknsd.teamcode.autoSteps.AutoStepExtendArmWithFlowAdjusting;
@@ -30,7 +31,7 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 import java.util.LinkedList;
 import java.util.List;
 
-@Autonomous(name = "Score Samples in Basket (GOOD)")
+@Autonomous(name = "Score Samples in Basket (GOOD)") @Disabled
 public class BasketAuto extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {

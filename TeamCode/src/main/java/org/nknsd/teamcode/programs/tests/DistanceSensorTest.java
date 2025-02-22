@@ -11,7 +11,7 @@ import org.nknsd.teamcode.frameworks.NKNProgramTrue;
 import java.util.HashMap;
 import java.util.List;
 
-@TeleOp(name = "Distance Sensor Test", group="Tests")
+@TeleOp(name = "Distance Sensor Test", group="Tests")@Disabled
 public class DistanceSensorTest extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {

@@ -9,7 +9,7 @@ import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.frameworks.NKNProgramTrue;
 
 import java.util.List;
-@TeleOp(name = "Shai Hulud Tester", group="Tests")
+@TeleOp(name = "Shai Hulud Tester", group="Tests")@Disabled
 public class ShaiHuludTester extends NKNProgramTrue {
 
 

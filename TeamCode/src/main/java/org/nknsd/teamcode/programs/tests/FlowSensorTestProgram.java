@@ -1,5 +1,6 @@
 package org.nknsd.teamcode.programs.tests;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.nknsd.teamcode.frameworks.NKNComponent;
@@ -13,7 +14,7 @@ import org.nknsd.teamcode.frameworks.NKNProgramTrue;
 
 import java.util.List;
 
-@TeleOp(name = "Flow Sensor Test", group="Tests")
+@TeleOp(name = "Flow Sensor Test", group="Tests")@Disabled
 public class FlowSensorTestProgram extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {

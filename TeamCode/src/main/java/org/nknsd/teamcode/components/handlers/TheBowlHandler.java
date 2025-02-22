@@ -6,7 +6,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.nknsd.teamcode.drivers.ShaiHuludDriver;
 import org.nknsd.teamcode.frameworks.NKNComponent;
+
+import java.util.concurrent.TimeUnit;
 
 public class TheBowlHandler implements NKNComponent {
     CRServo servo;
@@ -60,8 +63,43 @@ public class TheBowlHandler implements NKNComponent {
         return currentState;
     }
 
+    private long bowlStartTime, bowlDelayStart;
+    private BowlStates currentBowlState = BowlStates.STOPPED;
+    private final static long BOWL_DELAY = 750, BOWL_LENGTH = 1000;
+    public void doBowlin(ShaiHuludHandler shaiHuludHandler, ElapsedTime runtime) {
+        if (shaiHuludHandler.getState() == ShaiHuludHandler.ShaiStates.EJECT && currentBowlState == BowlStates.STOPPED) {
+            bowlDelayStart = runtime.now(TimeUnit.MILLISECONDS);
+            currentBowlState = BowlStates.WAITING_TO_START;
+        }
+
+        if (runtime.now(TimeUnit.MILLISECONDS) > bowlDelayStart + BOWL_DELAY && currentBowlState == BowlStates.WAITING_TO_START) {
+            bowlStartTime = runtime.now(TimeUnit.MILLISECONDS);
+            currentBowlState = BowlStates.ACTIVE;
+        }
+
+        if (runtime.now(TimeUnit.MILLISECONDS) > bowlStartTime + BOWL_LENGTH && currentBowlState == BowlStates.ACTIVE) {
+            currentBowlState = BowlStates.STOPPED;
+        }
+
+        switch (currentBowlState) {
+            case ACTIVE:
+                setServoPower(TheBowlHandler.States.BOWLIN);
+                break;
+
+            case STOPPED:
+                setServoPower(TheBowlHandler.States.not_bowlin);
+                break;
+        }
+    }
+
+    public void beginBowlin() {
+        // What this does is essentially guarentee that the bowl will immediately start by setting the targetted start time to 1000 milliseconds
+        bowlDelayStart = 0;
+        currentBowlState = BowlStates.WAITING_TO_START;
+    }
+
     public enum States {
-        BOWLIN(0.3),
+        BOWLIN(0.325),
         not_bowlin(0);
 
         public final double power;
@@ -69,5 +107,11 @@ public class TheBowlHandler implements NKNComponent {
         States(double power) {
             this.power = power;
         }
+    }
+
+    private enum BowlStates {
+        WAITING_TO_START,
+        ACTIVE,
+        STOPPED;
     }
 }

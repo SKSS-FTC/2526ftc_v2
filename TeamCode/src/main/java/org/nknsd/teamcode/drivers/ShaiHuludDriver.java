@@ -21,65 +21,101 @@ public class ShaiHuludDriver implements NKNComponent {
     private GamePadHandler gamePadHandler;
     private ShaiHuludHandler shaiHuludHandler; JointedArmHandler jointedArmHandler;
     private ShaiHuludControlScheme controlScheme;
-    private boolean debug = true;
+    private boolean debug = false;
 
-    private Runnable shExtend = new Runnable() {
+    private final Runnable shExtend = new Runnable() {
         @Override
         public void run() {
             shaiHuludHandler.beginPickup();
         }
     };
 
-    private Runnable shRetract = new Runnable() {
+    private final Runnable shRetract = new Runnable() {
         @Override
         public void run() {
             shaiHuludHandler.cancelPickup();
         }
     };
 
-    private Runnable jaRest = new Runnable() {
+    private final Runnable shInterruptGrab = new Runnable() {
         @Override
         public void run() {
-           jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.REST);
+            shaiHuludHandler.beginFalseGrab();
         }
     };
 
-    private Runnable jaCollect = new Runnable() {
+    private final Runnable jaRest = new Runnable() {
+        @Override
+        public void run() {
+           jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.REST);
+           if (shaiHuludHandler.getState() == ShaiHuludHandler.ShaiStates.SPECIMEN){
+              shaiHuludHandler.cancelPickup();
+           }
+        }
+    };
+
+    private final Runnable jaCollect = new Runnable() {
         @Override
         public void run() {
             jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.COLLECTION);
         }
     };
 
-    private Runnable jaDeposit = new Runnable() {
+    private final Runnable jaDeposit = new Runnable() {
         @Override
         public void run() {
             jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.DEPOSIT);
         }
     };
-    private Runnable jaSpecimenCollect = new Runnable() {
+    private final Runnable jaSpecimenCollect = new Runnable() {
         @Override
         public void run() {
-            jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.SPECIMEN_COLLECTION);
-            shaiHuludHandler.specimenPickup();
+            if (jointedArmHandler.targetPosition == JointedArmHandler.Positions.EARLY_BIRD) {
+                jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.WORM_SEARCH);
+            } else {
+                jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.EARLY_BIRD);
+            }
         }
     };
-    private Runnable jaSpecimenDeposit = new Runnable() {
+    private final Runnable jaSpecimenDeposit = new Runnable() {
         @Override
         public void run() {
-            jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.SPECIMEN_DEPOSIT);
+            if (jointedArmHandler.targetPosition == JointedArmHandler.Positions.NEST) {
+                jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.FEED);
+            } else {
+                jointedArmHandler.setTargetPosition(JointedArmHandler.Positions.NEST);
+                shaiHuludHandler.specimenPickup();
+            }
         }
     };
-    private Runnable jaClose = new Runnable() {
+    private final Runnable jaClose = new Runnable() {
         @Override
         public void run() {
             jointedArmHandler.setClawPosition(JointedArmHandler.Positions.GRAB_CLOSE);
         }
     };
-    private Runnable jaOpen = new Runnable() {
+    private final Runnable jaOpen = new Runnable() {
         @Override
         public void run() {
             jointedArmHandler.setClawPosition(JointedArmHandler.Positions.GRAB_OPEN);
+        }
+    };
+    private final Runnable theBowl = new Runnable() {
+        @Override
+        public void run() {
+            bowlHandler.beginBowlin();
+        }
+    };
+    private final Runnable manualSHRetract = new Runnable() {
+        @Override
+        public void run() {
+            shaiHuludHandler.manualRetract();
+        }
+    };
+    private final Runnable endManualSHRetract = new Runnable() {
+        @Override
+        public void run() {
+            shaiHuludHandler.endManualRetract();
         }
     };
     private TheBowlHandler bowlHandler;
@@ -99,6 +135,9 @@ public class ShaiHuludDriver implements NKNComponent {
         // Add event listeners
         gamePadHandler.addListener(controlScheme.shExtend(), shExtend, "SH Begin Extend");
         gamePadHandler.addListener(controlScheme.shRetract(), shRetract, "SH CANCEL BACK UP AHHH");
+        gamePadHandler.addListener(controlScheme.shInterruptGrab(), shInterruptGrab, "SH Interrupt grab");
+        gamePadHandler.addListener(controlScheme.manualSHRetract(), manualSHRetract, "SH Manual Retract Begin");
+        gamePadHandler.addListener(controlScheme.endManualSHRetract(), endManualSHRetract, "SH End Manual Retract");
 
         if (debug) {
             return;
@@ -106,11 +145,16 @@ public class ShaiHuludDriver implements NKNComponent {
         gamePadHandler.addListener(controlScheme.jaRest(), jaRest, "JA Rest");
         gamePadHandler.addListener(controlScheme.jaCollect(), jaCollect, "JA Collect");
         gamePadHandler.addListener(controlScheme.jaDeposit(), jaDeposit, "JA Deposit");
+
         gamePadHandler.addListener(controlScheme.jaClose(), jaClose, "JA Close");
         gamePadHandler.addListener(controlScheme.jaOpen(), jaOpen, "JA Open");
+
         gamePadHandler.addListener(controlScheme.jaSpecimenCollect(), jaSpecimenCollect, "JA SPEC COLLECT");
         gamePadHandler.addListener(controlScheme.jaSpecimenDeposit(), jaSpecimenDeposit, "JA SPEC DEPOSIT");
 
+        gamePadHandler.addListener(controlScheme.specimenSwitch(), "JA Specimen Switch");
+
+        gamePadHandler.addListener(controlScheme.theBowl(), theBowl, "BOWL");
     }
 
     @Override
@@ -123,54 +167,26 @@ public class ShaiHuludDriver implements NKNComponent {
         return "ShaiHuludDriver";
     }
 
-
-    private long bowlStartTime, bowlDelayStart;
-    private final static long BOWL_DELAY = 500, BOWL_LENGTH = 1000;
-    private BowlStates currentBowlState = BowlStates.STOPPED;
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
         if (debug) {
             jointedArmHandler.runStuff(gamePadHandler);
-            if (GamePadHandler.GamepadButtons.BACK.detect(gamePadHandler.getGamePad2())) {
-                bowlDelayStart = runtime.now(TimeUnit.MILLISECONDS);
-                currentBowlState = BowlStates.WAITING_TO_START;
+//            if (GamePadHandler.GamepadButtons.BACK.detect(gamePadHandler.getGamePad2())) {
+//                bowlDelayStart = runtime.now(TimeUnit.MILLISECONDS);
+//                currentBowlState = BowlStates.WAITING_TO_START;
+//            }
+
+            if (GamePadHandler.GamepadButtons.LEFT_TRIGGER.detect(gamePadHandler.getGamePad2())) {
+                shaiHuludHandler.specimenPickup();
             }
         }
 
-        if (shaiHuludHandler.getState() == ShaiHuludHandler.ShaiStates.EJECT && currentBowlState == BowlStates.STOPPED) {
-            bowlDelayStart = runtime.now(TimeUnit.MILLISECONDS);
-            currentBowlState = BowlStates.WAITING_TO_START;
-        }
-
-        if (runtime.now(TimeUnit.MILLISECONDS) > bowlDelayStart + BOWL_DELAY && currentBowlState == BowlStates.WAITING_TO_START) {
-            bowlStartTime = runtime.now(TimeUnit.MILLISECONDS);
-            currentBowlState = BowlStates.ACTIVE;
-        }
-
-        if (runtime.now(TimeUnit.MILLISECONDS) > bowlStartTime + BOWL_LENGTH && currentBowlState == BowlStates.ACTIVE) {
-            currentBowlState = BowlStates.STOPPED;
-        }
-
-        switch (currentBowlState) {
-            case ACTIVE:
-                bowlHandler.setServoPower(TheBowlHandler.States.BOWLIN);
-                break;
-
-            case STOPPED:
-                bowlHandler.setServoPower(TheBowlHandler.States.not_bowlin);
-                break;
-        }
-    }
-
-    private enum BowlStates {
-        WAITING_TO_START,
-        ACTIVE,
-        STOPPED;
+        bowlHandler.doBowlin(shaiHuludHandler, runtime);
     }
 
     @Override
     public void doTelemetry(Telemetry telemetry) {
-
+        if (controlScheme.getDoingSpecimen()) telemetry.addData("JA", "Doing Specimens");
     }
 
     public void link(GamePadHandler gamePadHandler, ShaiHuludHandler shaiHuludHandler, JointedArmHandler jointedArmHandler, TheBowlHandler bowlHandler, ShaiHuludControlScheme controlScheme) {

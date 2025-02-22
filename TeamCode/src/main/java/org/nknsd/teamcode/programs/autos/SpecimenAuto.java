@@ -1,6 +1,7 @@
 package org.nknsd.teamcode.programs.autos;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.nknsd.teamcode.autoSteps.AutoStepAbsoluteControl;
 import org.nknsd.teamcode.autoSteps.AutoStepChangeMaxSpeed;
@@ -37,7 +38,7 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 import java.util.LinkedList;
 import java.util.List;
 
-@Autonomous(name = "Score Specimen on Bar (IN DEV)")
+@Autonomous(name = "Score Specimen on Bar (IN DEV)") @Disabled
 public class SpecimenAuto extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {

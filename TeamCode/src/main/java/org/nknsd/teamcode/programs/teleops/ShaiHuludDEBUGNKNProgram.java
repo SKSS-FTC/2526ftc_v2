@@ -7,7 +7,6 @@ import org.nknsd.teamcode.components.handlers.ShaiHuludHandler;
 import org.nknsd.teamcode.components.handlers.TheBowlHandler;
 import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.components.sensors.IMUSensor;
-import org.nknsd.teamcode.components.sensors.TouchSens;
 import org.nknsd.teamcode.components.sensors.hummelvision.LilyVisionHandler;
 import org.nknsd.teamcode.components.utility.ColorPicker;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
@@ -21,8 +20,8 @@ import org.nknsd.teamcode.frameworks.NKNProgramTrue;
 
 import java.util.List;
 
-@TeleOp(name = "Hail Mary's OpMode")
-public class ShaiHuludNKNProgram extends NKNProgramTrue {
+@TeleOp(name = "Hail DEBUG Mary")
+public class ShaiHuludDEBUGNKNProgram extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Misc
@@ -43,10 +42,6 @@ public class ShaiHuludNKNProgram extends NKNProgramTrue {
         components.add(lilyVisionHandler);
         telemetryEnabled.add(lilyVisionHandler);
 
-        TouchSens touchSens = new TouchSens("jaLimit");
-        components.add(touchSens);
-        telemetryEnabled.add(touchSens);
-
 
         // Handlers
         WheelHandler wheelHandler = new WheelHandler();
@@ -54,11 +49,11 @@ public class ShaiHuludNKNProgram extends NKNProgramTrue {
 
         ShaiHuludHandler shaiHuludHandler = new ShaiHuludHandler();
         components.add(shaiHuludHandler);
-        //telemetryEnabled.add(shaiHuludHandler);
+        telemetryEnabled.add(shaiHuludHandler);
 
         JointedArmHandler jointedArmHandler = new JointedArmHandler();
         components.add(jointedArmHandler);
-        //telemetryEnabled.add(jointedArmHandler);
+        telemetryEnabled.add(jointedArmHandler);
 
         TheBowlHandler bowlHandler = new TheBowlHandler();
         components.add(bowlHandler);
@@ -85,8 +80,7 @@ public class ShaiHuludNKNProgram extends NKNProgramTrue {
         colorPicker.link(gamePadHandler, generic2PController);
         lilyVisionHandler.link(colorPicker);
         shaiHuludHandler.link(lilyVisionHandler, colorPicker);
-        shaiHuludHandler.linkWheels(wheelHandler);
-        jointedArmHandler.link(touchSens);
+        //shaiHuludHandler.linkWheels(wheelHandler);
 
         wheelDriver.link(gamePadHandler, wheelHandler, wheelController);
         shaiHuludDriver.link(gamePadHandler, shaiHuludHandler, jointedArmHandler, bowlHandler, shaiHuludController);
@@ -94,5 +88,7 @@ public class ShaiHuludNKNProgram extends NKNProgramTrue {
         wheelController.link(gamePadHandler);
         shaiHuludController.link(gamePadHandler);
         generic2PController.link(gamePadHandler);
+
+        shaiHuludDriver.enableDebug();
     }
 }
