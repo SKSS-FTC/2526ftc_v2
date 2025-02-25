@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.nknsd.teamcode.components.sensors.DistSensor;
-import org.nknsd.teamcode.components.sensors.DistHubSensor;
+import org.nknsd.teamcode.components.sensors.DistSensorHub;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.frameworks.NKNProgram;
 
@@ -18,17 +18,17 @@ public class DistanceSensorTest extends NKNProgram {
         DistSensor backwardSensor = new DistSensor("sensorBackDist");
         DistSensor leftSensor = new DistSensor("sensorLeftDist");
         DistSensor rightSensor = new DistSensor("sensorRightDist");
-        DistHubSensor allSensor = new DistHubSensor();
+        DistSensorHub allSensor = new DistSensorHub();
         components.add(backwardSensor);
         components.add(leftSensor);
         components.add(rightSensor);
         components.add(allSensor);
         telemetryEnabled.add(allSensor);
 
-        HashMap<DistHubSensor.SensorNames, DistSensor> sensors = new HashMap<>();
-        sensors.put(DistHubSensor.SensorNames.BACK, backwardSensor);
-        sensors.put(DistHubSensor.SensorNames.LEFT, leftSensor);
-        sensors.put(DistHubSensor.SensorNames.RIGHT, rightSensor);
+        HashMap<DistSensorHub.SensorNames, DistSensor> sensors = new HashMap<>();
+        sensors.put(DistSensorHub.SensorNames.BACK, backwardSensor);
+        sensors.put(DistSensorHub.SensorNames.LEFT, leftSensor);
+        sensors.put(DistSensorHub.SensorNames.RIGHT, rightSensor);
         allSensor.link(sensors);
     }
 }
