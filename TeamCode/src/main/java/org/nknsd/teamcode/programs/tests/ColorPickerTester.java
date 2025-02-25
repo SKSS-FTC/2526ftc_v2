@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.nknsd.teamcode.components.utility.ColorPicker;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
-import org.nknsd.teamcode.controlSchemes.reals.KarstenGeneric2PController;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.frameworks.NKNProgram;
 

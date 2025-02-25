@@ -10,14 +10,13 @@ import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
 import org.nknsd.teamcode.components.handlers.TheBowlHandler;
-import org.nknsd.teamcode.components.sensors.DistHubSensor;
+import org.nknsd.teamcode.components.sensors.DistSensorHub;
 import org.nknsd.teamcode.components.sensors.DistSensor;
 import org.nknsd.teamcode.components.sensors.FlowSensor;
 import org.nknsd.teamcode.components.sensors.IMUSensor;
 import org.nknsd.teamcode.components.handlers.IntakeSpinnerHandler;
 import org.nknsd.teamcode.components.handlers.RotationHandler;
 import org.nknsd.teamcode.components.handlers.WheelHandler;
-import org.nknsd.teamcode.helperClasses.PIDModel;
 
 public class AutoSkeleton {
     private double maxSpeed, minSpeed;                  // Maximum speed the robot can move at
@@ -41,7 +40,7 @@ public class AutoSkeleton {
     private IntakeSpinnerHandler intakeSpinnerHandler;
     private double[] offset;
     private double headingOffset;
-    private DistHubSensor distSensHub;
+    private DistSensorHub distSensHub;
     private TheBowlHandler theBowlHandler;
     private int priority = 0;
 
@@ -86,7 +85,7 @@ public class AutoSkeleton {
         this.sensorBackDist = sensorBackDist;
     }
 
-    public void distSensorLink(DistHubSensor sensorHubFor) {
+    public void distSensorLink(DistSensorHub sensorHubFor) {
         this.distSensHub = sensorHubFor;
     }
     
