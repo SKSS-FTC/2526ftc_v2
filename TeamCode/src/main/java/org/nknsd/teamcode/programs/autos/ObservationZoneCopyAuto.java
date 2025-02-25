@@ -3,29 +3,25 @@ package org.nknsd.teamcode.programs.autos;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.nknsd.teamcode.autoSteps.AutoStepAbsoluteControl;
+import org.nknsd.teamcode.autoSteps.AutoStepMove;
+import org.nknsd.teamcode.autoSteps.magentaSteps.AutoStepMoveNRotate;
 import org.nknsd.teamcode.components.handlers.JointedArmHandler;
 import org.nknsd.teamcode.components.handlers.ShaiHuludHandler;
-import org.nknsd.teamcode.components.sensors.DistSensor;
-import org.nknsd.teamcode.components.sensors.TouchSens;
-import org.nknsd.teamcode.frameworks.NKNAutoStep;
-import org.nknsd.teamcode.frameworks.NKNComponent;
-import org.nknsd.teamcode.autoSteps.AutoStepMove;
-import org.nknsd.teamcode.components.handlers.ExtensionHandler;
+import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.components.sensors.FlowSensor;
 import org.nknsd.teamcode.components.sensors.IMUSensor;
-import org.nknsd.teamcode.components.handlers.IntakeSpinnerHandler;
-import org.nknsd.teamcode.components.sensors.PotentiometerSensor;
-import org.nknsd.teamcode.components.handlers.RotationHandler;
-import org.nknsd.teamcode.components.handlers.WheelHandler;
+import org.nknsd.teamcode.components.sensors.TouchSens;
 import org.nknsd.teamcode.components.utility.AutoHeart;
+import org.nknsd.teamcode.frameworks.NKNAutoStep;
+import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.frameworks.NKNProgramTrue;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 import java.util.LinkedList;
 import java.util.List;
 
-@Autonomous(name = "Observation Zone Auto")
-public class ObservationZoneAuto extends NKNProgramTrue {
+@Autonomous(name = "COPY TEST Observation Zone Auto")
+public class ObservationZoneCopyAuto extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Step List
@@ -33,7 +29,7 @@ public class ObservationZoneAuto extends NKNProgramTrue {
 
 
         // Core mover
-        AutoSkeleton autoSkeleton = new AutoSkeleton(0.7, 0.3, 0.7, 1.5);
+        AutoSkeleton autoSkeleton = new AutoSkeleton(0.7, 0.3, 0.3, 1.5);
 
         AutoHeart autoHeart = new AutoHeart(stepList);
         components.add(autoHeart);
@@ -76,10 +72,12 @@ public class ObservationZoneAuto extends NKNProgramTrue {
         // Declare steps
         AutoStepAbsoluteControl moveToB2 = new AutoStepAbsoluteControl(1.3, 1, 0);
         AutoStepMove moveUp = new AutoStepMove(0, 1);
-        AutoStepAbsoluteControl moveTo1stSample = new AutoStepAbsoluteControl(1.6, 2.4861, 0);
+        AutoStepMoveNRotate turnToLeft = new AutoStepMoveNRotate(0, 0, -90);
+        AutoStepAbsoluteControl verticalAlignWith1stSample = new AutoStepAbsoluteControl(1.3, 2.4861, -90);
+        AutoStepAbsoluteControl moveTo1stSample = new AutoStepAbsoluteControl(1.6, 2.4861, -90);
         AutoStepMove depositSample = new AutoStepMove(0, -1.951);
-        AutoStepAbsoluteControl moveTo2ndSample = new AutoStepAbsoluteControl(2.15, 2.4861, 0);
-        AutoStepAbsoluteControl moveTo3rdSample = new AutoStepAbsoluteControl(2.4, 2.4861, 0);
+        AutoStepAbsoluteControl moveTo2ndSample = new AutoStepAbsoluteControl(2.15, 2.4861, -90);
+        AutoStepAbsoluteControl moveTo3rdSample = new AutoStepAbsoluteControl(2.375, 2.4861, -90);
 
         //Move forward a little
         AutoStepMove step0 = new AutoStepMove(0, 0.5);
@@ -88,6 +86,8 @@ public class ObservationZoneAuto extends NKNProgramTrue {
         // Push 1st blue
         stepList.add(moveToB2);
         stepList.add(moveUp);
+        stepList.add(turnToLeft);
+        stepList.add(verticalAlignWith1stSample);
         stepList.add(moveTo1stSample);
         stepList.add(depositSample);
 

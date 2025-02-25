@@ -68,6 +68,12 @@ public class AutoSkeleton {
         this.intakeSpinnerHandler = intakeSpinnerHandler;
     }
 
+    public void link(WheelHandler wheelHandler, FlowSensor flowSensor, IMUSensor imuSensor) {
+        this.wheelHandler = wheelHandler;
+        this.flowSensor = flowSensor;
+        this.imuSensor = imuSensor;
+    }
+
     public void specimenLink(SpecimenExtensionHandler specimenExtensionHandler, SpecimenRotationHandler specimenRotationHandler, SpecimenClawHandler specimenClawHandler) {
         this.specimenExtensionHandler = specimenExtensionHandler;
         this.specimenRotationHandler = specimenRotationHandler;
@@ -177,7 +183,7 @@ public class AutoSkeleton {
         double ySpeed = 0;
         double turnSpeed = 0;
         if (Math.abs(xDist) > movementMargin / 1.3) { // we need to reduce movement margin to account for the rare scenarios when x & y are both within margin but combined they are not
-            xSpeed = xDist * (maxSpeed / TILE_LENGTH) * (6 / 3); // This function makes xSpeed reach maxSpeed at 3/4 tile length away
+            xSpeed = xDist * (maxSpeed / TILE_LENGTH) * (6f / 3f); // This function makes xSpeed reach maxSpeed at 3/4 tile length away
             xSpeed = (Math.cos(headingOffset) * xSpeed) - (Math.sin(headingOffset) * ySpeed); // Rotate based off heading's OFFSET
             xSpeed = clamp(xSpeed, minSpeed, maxSpeed); // Clamp to acceptable values
 
@@ -187,7 +193,7 @@ public class AutoSkeleton {
 
 
         if (Math.abs(yDist) > movementMargin / 1.3) {
-            ySpeed = yDist * (maxSpeed / TILE_LENGTH) * (4 / 3);
+            ySpeed = yDist * (maxSpeed / TILE_LENGTH) * (4f / 3f);
             ySpeed = (Math.sin(headingOffset) * xSpeed) + (Math.cos(headingOffset) * ySpeed);
             ySpeed = clamp(ySpeed, minSpeed, maxSpeed);
 
@@ -197,7 +203,7 @@ public class AutoSkeleton {
 
 
         if (Math.abs(turnDist) > turnMargin) {
-            turnSpeed = turnDist * (maxSpeed / 90) * (4 / 3); // We arbitrarily scale turnSpeed to 90*
+            turnSpeed = turnDist * (maxSpeed / 90) * (4f / 3f); // We arbitrarily scale turnSpeed to 90*
             turnSpeed = clamp(turnSpeed, minSpeed, maxSpeed);
 
         } else {

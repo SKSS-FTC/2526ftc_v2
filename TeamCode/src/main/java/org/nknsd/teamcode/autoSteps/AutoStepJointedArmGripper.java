@@ -3,16 +3,16 @@ package org.nknsd.teamcode.autoSteps;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
+import org.nknsd.teamcode.components.handlers.JointedArmHandler;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
-public class AutoStepExtendSpecimenArmSynced extends NKNAutoStep {
-    private final SpecimenExtensionHandler.SpecimenExtensionPositions extensionPosition;
+public class AutoStepJointedArmGripper extends NKNAutoStep {
+    private final boolean shouldClose;
     AutoSkeleton autoSkeleton;
 
-    public AutoStepExtendSpecimenArmSynced(SpecimenExtensionHandler.SpecimenExtensionPositions extensionPosition) {
-        this.extensionPosition = extensionPosition;
+    public AutoStepJointedArmGripper(boolean closed) {
+        shouldClose = closed;
     }
 
     @Override
@@ -22,7 +22,11 @@ public class AutoStepExtendSpecimenArmSynced extends NKNAutoStep {
     }
 
     public void begin(ElapsedTime runtime, Telemetry telemetry) {
-        autoSkeleton.setTargetSpecArmExtension(extensionPosition);
+        if (shouldClose) {
+            autoSkeleton.jointedArmGrip();
+        } else {
+            autoSkeleton.jointedArmRelease();
+        }
     }
 
     @Override
@@ -35,6 +39,6 @@ public class AutoStepExtendSpecimenArmSynced extends NKNAutoStep {
 
     @Override
     public String getName() {
-        return "Extending to " + extensionPosition.name();
+        return "Extending";
     }
 }

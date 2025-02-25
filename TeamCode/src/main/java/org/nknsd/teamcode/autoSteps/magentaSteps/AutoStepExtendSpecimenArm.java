@@ -1,17 +1,18 @@
-package org.nknsd.teamcode.autoSteps;
+package org.nknsd.teamcode.autoSteps.magentaSteps;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.nknsd.teamcode.components.handlers.ExtensionHandler;
+import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
-import org.nknsd.teamcode.components.handlers.ExtensionHandler;
 
-public class AutoStepExtendArm extends NKNAutoStep {
-    private final ExtensionHandler.ExtensionPositions extensionPosition;
+public class AutoStepExtendSpecimenArm extends NKNAutoStep {
+    private final SpecimenExtensionHandler.SpecimenExtensionPositions extensionPosition;
     AutoSkeleton autoSkeleton;
 
-    public AutoStepExtendArm(ExtensionHandler.ExtensionPositions extensionPosition) {
+    public AutoStepExtendSpecimenArm(SpecimenExtensionHandler.SpecimenExtensionPositions extensionPosition) {
         this.extensionPosition = extensionPosition;
     }
 
@@ -22,7 +23,7 @@ public class AutoStepExtendArm extends NKNAutoStep {
     }
 
     public void begin(ElapsedTime runtime, Telemetry telemetry) {
-        autoSkeleton.setTargetArmExtension(extensionPosition);
+        autoSkeleton.setTargetSpecArmExtension(extensionPosition);
     }
 
     @Override
@@ -30,7 +31,7 @@ public class AutoStepExtendArm extends NKNAutoStep {
 
     @Override
     public boolean isDone(ElapsedTime runtime) {
-        return autoSkeleton.isExtensionDone();
+        return autoSkeleton.isSpecExtensionDone();
     }
 
     @Override

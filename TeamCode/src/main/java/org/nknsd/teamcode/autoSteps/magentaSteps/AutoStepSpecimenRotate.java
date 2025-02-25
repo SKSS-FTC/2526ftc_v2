@@ -1,4 +1,4 @@
-package org.nknsd.teamcode.autoSteps;
+package org.nknsd.teamcode.autoSteps.magentaSteps;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 

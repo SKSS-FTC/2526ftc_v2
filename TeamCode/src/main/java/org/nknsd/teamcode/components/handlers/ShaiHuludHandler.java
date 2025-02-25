@@ -25,7 +25,7 @@ public class ShaiHuludHandler implements NKNComponent {
     private final double ALIGN_MARGIN = 8;
     private final int PRIORITY = 1;
     private Gamepad gamepad; private Telemetry telemetry;
-    private boolean skipStates = true;
+    private boolean skipStates = false;
 
     @Override
     public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
@@ -41,8 +41,8 @@ public class ShaiHuludHandler implements NKNComponent {
         positions[2] = new ShaiHuludPosition(-1800, 0.28, 0.6); // rotate down
         positions[3] = new ShaiHuludPosition(-1800, 0.28, 0.2); // spike grab
         positions[4] = new ShaiHuludPosition(-300, 0.8, 0.2); // retract
-        positions[5] = new ShaiHuludPosition(0, 0.8, 1); // eject
-        positions[6] = new ShaiHuludPosition(0,0.6,0.6); // specimen grab
+        positions[5] = new ShaiHuludPosition(0, 0.75, 1); // eject
+        positions[6] = new ShaiHuludPosition(-50,0.6,0.6); // specimen grab
 
         gamepad = gamepad2; //super botched way to implement the e-stop for the shai hulud movement
         this.telemetry = telemetry;
@@ -357,7 +357,7 @@ public class ShaiHuludHandler implements NKNComponent {
     // Toggle ON manual retract
     public void manualRetract() {
         extensionMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        extensionMotor.setPower(0.3);
+        extensionMotor.setPower(0.75);
         skipStates = true;
     }
 

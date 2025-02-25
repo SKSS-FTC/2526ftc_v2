@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.autoSteps.AutoStepMove;
-import org.nknsd.teamcode.autoSteps.AutoStepMoveNRotate;
+import org.nknsd.teamcode.autoSteps.magentaSteps.AutoStepMoveNRotate;
 import org.nknsd.teamcode.autoSteps.AutoStepSleep;
 import org.nknsd.teamcode.components.handlers.ExtensionHandler;
 import org.nknsd.teamcode.components.sensors.FlowSensor;
@@ -22,7 +22,7 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 import java.util.LinkedList;
 import java.util.List;
 
-@Autonomous(name = "Auto Test [Don't run]")
+@Autonomous(name = "Auto Test [Don't run]") @Disabled
 public class TestingAuto extends NKNProgramTrue {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {

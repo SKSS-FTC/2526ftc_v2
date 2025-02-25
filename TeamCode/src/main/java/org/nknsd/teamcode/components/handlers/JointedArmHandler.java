@@ -12,6 +12,8 @@ import org.nknsd.teamcode.components.sensors.TouchSens;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 
+import java.util.concurrent.TimeUnit;
+
 public class JointedArmHandler implements NKNComponent {
     public static final int MAX_INDEX_OF_ROTATION_POSITIONS = 5;
     final double motorThreshold = 4, servoThreshold = 0;
@@ -42,8 +44,11 @@ public class JointedArmHandler implements NKNComponent {
 
     }
 
+    private long startTime;
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
+        startTime = runtime.now(TimeUnit.MILLISECONDS);
+
         motor.setPower(0.5);
 
         motor.setTargetPosition(0);
@@ -57,8 +62,21 @@ public class JointedArmHandler implements NKNComponent {
         return "JointedArmRotator :D";
     }
 
+    private boolean oneTimeThing = false;
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
+        // Code to run once after a delay
+        if (!oneTimeThing && runtime.now(TimeUnit.MILLISECONDS) > 1500 + startTime) {
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            motor.setPower(1);
+            motor.setTargetPosition(0);
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            oneTimeThing = true;
+        }
+
         if (touchSens != null) {
             if (touchSens.isTouching()) {
                 motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -78,9 +96,10 @@ public class JointedArmHandler implements NKNComponent {
     }
 
     public void setTargetPosition(Positions position) {
-        if (!isAtTargetPosition()) {
-            return;
-        }
+        // This code is actually a bad thing to include, silly me
+//        if (!isAtTargetPosition()) {
+//            return;
+//        }
 
         if (position == Positions.DEPOSIT && targetPosition == Positions.COLLECTION) {
             setTargetPosition(Positions.REST);
@@ -103,13 +122,13 @@ public class JointedArmHandler implements NKNComponent {
     }
 
     public enum Positions {
-        REST(0, 0.48, 1, 0.71),
-        COLLECTION(0, 0.029, 0.78, 0.63),
-        DEPOSIT(2620, 0.35, 0.139, 0.71),
-        EARLY_BIRD(0, .289, 0, .63), // Goes to a position which allows us to rotate to worm search
-        WORM_SEARCH(0, .57, .02, .369), // Prep to peck a specimen off the pen
-        NEST(860, .33, .769, 1), // Prepares to deposit a specimen on the wall
-        FEED(1630, .33, .769, 1), // Raises the arm to deposit the specimen
+        REST(0, 0.619, 1, 0.71),
+        COLLECTION(0, 0.168, 0.78, 0.63),
+        DEPOSIT(2620, 0.489, 0.139, 0.71),
+        EARLY_BIRD(0, 0.428, 0.01, 0.71), // Goes to a position which allows us to rotate to worm search
+        WORM_SEARCH(0, .709, .02, .369), // Prep to peck a specimen off the pen
+        NEST(860, 0.469, .769, 1), // Prepares to deposit a specimen on the wall
+        FEED(1750, 0.469, .769, 1), // Raises the arm to deposit the specimen
         GRAB_OPEN(0,0,0,0.63),
         GRAB_CLOSE(0,0,0,0.71);
 
@@ -142,20 +161,20 @@ public class JointedArmHandler implements NKNComponent {
         }
 
         if (a) {
-            joint1.setPosition(joint1.getPosition() + 0.01);
+            joint1.setPosition(joint1.getPosition() + 0.05);
             delayButtons = true;
         }
         if (b) {
-            joint1.setPosition(joint1.getPosition() - 0.01);
+            joint1.setPosition(joint1.getPosition() - 0.05);
             delayButtons = true;
         }
 
         if (right) {
-            joint2.setPosition(joint2.getPosition() + 0.01);
+            joint2.setPosition(joint2.getPosition() + 0.04);
             delayButtons = true;
         }
         if (left) {
-            joint2.setPosition(joint2.getPosition() - 0.01);
+            joint2.setPosition(joint2.getPosition() - 0.04);
             delayButtons = true;
         }
 
