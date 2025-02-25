@@ -3,17 +3,13 @@ package org.nknsd.teamcode.autoSteps;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
-public class AutoStepSpecimenRotate extends NKNAutoStep {
-    AutoSkeleton autoSkeleton;
-    private final SpecimenRotationHandler.SpecimenRotationPositions rotationPosition;
+public class AutoStepExtendShaiHulud extends NKNAutoStep {
 
-    public AutoStepSpecimenRotate(SpecimenRotationHandler.SpecimenRotationPositions rotationPosition) {
-        this.rotationPosition = rotationPosition;
-    }
+    AutoSkeleton autoSkeleton;
+
 
     @Override
     public void link(AutoSkeleton autoSkeleton) {
@@ -22,7 +18,7 @@ public class AutoStepSpecimenRotate extends NKNAutoStep {
     }
 
     public void begin(ElapsedTime runtime, Telemetry telemetry) {
-        autoSkeleton.setSpecimenRotationTarget(rotationPosition);
+        autoSkeleton.startShaiHuludExtension();
     }
 
     @Override
@@ -30,11 +26,11 @@ public class AutoStepSpecimenRotate extends NKNAutoStep {
 
     @Override
     public boolean isDone(ElapsedTime runtime) {
-        return true;
+        return autoSkeleton.isShaiHuludResting();
     }
 
     @Override
     public String getName() {
-        return "Setting specimen rotation target";
+        return "Shai Hulud Extending";
     }
 }

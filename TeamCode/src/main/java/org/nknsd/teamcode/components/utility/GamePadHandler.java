@@ -91,6 +91,10 @@ public class GamePadHandler implements NKNComponent {
         eventListeners.add(new EventPair(listener, event, name));
     }
 
+    public void addListener(Callable<Boolean> listener, String name) {
+        eventListeners.add(new EventPair(listener, name));
+    }
+
     public void removeListener(String name) {
         // Application of lambdas
         // equivalent to looping through eventListeners, and for every eventListener checking if it's equal to the name

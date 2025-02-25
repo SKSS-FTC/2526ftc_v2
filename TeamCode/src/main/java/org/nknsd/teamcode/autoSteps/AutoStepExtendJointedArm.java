@@ -3,16 +3,17 @@ package org.nknsd.teamcode.autoSteps;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.nknsd.teamcode.components.handlers.ExtensionHandler;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
-import org.nknsd.teamcode.components.handlers.ExtensionHandler;
+import org.nknsd.teamcode.components.handlers.JointedArmHandler;
 
-public class AutoStepExtendArm extends NKNAutoStep {
-    private final ExtensionHandler.ExtensionPositions extensionPosition;
+public class AutoStepExtendJointedArm extends NKNAutoStep {
+    private final JointedArmHandler.Positions position;
     AutoSkeleton autoSkeleton;
 
-    public AutoStepExtendArm(ExtensionHandler.ExtensionPositions extensionPosition) {
-        this.extensionPosition = extensionPosition;
+    public AutoStepExtendJointedArm(JointedArmHandler.Positions position) {
+        this.position = position;
     }
 
     @Override
@@ -22,7 +23,7 @@ public class AutoStepExtendArm extends NKNAutoStep {
     }
 
     public void begin(ElapsedTime runtime, Telemetry telemetry) {
-        autoSkeleton.setTargetArmExtension(extensionPosition);
+        autoSkeleton.setJointedArmPosition(position);
     }
 
     @Override
@@ -30,11 +31,11 @@ public class AutoStepExtendArm extends NKNAutoStep {
 
     @Override
     public boolean isDone(ElapsedTime runtime) {
-        return autoSkeleton.isExtensionDone();
+        return autoSkeleton.isJointedArmExtensionDone();
     }
 
     @Override
     public String getName() {
-        return "Extending to " + extensionPosition.name();
+        return "Extending";
     }
 }

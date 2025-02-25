@@ -1,5 +1,7 @@
 package org.nknsd.teamcode.helperClasses;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class PosPair {
     public final double x;
     public final double y;
@@ -29,5 +31,70 @@ public class PosPair {
 
     public PosPair scale(double scalar) {
         return new PosPair(scalar * x, scalar * y);
+    }
+
+    public PosPair dropLowValues(double dropOff) {
+        double newX, newY;
+
+        if (Math.abs(x) < dropOff) {
+            newX = 0;
+        } else {
+            newX = x;
+        }
+
+        if (Math.abs(y) < dropOff) {
+            newY = 0;
+        } else {
+            newY = y;
+        }
+
+        return new PosPair(x, y);
+    }
+
+    // Returns a new PosPair with an x clamped to a given minimum
+    public PosPair clampValuesToMin(double min) {
+        double newX, newY;
+
+        if (Math.abs(x) < min) {
+            newX = (x / Math.abs(x)) * min;
+        } else {
+            newX = x;
+        }
+
+        if (Math.abs(y) < min) {
+            newY = (y / Math.abs(y)) * min;
+        } else {
+            newY = y;
+        }
+
+        return new PosPair(newX, newY);
+    }
+
+    public void doTelemetry(Telemetry telemetry) {
+        doTelemetry(telemetry, "");
+    }
+
+    public void doTelemetry(Telemetry telemetry, String name) {
+        telemetry.addData(name + "-X", x);
+        telemetry.addData(name + "-Y", y);
+    }
+
+    /**
+     * Adds PosPair p to this, and returns the result as a new PosPair
+     * @param p the PosPair to add
+     * @return the PosPair which is the result of adding the two
+     */
+    public PosPair add(PosPair p) {
+        return new PosPair(x + p.x, y + p.y);
+    }
+
+    /**
+     * Adds an x and y value pair to this PosPair and returns as a new PosPair
+     * @param x the x value to add
+     * @param y the y value to add
+     * @return the PosPair which is the result of adding x & y to this pos
+     */
+    public PosPair add(double x, double y) {
+        return new PosPair(this.x + x, this.y + y);
     }
 }
