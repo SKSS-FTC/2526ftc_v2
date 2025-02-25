@@ -12,13 +12,8 @@ import org.nknsd.teamcode.frameworks.NKNProgram;
 
 import java.util.List;
 
-<<<<<<< HEAD
-@TeleOp(name = "Flow Sensor Test", group="Tests")@Disabled
-public class FlowSensorTestProgram extends NKNProgramTrue {
-=======
-@TeleOp(name = "Flow Sensor Test", group="Tests")
+@TeleOp(name = "Flow Sensor Test", group="Tests") @Disabled
 public class FlowSensorTestProgram extends NKNProgram {
->>>>>>> 67db820610588792885f3f6102b14615e92e5d38
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Gamepad Handler

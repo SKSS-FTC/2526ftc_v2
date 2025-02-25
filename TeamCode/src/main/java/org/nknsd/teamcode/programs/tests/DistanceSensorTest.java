@@ -1,5 +1,6 @@
 package org.nknsd.teamcode.programs.tests;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.nknsd.teamcode.components.sensors.DistSensor;
@@ -10,13 +11,8 @@ import org.nknsd.teamcode.frameworks.NKNProgram;
 import java.util.HashMap;
 import java.util.List;
 
-<<<<<<< HEAD
-@TeleOp(name = "Distance Sensor Test", group="Tests")@Disabled
-public class DistanceSensorTest extends NKNProgramTrue {
-=======
-@TeleOp(name = "Forward Distance Sensor Test", group="Tests")
+@TeleOp(name = "Forward Distance Sensor Test", group="Tests") @Disabled
 public class DistanceSensorTest extends NKNProgram {
->>>>>>> 67db820610588792885f3f6102b14615e92e5d38
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         DistSensor backwardSensor = new DistSensor("sensorBackDist");

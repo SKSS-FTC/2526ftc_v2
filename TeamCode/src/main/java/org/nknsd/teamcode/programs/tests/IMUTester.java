@@ -7,12 +7,12 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.nknsd.teamcode.components.sensors.IMUSensor;
 import org.nknsd.teamcode.components.sensors.PotentiometerSensor;
 import org.nknsd.teamcode.frameworks.NKNComponent;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 
 import java.util.List;
 
-@TeleOp(name = "IMU Tester", group="Tests")
-public class IMUTester extends NKNProgramTrue {
+@TeleOp(name = "IMU Tester", group="Tests") @Disabled
+public class IMUTester extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // IMU
