@@ -3,13 +3,11 @@ package org.nknsd.teamcode.frameworks;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.nknsd.teamcode.programs.tests.EACmonkeyProgram;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public abstract class NKNProgramTrue extends OpMode {
+public abstract class NKNProgram extends OpMode {
     private final List<NKNComponent> componentList = new LinkedList<>();
     private final List<NKNComponent> enabledTelemetryList = new LinkedList<>();
     private final ElapsedTime runtime = new ElapsedTime();
@@ -73,10 +71,8 @@ public abstract class NKNProgramTrue extends OpMode {
     // Runs once every ~500 milliseconds
     // ONLY calls for components to do telemetry
     public void doTelemetry() {
-        for (NKNComponent component:componentList){
-            if (isInTelemetryEnabledList(component)) {
-                component.doTelemetry(telemetry);
-            }
+        for (NKNComponent component:enabledTelemetryList){
+            component.doTelemetry(telemetry);
         }
         telemetry.update();
         lastTelemetryCall = runtime.now(TimeUnit.MILLISECONDS);
@@ -88,15 +84,6 @@ public abstract class NKNProgramTrue extends OpMode {
         for (NKNComponent component:componentList){
             component.stop(runtime,telemetry);
         }
-    }
-
-    private boolean isInTelemetryEnabledList(NKNComponent component) {
-        for (NKNComponent c: enabledTelemetryList) {
-            if (c.equals(component)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     // Fill in this function with your components to create the main list

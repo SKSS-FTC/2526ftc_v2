@@ -15,12 +15,12 @@ import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.drivers.CollyRandomWheelDriver;
 import org.nknsd.teamcode.drivers.EACDriver;
 import org.nknsd.teamcode.controlSchemes.reals.KarstenEACController;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 
 import java.util.List;
 
 @TeleOp(name = "Collyien Physics") @Disabled
-public class CollyMovementNKNProgram extends NKNProgramTrue {
+public class CollyMovementNKNProgram extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Misc

@@ -5,110 +5,50 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.nknsd.teamcode.autoSteps.AutoStepExtendSpecAndOrientBackDist;
+import org.nknsd.teamcode.components.handlers.RotationHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
+import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
 import org.nknsd.teamcode.controlSchemes.abstracts.SpecimenControlScheme;
+import org.nknsd.teamcode.controlSchemes.abstracts.WheelControlScheme;
 import org.nknsd.teamcode.frameworks.NKNComponent;
+import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 public class SpecimenFancyDepositDriver implements NKNComponent {
     private GamePadHandler gamePadHandler;
     private SpecimenExtensionHandler specimenExtensionHandler;
     private SpecimenRotationHandler specimenRotationHandler;
     private SpecimenClawHandler specimenClawHandler;
-    private SpecimenControlScheme controlScheme;
+    private WheelControlScheme controlScheme;
+    private WheelHandler wheelHandler;
+    private AutoSkeleton autoSkeleton;
+    private AutoStepExtendSpecAndOrientBackDist fancyDepositStep = new AutoStepExtendSpecAndOrientBackDist(SpecimenExtensionHandler.SpecimenExtensionPositions.SPECIMEN_CLIP, 7.5, .1, 0.2);
 
-    Runnable specimenExtend = new Runnable() {
+    private boolean isFancyDepositing = false;
+
+
+    Runnable specFancyDeposit = new Runnable() {
         @Override
         public void run() {
-            boolean done = false; // Repeat until we either hit the end of the array or we reach a valid extension position
-            int index = specimenExtensionHandler.targetPosition().ordinal();
-            while (!done) {
-                index++;
-
-                if (index >= SpecimenExtensionHandler.SpecimenExtensionPositions.values().length) {
-                    return;
-                }
-
-                done = specimenExtensionHandler.gotoPosition(SpecimenExtensionHandler.SpecimenExtensionPositions.values()[index]);
+            if (isFancyDepositing) {
+                wheelHandler.setPriority(0);
+                autoSkeleton.setPriority(0);
+                isFancyDepositing = false;
+            }
+            else {
+                fancyDepositStep.begin();
+                isFancyDepositing = true;
+                wheelHandler.setPriority(2);
+                autoSkeleton.setPriority(2);
             }
         }
     };
-    Runnable specimenRetract = new Runnable() {
-        @Override
-        public void run() {
-            boolean done = false; // Repeat until we either hit the end of the array or we reach a valid rotation position
-            int index = specimenExtensionHandler.targetPosition().ordinal();
-            while (!done) {
-                index --;
-
-                if (index < 0) {return;}
-
-                done = specimenExtensionHandler.gotoPosition(SpecimenExtensionHandler.SpecimenExtensionPositions.values()[index]);
-            }
-        }
-    };
-    Runnable specimenForward = new Runnable() {
-        @Override
-        public void run() {
-            boolean done = false; // Repeat until we either hit the end of the array or we reach a valid extension position
-            int index = specimenRotationHandler.targetPosition().ordinal();
-            while (!done) {
-                index++;
-
-                if (index >= SpecimenRotationHandler.SpecimenRotationPositions.values().length) {
-                    return;
-                }
-
-                done = specimenRotationHandler.goToPosition(SpecimenRotationHandler.SpecimenRotationPositions.values()[index]);
-            }
-        }
-    };
-    Runnable specimenBackward = new Runnable() {
-        @Override
-        public void run() {
-            boolean done = false; // Repeat until we either hit the end of the array or we reach a valid extension position
-            int index = specimenRotationHandler.targetPosition().ordinal();
-            while (!done) {
-                index --;
-
-                if (index < 0) {return;}
-
-                done = specimenRotationHandler.goToPosition(SpecimenRotationHandler.SpecimenRotationPositions.values()[index]);
-            }
-        }
-    };
-    Runnable goToRestingAfterRelease = new Runnable(){
-
-        @Override
-        public void run() {
-            specimenRotationHandler.goToPosition(SpecimenRotationHandler.SpecimenRotationPositions.MIDDLE);
-        }
-    };
-    Runnable grip = new Runnable() {
-        @Override
-        public void run() {
-            specimenClawHandler.setClawPosition(SpecimenClawHandler.ClawPositions.GRIP);
-        }
-    };
-    Runnable release = new Runnable() {
-        @Override
-        public void run() {
-            specimenClawHandler.setClawPosition(SpecimenClawHandler.ClawPositions.RELEASE);
-        }
-    };
-    Runnable resetSpecExt = new Runnable() {
-        @Override
-        public void run() {
-            specimenExtensionHandler.resetEncoder();
-        }
-    };
-    private Telemetry telemetry;
 
     @Override
     public boolean init(Telemetry telemetry, HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
-        this.telemetry = telemetry;
         return true;
     }
 
@@ -119,14 +59,7 @@ public class SpecimenFancyDepositDriver implements NKNComponent {
 
     @Override
     public void start(ElapsedTime runtime, Telemetry telemetry) {
-        gamePadHandler.addListener(controlScheme.specimenBackwards(), specimenBackward, "Specimen Rotate Backwards");
-        gamePadHandler.addListener(controlScheme.specimenForward(), specimenForward, "Specimen Rotate Forwards");
-        gamePadHandler.addListener(controlScheme.specimenGrab(), grip, "Specimen Grip");
-        gamePadHandler.addListener(controlScheme.specimenRelease(), release, "Specimen Release");
-        gamePadHandler.addListener(controlScheme.specimenRaise(), specimenExtend, "Specimen Extend");
-        gamePadHandler.addListener(controlScheme.specimenLower(), specimenRetract, "Specimen Lower");
-        gamePadHandler.addListener(controlScheme.goToRestingAfterRelease(), goToRestingAfterRelease,"Go To Resting After Release");
-        gamePadHandler.addListener(controlScheme.resetSpecExt(), resetSpecExt,"Reset Spec Ext");
+        gamePadHandler.addListener(controlScheme.specFancyDeposit(), specFancyDeposit, "Spec Fancy Deposit");
     }
 
     @Override
@@ -136,24 +69,35 @@ public class SpecimenFancyDepositDriver implements NKNComponent {
 
     @Override
     public String getName() {
-        return "SpecimenDriver";
+        return "SpecimenFancyDepositDriver";
     }
 
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
+        if (isFancyDepositing) {
+            fancyDepositStep.run(telemetry, runtime);
 
+            if (fancyDepositStep.isDone(runtime)) {
+                wheelHandler.setPriority(0);
+                autoSkeleton.setPriority(0);
+                isFancyDepositing = false;
+            }
+        }
     }
 
     @Override
     public void doTelemetry(Telemetry telemetry) {
-        telemetry.addData("Specimen Controls", controlScheme.getName());
+        telemetry.addData("Specimen FANCY Controls", controlScheme.getName());
+        telemetry.addData("Currently Trying", isFancyDepositing);
     }
 
-    public void link (SpecimenExtensionHandler specimenExtensionHandler, SpecimenRotationHandler specimenRotationHandler, SpecimenClawHandler specimenClawHandler, GamePadHandler gamepadHandler, SpecimenControlScheme controlScheme){
+    public void link (SpecimenExtensionHandler specimenExtensionHandler, GamePadHandler gamepadHandler, WheelControlScheme controlScheme, WheelHandler wheelHandler, AutoSkeleton autoSkeleton){
         this.specimenExtensionHandler = specimenExtensionHandler;
-        this.specimenRotationHandler = specimenRotationHandler;
-        this.specimenClawHandler = specimenClawHandler;
         this.gamePadHandler = gamepadHandler;
         this.controlScheme = controlScheme;
+        this.wheelHandler = wheelHandler;
+        this.autoSkeleton = autoSkeleton;
+
+        fancyDepositStep.link(autoSkeleton);
     }
 }

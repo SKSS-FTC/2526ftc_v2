@@ -43,6 +43,7 @@ public class AutoSkeleton {
     private double headingOffset;
     private DistHubSensor distSensHub;
     private TheBowlHandler theBowlHandler;
+    private int priority = 0;
 
 
     public AutoSkeleton(double maxSpeed, double minSpeed, double movementMargin, double turnMargin) {

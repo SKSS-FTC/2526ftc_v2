@@ -23,15 +23,14 @@ import org.nknsd.teamcode.components.sensors.PotentiometerSensor;
 import org.nknsd.teamcode.components.handlers.RotationHandler;
 import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.components.utility.AutoHeart;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 import java.util.LinkedList;
 import java.util.List;
 
 @Autonomous(name = "Score Samples in Basket (GOOD)") @Disabled
-public class BasketAuto extends NKNProgramTrue {
-    @Override
+public class BasketAuto extends NKNProgram {
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Step List
         List<NKNAutoStep> stepList = new LinkedList<NKNAutoStep>();
@@ -95,11 +94,11 @@ public class BasketAuto extends NKNProgramTrue {
         AutoStepRelativeMove backMOREAwayFromBasket = new AutoStepRelativeMove(0, -.45, 250);
         AutoStepRelativeMove slightlyBackAway = new AutoStepRelativeMove(0, -.4, 190);
 
-        AutoStepAbsoluteControl pickUpFirstYellow = new AutoStepAbsoluteControl(0.4176, 1.3968, -68.8);
+        AutoStepAbsoluteControl pickUpFirstYellow = new AutoStepAbsoluteControl(0.4376, 1.3268, -68.8);
         AutoStepRelativeMove moveToPickup = new AutoStepRelativeMove(0, 0.3, 400);
         AutoStepMove dodgeWall = new AutoStepMove(0, -0.5);
 
-        AutoStepAbsoluteControl pickUpSecondYellow = new AutoStepAbsoluteControl(0.0242, 1.6314, -90);
+        AutoStepAbsoluteControl pickUpSecondYellow = new AutoStepAbsoluteControl(0.0242, 1.7214, -90);
         AutoStepAbsoluteControl alignToPark = new AutoStepAbsoluteControl(-0.05, 2.2, 90);
         AutoStepMove driveInToPark = new AutoStepMove(0.58, 0);
 
@@ -120,7 +119,7 @@ public class BasketAuto extends NKNProgramTrue {
 
         AutoStepChangeMaxSpeed reallySlowSpeed = new AutoStepChangeMaxSpeed(0.2);
         AutoStepChangeMaxSpeed slowSpeed = new AutoStepChangeMaxSpeed(0.5);
-        AutoStepChangeMaxSpeed normalSpeed = new AutoStepChangeMaxSpeed(0.69);
+        AutoStepChangeMaxSpeed normalSpeed = new AutoStepChangeMaxSpeed(0.75);
 
 
 
@@ -136,6 +135,7 @@ public class BasketAuto extends NKNProgramTrue {
         stepList.add(rotateToSpecial);
         stepList.add(sleep);
         stepList.add(backAwayFromBasket);
+        stepList.add(sleep);
         stepList.add(retract);
 
         // Get second block

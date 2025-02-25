@@ -7,15 +7,18 @@ import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.components.sensors.FlowSensor;
 import org.nknsd.teamcode.components.utility.GamePadHandler;
 import org.nknsd.teamcode.components.sensors.IMUSensor;
-import org.nknsd.teamcode.drivers.WheelDriver;
-import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.controlSchemes.reals.CollyWheelController;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 
 import java.util.List;
 
+<<<<<<< HEAD
 @TeleOp(name = "Flow Sensor Test", group="Tests")@Disabled
 public class FlowSensorTestProgram extends NKNProgramTrue {
+=======
+@TeleOp(name = "Flow Sensor Test", group="Tests")
+public class FlowSensorTestProgram extends NKNProgram {
+>>>>>>> 67db820610588792885f3f6102b14615e92e5d38
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Gamepad Handler

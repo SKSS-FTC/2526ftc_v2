@@ -13,6 +13,7 @@ public class AutoStepExtendSpecAndOrientBackDist extends NKNAutoStep {
     private final SpecimenExtensionHandler.SpecimenExtensionPositions extensionPosition;
     private final double targ; private final double speed; private final double margin;
     AutoSkeleton autoSkeleton;
+    private boolean flag = false; // God this is horrible code. Quick patch fix for the alternate way to access this step.. which also disables the extension part. Check specimenFancyDepositDriver
 
     public AutoStepExtendSpecAndOrientBackDist(SpecimenExtensionHandler.SpecimenExtensionPositions extensionPosition, double target, double speed, double margin ) {
         this.extensionPosition = extensionPosition;
@@ -32,23 +33,39 @@ public class AutoStepExtendSpecAndOrientBackDist extends NKNAutoStep {
 
     }
 
+    public void begin() {
+        flag = true;
+    }
+
     @Override
     public void run(Telemetry telemetry, ElapsedTime runtime) {
-       if (Math.abs(targ - autoSkeleton.getSensorForDist()) > margin) {
-           autoSkeleton.relativeRun(0, speed);
-       } else if (Math.abs(targ - autoSkeleton.getSensorForDist()) < margin){
-           autoSkeleton.relativeRun(0, -speed);
-       } else {
-           autoSkeleton.relativeRun(0,0);
-       }
+        telemetry.addData("Sensing", autoSkeleton.getSensorBackDist());
+
+        if (Math.abs(targ - autoSkeleton.getSensorBackDist()) < margin) {
+            autoSkeleton.relativeRun(0,0);
+            telemetry.addData("Running", "NOT");
+        }
+        else if (targ > autoSkeleton.getSensorBackDist()) {
+            autoSkeleton.relativeRun(0, speed);
+            telemetry.addData("Running", "Closer");
+        }
+        else {
+            autoSkeleton.relativeRun(0, -speed);
+            telemetry.addData("Running", "Farther");
+        }
+
     }
 
     @Override
     public boolean isDone(ElapsedTime runtime) {
-        if (autoSkeleton.isSpecExtensionDone()){
+        if (autoSkeleton.isSpecExtensionDone() && !flag){
+            autoSkeleton.relativeRun(0,0);
+            return true;
+        } else if (Math.abs(targ - autoSkeleton.getSensorBackDist()) < margin && flag) {
             autoSkeleton.relativeRun(0,0);
             return true;
         }
+
         return false;
     }
 

@@ -1,6 +1,5 @@
 package org.nknsd.teamcode.programs.tests;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.nknsd.teamcode.controlSchemes.reals.CollyWheelController;
@@ -10,12 +9,12 @@ import org.nknsd.teamcode.components.utility.GamePadHandler;
 import org.nknsd.teamcode.components.sensors.IMUSensor;
 import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.drivers.AdvancedWheelDriver;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 
 import java.util.List;
 
 @TeleOp(name = "Advanced Movement Test", group="Tests")
-public class AbsoluteMovementTestProgram extends NKNProgramTrue {
+public class AbsoluteMovementTestProgram extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Gamepad Handler

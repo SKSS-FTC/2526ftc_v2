@@ -6,8 +6,7 @@ import org.nknsd.teamcode.controlSchemes.abstracts.WheelControlScheme;
 import java.util.concurrent.Callable;
 
 public class CollyWheelController extends WheelControlScheme {
-    private boolean delaySpeedChangesUp = false;
-    private boolean delaySpeedChangesDown = false;
+    private boolean delaySpeedChangesUp = false, delaySpeedChangesDown = false, delaySpecFancyDeposit = false;
 
     @Override
     public String getName() {
@@ -45,6 +44,25 @@ public class CollyWheelController extends WheelControlScheme {
                     return true;
                 } else if (!button) {
                     delaySpeedChangesDown = false;
+                }
+
+                return false;
+            }
+        };
+    }
+
+    @Override
+    public Callable<Boolean> specFancyDeposit() {
+        return new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                boolean button = GamePadHandler.GamepadButtons.X.detect(gamePadHandler.getGamePad1());
+
+                if (!delaySpecFancyDeposit && button) {
+                    delaySpecFancyDeposit = true;
+                    return true;
+                } else if (!button) {
+                    delaySpecFancyDeposit = false;
                 }
 
                 return false;

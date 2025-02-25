@@ -18,14 +18,14 @@ import org.nknsd.teamcode.components.sensors.PotentiometerSensor;
 import org.nknsd.teamcode.components.handlers.RotationHandler;
 import org.nknsd.teamcode.components.handlers.WheelHandler;
 import org.nknsd.teamcode.components.utility.AutoHeart;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 
 import java.util.LinkedList;
 import java.util.List;
 
 @Autonomous(name = "Observation Zone Auto")
-public class ObservationZoneAuto extends NKNProgramTrue {
+public class ObservationZoneAuto extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Step List
@@ -33,7 +33,7 @@ public class ObservationZoneAuto extends NKNProgramTrue {
 
 
         // Core mover
-        AutoSkeleton autoSkeleton = new AutoSkeleton(0.7, 0.3, 0.7, 1.5);
+        AutoSkeleton autoSkeleton = new AutoSkeleton(0.7, 0.3, 0.7  , 1.5);
 
         AutoHeart autoHeart = new AutoHeart(stepList);
         components.add(autoHeart);

@@ -9,12 +9,12 @@ import org.nknsd.teamcode.components.handlers.IntakeSpinnerHandler;
 import org.nknsd.teamcode.components.sensors.PotentiometerSensor;
 import org.nknsd.teamcode.components.handlers.RotationHandler;
 import org.nknsd.teamcode.components.testfiles.EACmonkey;
-import org.nknsd.teamcode.frameworks.NKNProgramTrue;
+import org.nknsd.teamcode.frameworks.NKNProgram;
 
 import java.util.List;
 
 @TeleOp(name = "EAC Monkey", group="Tests") @Disabled
-public class EACmonkeyProgram extends NKNProgramTrue {
+public class EACmonkeyProgram extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         ExtensionHandler extensionHandler = new ExtensionHandler();
