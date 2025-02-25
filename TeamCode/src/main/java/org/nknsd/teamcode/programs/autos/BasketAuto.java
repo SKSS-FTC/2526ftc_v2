@@ -1,17 +1,18 @@
 package org.nknsd.teamcode.programs.autos;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-import org.nknsd.teamcode.autoSteps.AutoStepExtendArmSynced;
-import org.nknsd.teamcode.autoSteps.AutoStepExtendArmWithFlowAdjusting;
-import org.nknsd.teamcode.autoSteps.AutoStepMoveNRotate;
+import org.nknsd.teamcode.autoSteps.magentaSteps.AutoStepExtendArmSynced;
+import org.nknsd.teamcode.autoSteps.magentaSteps.AutoStepExtendArmWithFlowAdjusting;
+import org.nknsd.teamcode.autoSteps.magentaSteps.AutoStepMoveNRotate;
 import org.nknsd.teamcode.frameworks.NKNAutoStep;
 import org.nknsd.teamcode.frameworks.NKNComponent;
 import org.nknsd.teamcode.autoSteps.AutoStepAbsoluteControl;
 import org.nknsd.teamcode.autoSteps.AutoStepChangeMaxSpeed;
 import org.nknsd.teamcode.autoSteps.AutoStepMove;
 import org.nknsd.teamcode.autoSteps.AutoStepRelativeMove;
-import org.nknsd.teamcode.autoSteps.AutoStepRotateArm;
+import org.nknsd.teamcode.autoSteps.magentaSteps.AutoStepRotateArm;
 import org.nknsd.teamcode.autoSteps.AutoStepServo;
 import org.nknsd.teamcode.autoSteps.AutoStepSleep;
 import org.nknsd.teamcode.components.handlers.ExtensionHandler;
@@ -28,9 +29,8 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 import java.util.LinkedList;
 import java.util.List;
 
-@Autonomous(name = "Score Samples in Basket (GOOD)")
+@Autonomous(name = "Score Samples in Basket (GOOD)") @Disabled
 public class BasketAuto extends NKNProgram {
-    @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {
         // Step List
         List<NKNAutoStep> stepList = new LinkedList<NKNAutoStep>();

@@ -11,7 +11,7 @@ import org.nknsd.teamcode.frameworks.NKNProgram;
 
 import java.util.List;
 
-@TeleOp(name = "Vision Tester", group="Tests")
+@TeleOp(name = "Vision Tester", group="Tests")@Disabled
 // @Disabled
 public class VisionSensorTester extends NKNProgram {
     @Override

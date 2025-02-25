@@ -1,18 +1,19 @@
 package org.nknsd.teamcode.programs.autos;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.nknsd.teamcode.autoSteps.AutoStepAbsoluteControl;
 import org.nknsd.teamcode.autoSteps.AutoStepChangeMaxSpeed;
-import org.nknsd.teamcode.autoSteps.AutoStepExtendSpecAndOrientBackDist;
-import org.nknsd.teamcode.autoSteps.AutoStepExtendSpecimenArm;
+import org.nknsd.teamcode.autoSteps.magentaSteps.AutoStepExtendSpecAndOrientBackDist;
+import org.nknsd.teamcode.autoSteps.magentaSteps.AutoStepExtendSpecimenArm;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveBackwardWithSensor;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveForwardWithSensorSmart;
-import org.nknsd.teamcode.autoSteps.AutoStepMoveNRotate;
+import org.nknsd.teamcode.autoSteps.magentaSteps.AutoStepMoveNRotate;
 import org.nknsd.teamcode.autoSteps.AutoStepMoveSidewaysWithSensor;
 import org.nknsd.teamcode.autoSteps.AutoStepRelativeMove;
-import org.nknsd.teamcode.autoSteps.AutoStepSpecimenClaw;
-import org.nknsd.teamcode.autoSteps.AutoStepSpecimenRotate;
+import org.nknsd.teamcode.autoSteps.magentaSteps.AutoStepSpecimenClaw;
+import org.nknsd.teamcode.autoSteps.magentaSteps.AutoStepSpecimenRotate;
 import org.nknsd.teamcode.components.handlers.SpecimenClawHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenExtensionHandler;
 import org.nknsd.teamcode.components.handlers.SpecimenRotationHandler;
@@ -35,7 +36,7 @@ import org.nknsd.teamcode.helperClasses.AutoSkeleton;
 import java.util.LinkedList;
 import java.util.List;
 
-@Autonomous(name = "Score Specimen on Bar (IN DEV)")
+@Autonomous(name = "Score Specimen on Bar (IN DEV)") @Disabled
 public class SpecimenAuto extends NKNProgram {
     @Override
     public void createComponents(List<NKNComponent> components, List<NKNComponent> telemetryEnabled) {

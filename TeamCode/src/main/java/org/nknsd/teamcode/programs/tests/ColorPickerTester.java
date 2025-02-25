@@ -1,5 +1,6 @@
 package org.nknsd.teamcode.programs.tests;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.nknsd.teamcode.components.utility.ColorPicker;
@@ -10,7 +11,7 @@ import org.nknsd.teamcode.frameworks.NKNProgram;
 
 import java.util.List;
 
-@TeleOp(name = "Color Picker Tester", group="Tests")
+@TeleOp(name = "Color Picker Tester", group="Tests") @Disabled
 // @Disabled
 public class ColorPickerTester extends NKNProgram {
     @Override
