@@ -4,6 +4,7 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.EncoderDirection.FORWARD;
+import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.EncoderDirection.REVERSED;
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -41,10 +42,9 @@ public class AutoBucket extends LinearOpMode {
     //topBucket();
 
     //Move robot to pick up second block
-    //moveRobot(1.0, 1.0, 0.0);
-    amazingSwerve.swerveTheThing(-1,-1,0);
-    sleepWithAmazingSwerve(500);
-    sleep(500);
+    moveRobot(.37, .12, 0.0);
+    //sleepWithAmazingSwerve(500);
+    sleep(10000);
   }
 
   public void topBucket(){
@@ -93,12 +93,12 @@ public class AutoBucket extends LinearOpMode {
 
   public void initOdo() {
     odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
-    odo.recalibrateIMU();
-    odo.resetPosAndIMU();
+    odo.resetPosAndIMU();sleep(250);
     odo.setOffsets(110, 30);
+    sleep(100);
     odo.setEncoderResolution(goBILDA_4_BAR_POD);
-    odo.setEncoderDirections(FORWARD, FORWARD);
-    odo.resetHeading(Rotation2d.fromDegrees(120));
+    odo.setEncoderDirections(REVERSED, FORWARD);
+    odo.resetHeading(Rotation2d.fromRadians(1.88));
   }
 
   public void moveRobot(double change_x, double change_y, double steer_amt) {
@@ -110,7 +110,7 @@ public class AutoBucket extends LinearOpMode {
 
     while (!(change_x < 0.05 && change_x > -0.05)   ||   !(change_y < 0.05 && change_y > -0.05)) {
 
-      //reduce input to motor speed
+      //reduce input of motor speed
       double limit = 0.45;
       if(change_x > limit)
         change_x = limit;

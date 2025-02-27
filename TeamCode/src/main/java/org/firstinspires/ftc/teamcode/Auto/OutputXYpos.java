@@ -3,12 +3,14 @@ package org.firstinspires.ftc.teamcode.Auto;
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.EncoderDirection.FORWARD;
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Mekanism.Mekanism;
 import org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.Swerve.wpilib.geometry.Rotation2d;
 
+@Autonomous(name = "output position")
 public class OutputXYpos extends LinearOpMode {
     private GoBildaPinpointDriver odometry;
     private Mekanism mek;
@@ -16,12 +18,12 @@ public class OutputXYpos extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         odometry = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
-        odometry.recalibrateIMU();
-        odometry.resetPosAndIMU();
+        odometry.resetPosAndIMU();sleep(250);
         odometry.setOffsets(110, 30);
+        sleep(100);
         odometry.setEncoderResolution(goBILDA_4_BAR_POD);
         odometry.setEncoderDirections(FORWARD, FORWARD);
-        odometry.resetHeading(Rotation2d.fromDegrees(120));
+        odometry.resetHeading(Rotation2d.fromRadians(1.88));
 
         waitForStart();
         while (opModeIsActive()) {
