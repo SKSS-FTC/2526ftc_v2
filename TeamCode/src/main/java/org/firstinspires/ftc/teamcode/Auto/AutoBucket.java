@@ -152,8 +152,8 @@ public class AutoBucket extends LinearOpMode {
       change_y *= -1;
 
       //to try to compensate for stupid stuff
-      if(wanted_y < -current_y)
-        change_y *= -1;
+//      if(wanted_y < -current_y)
+//        change_y *= -1;
 
       //print
       outputPosition();
