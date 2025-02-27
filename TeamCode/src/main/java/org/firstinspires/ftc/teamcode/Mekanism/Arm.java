@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Arm {
@@ -116,6 +115,13 @@ public class Arm {
       slide.setPower(slidePower);
       slide2.setPower(slidePower);
     }
+
+    if(slide.getCurrentPosition() < -100) {
+      slide.setMode(STOP_AND_RESET_ENCODER);
+      slide2.setMode(STOP_AND_RESET_ENCODER);
+      slide.setMode(RUN_USING_ENCODER);
+      slide2.setMode(RUN_USING_ENCODER);
+    }
   }
 
 
@@ -208,10 +214,10 @@ public class Arm {
     double current_Angle = pivot.getCurrentPosition() / countsPerDegree;
 
     // Limits for the motor
-    if (current_Angle > limitPivot) {
+    if (current_Angle > limitPivot && x > limitPivot) {
       x = limitPivot;
       telemetry.addLine("Pivot pos over limit");
-    } else if (current_Angle < 0) {
+    } else if (current_Angle < 0 && x < 0) {
       x = 0;
       telemetry.addLine("Pivot pos under 0");
     }
@@ -249,8 +255,8 @@ public class Arm {
     pivotPower = power / 2;
 
     maxLength = limitSlide * Math.cos(Math.toRadians(pivot.getCurrentPosition() / countsPerDegree)) * 1;
-    if (maxLength < 2500)
-      maxLength = 2500;
+    if (maxLength < 2625)
+      maxLength = 2625;
     if (slide.getCurrentPosition() > maxLength && power > 0) {
       setSlide(-power * 3);
       telemetry.addLine("auto in slide");
@@ -267,7 +273,7 @@ public class Arm {
 
     // Calculates the max the arm can go without going over the 40IN limit
     maxLength = limitSlide * Math.cos(Math.toRadians(pivot.getCurrentPosition() / countsPerDegree)) * 1.4;
-    if (maxLength < 2500) maxLength = 2500;
+    if (maxLength < 2625) maxLength = 2625;
 
     if (maxLength > limitSlide) maxLength = limitSlide;
 
@@ -290,8 +296,8 @@ public class Arm {
 
     // Calculates the max the arm can go without going over the 40IN limit
     double maxLength = limitSlide * Math.cos(Math.toRadians(pivot.getCurrentPosition() / countsPerDegree)) * 1.2;
-    if (maxLength < 2500)
-      maxLength = 2500;
+    if (maxLength < 2625)
+      maxLength = 2625;
 
     // If the max length calculated is longer than the physical limit of the slide, set it to that
     if (maxLength > limitSlide) maxLength = limitSlide;
@@ -305,14 +311,17 @@ public class Arm {
       telemetry.addLine("Slide over robot length limit");
     } else if (slide.getCurrentPosition() < 0 && power < 0) {
       telemetry.addLine("Slide under 0");
-      power = 0;
+      power = 0.1;
     }
+
+    if (slide.getCurrentPosition() <= 0 && power <= 0)
+      power = -0.25;
     telemetry.addLine("Power after checks: " + power);
     slidePower = power;
   }
 
   public void hang() {
-    setSlide(-1.);
+    //setSlide(-1.);
     setSlide(-1);
   }
 }
