@@ -101,15 +101,16 @@ public class AutoBucket extends LinearOpMode {
     odo.resetHeading(Rotation2d.fromDegrees(120));
   }
 
-  public void moveRobot(double strafe_x, double strafe_y, double steer_amt) {
-    double odo_multiplier = 5;
-    double change_x = strafe_x + odo.getPosX() * odo_multiplier;
-    double change_y = strafe_y - odo.getPosY() * odo_multiplier;
-    boolean y_was_0 = false;
+  public void moveRobot(double change_x, double change_y, double steer_amt) {
+    //double odo_multiplier = 5;
+    double current_x = odo.getPosX();
+    double current_y = odo.getPosY();
+    double wanted_x = current_x + change_x;
+    double wanted_y = current_y + change_y;
 
-    while (!(change_x > 0.05) || !(change_x < 0.05)   ||   !(change_y > 0.05) || !(change_y < 0.05)) {
+    while (!(change_x < 0.05 && change_x > -0.05)   ||   !(change_y < 0.05 && change_y > -0.05)) {
 
-      //reduce input to swerve
+      //reduce input to motor speed
       double limit = 0.45;
       if(change_x > limit)
         change_x = limit;
@@ -119,12 +120,19 @@ public class AutoBucket extends LinearOpMode {
         change_y = limit;
       if(change_y < -limit)
         change_y = -limit;
-      amazingSwerve.swerveTheThing(-change_x, change_y, 0.0);
 
-      //reset input and print input
-      change_x = strafe_x - odo.getPosX() * odo_multiplier;
-      change_y = strafe_y - odo.getPosY() * odo_multiplier;
+      //actually move robot
+      amazingSwerve.swerveTheThing(change_x, change_y, 0.0);
+
+      //update variables "current" and "change"
+      current_x = odo.getPosX();
+      current_y = odo.getPosY();
+      change_x = wanted_x - current_x;
+      change_y = wanted_y - current_y;
+      change_x *= -1;
       change_y *= -1;
+
+      //print
       outputPosition();
       telemetry.addLine("change x: " + change_x);
       telemetry.addLine("change y: " + -change_y);
