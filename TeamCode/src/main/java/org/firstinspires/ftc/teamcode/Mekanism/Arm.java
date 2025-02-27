@@ -312,7 +312,7 @@ public class Arm {
   }
 
   public void hang() {
-    setSlide(-1.);
+    //setSlide(-1.);
     setSlide(-1);
   }
 }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.EncoderDirection.FORWARD;
+import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.EncoderDirection.REVERSED;
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -22,8 +23,8 @@ public class OutputXYpos extends LinearOpMode {
         odometry.setOffsets(110, 30);
         sleep(100);
         odometry.setEncoderResolution(goBILDA_4_BAR_POD);
-        odometry.setEncoderDirections(FORWARD, FORWARD);
-        odometry.resetHeading(Rotation2d.fromRadians(1.88));
+        odometry.setEncoderDirections(REVERSED, REVERSED);
+        odometry.resetHeading();
 
         waitForStart();
         while (opModeIsActive()) {

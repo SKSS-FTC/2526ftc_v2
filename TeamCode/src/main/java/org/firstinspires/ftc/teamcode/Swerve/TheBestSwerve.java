@@ -152,12 +152,12 @@ public class TheBestSwerve {
       // Compute theta of the left joystick vector
 		double joy_theta = Math.atan2(left_joy_y, left_joy_x);
 
-		telemetry.addLine("Joy theta: " + joy_theta);
+//		telemetry.addLine("Joy theta: " + joy_theta);
 
       // Compute vector magnitude, this will be the speed of the robot
 		double joy_magnitude = Math.sqrt(Math.pow(left_joy_x, 2.0) + Math.pow(left_joy_y, 2.0));
 
-		telemetry.addLine("Joy mag: " + joy_magnitude);
+//		telemetry.addLine("Joy mag: " + joy_magnitude);
 
       // Read raw value from odometer (in radians)
 		double robot_theta = odometry.getHeading().getRadians();
@@ -165,7 +165,7 @@ public class TheBestSwerve {
 
       // Normalize odometry reading to align with standard polar coordinates
 		robot_theta = normalize_angle(robot_theta);
-		telemetry.addLine("Robot theta: " + robot_theta);
+//		telemetry.addLine("Robot theta: " + robot_theta);
 
       // Compute steering angle relative to field-centric movements
 		double steering_angle = joy_theta - robot_theta;
@@ -174,19 +174,19 @@ public class TheBestSwerve {
 		}
 		steering_angle = steering_angle % (2.0 * Math.PI);
 
-		telemetry.addLine("Chang in steering (from robot heading): " + steering_angle);
+//		telemetry.addLine("Chang in steering (from robot heading): " + steering_angle);
 
       // Normalize steering to 0 to 1 range
 		steering_angle /= Math.PI;
 
-		telemetry.addLine("Normalized steering: " + steering_angle);
+//		telemetry.addLine("Normalized steering: " + steering_angle);
 
       //set steering angle to usable servo value
 		steering_angle = (steering_angle + .5) / 2 + .25;
 		if (joy_magnitude < 0.01)
 			steering_angle = 0.5;
 
-		telemetry.addLine("Servo steering: " + steering_angle);
+//		telemetry.addLine("Servo steering: " + steering_angle);
 
       /**
        * At this point, we have vector magnitudes and angles associated with both the 
@@ -230,9 +230,9 @@ public class TheBestSwerve {
 		drive_direction = get_drive_direction(steering_angle, drive_direction, schmitt_breakpoint_tolerance);
 
 		if (drive_direction) {
-			telemetry.addLine("POS");
+//			telemetry.addLine("POS");
 		} else {
-			telemetry.addLine("NEG");
+//			telemetry.addLine("NEG");
 		}
 
       // At this point we're assuming that we're moving forward. See if the schmitt direction
@@ -247,7 +247,7 @@ public class TheBestSwerve {
 
 			joy_magnitude *= -1.0;
 		}
-		telemetry.addLine("New theta: " + steering_angle);
+//		telemetry.addLine("New theta: " + steering_angle);
 
 
       // The computed vector exceeds the allowable drive speed, cap the speed where needed
@@ -302,26 +302,26 @@ public class TheBestSwerve {
 				if (theta_angle_difference <= (2.0 * Math.PI) - cone_threshold) {
             // Apply some left steering to go back to where we should be
 					applied_turn_radius = corrected_turn_radius;
-					telemetry.addLine("DETECTED: TURN DRIFTED RIGHT .. " + applied_turn_radius);
+//					telemetry.addLine("DETECTED: TURN DRIFTED RIGHT .. " + applied_turn_radius);
 				}
 				else {
-					telemetry.addLine("DETECTED: TURN AMT GOOD");
+//					telemetry.addLine("DETECTED: TURN AMT GOOD");
 				}
 			}
 			else {
 				if (theta_angle_difference >= cone_threshold) {
             // Apply some right steering to go back to where we should be
 					applied_turn_radius = -1.0 * corrected_turn_radius;
-					telemetry.addLine("DETECTED: TURN DRIFTED LEFT .. " + applied_turn_radius);
+//					telemetry.addLine("DETECTED: TURN DRIFTED LEFT .. " + applied_turn_radius);
 				}
 				else {
-					telemetry.addLine("DETECTED: TURN AMT GOOD");
+//					telemetry.addLine("DETECTED: TURN AMT GOOD");
 				}
 			}
 
-			telemetry.addLine("Rolled over theta: " + rolled_over_robot_theta);
-			telemetry.addLine("Intended robot theta: " + intended_robot_theta);
-			telemetry.addLine("ANGLE DIFF: " + theta_angle_difference);
+//			telemetry.addLine("Rolled over theta: " + rolled_over_robot_theta);
+//			telemetry.addLine("Intended robot theta: " + intended_robot_theta);
+//			telemetry.addLine("ANGLE DIFF: " + theta_angle_difference);
 		}
 		else {
 			activate_intended_robot_theta = false;
@@ -365,14 +365,14 @@ public class TheBestSwerve {
 				}
 			}
 
-			telemetry.addLine("Going up: " + goingUp);
+//			telemetry.addLine("Going up: " + goingUp);
 
 			GeneralDirection general_direction = get_general_direction(steering_angle, goingUp);
 
         // Strafing up or down means the front two wheels are the driving wheels.
         // This works in reverse because of the simple direction change.
 			if (general_direction == GeneralDirection.UP) {
-				telemetry.addLine("FORWARD");
+//				telemetry.addLine("FORWARD");
 				steer_wheels(
 					steering_angle + right_joystick_steering_amt + applied_turn_radius,
 					steering_angle + right_joystick_steering_amt + applied_turn_radius,
@@ -381,7 +381,7 @@ public class TheBestSwerve {
 				);
 			}
 			else if (general_direction == GeneralDirection.DOWN) {
-				telemetry.addLine("REVERSE");
+//				telemetry.addLine("REVERSE");
 				steer_wheels(
 					steering_angle + right_joystick_steering_amt,
 					steering_angle + right_joystick_steering_amt,
@@ -391,7 +391,7 @@ public class TheBestSwerve {
 			}
         // Strafing left means the left front and back wheels are now the driving wheels
 			else if (general_direction == GeneralDirection.LEFT) {
-				telemetry.addLine("LEFT");
+//				telemetry.addLine("LEFT");
 				steer_wheels(
               steering_angle + right_joystick_steering_amt + applied_turn_radius, // Front left
               steering_angle - right_joystick_steering_amt, // Front right
@@ -401,7 +401,7 @@ public class TheBestSwerve {
 			}
         // Strafing right means the right front and back wheels are now the driving wheels
 			else {
-				telemetry.addLine("RIGHT");
+//				telemetry.addLine("RIGHT");
 				steer_wheels(
               steering_angle - right_joystick_steering_amt, // Front left
               steering_angle + right_joystick_steering_amt + applied_turn_radius, // Front right
