@@ -42,7 +42,11 @@ public class AutoBucket extends LinearOpMode {
     //topBucket();
 
     //Move robot to pick up second block
-    moveRobot(0, .1, 0.0);
+    //moveRobot(0, .1, 0.0);
+    amazingSwerve.swerveTheThing(0,-0.25,0);
+    sleepWithAmazingSwerve(250);
+    amazingSwerve.swerveTheThing(0,0,-0.1);
+    sleepWithAmazingSwerve(250);
     sleep(10000);
   }
 
@@ -101,6 +105,13 @@ public class AutoBucket extends LinearOpMode {
     odo.resetHeading(Rotation2d.fromRadians(1.88));
   }
 
+  public void drive(double x, double y, double heading) {
+    double heading2 = Math.atan2(x, y);
+    if(heading2<0)
+      heading2 += 360;
+    driveBase.set_wheels(heading2, heading2, heading2, heading2, odo.getHeading().getRadians());
+  }
+
   public void moveRobot(double change_x, double change_y, double steer_amt) {
     double current_x = odo.getPosX();
     double current_y = odo.getPosY();
@@ -118,7 +129,7 @@ public class AutoBucket extends LinearOpMode {
       if (change_x < -accuracy && change_x < -limit) change_x = -limit;
       if (change_y > accuracy && change_y > limit) change_y = limit;
       if (change_y < -accuracy && change_y < -limit) change_y = -limit;
-      telemetry.addLine(""+change_y);
+      telemetry.addLine("" + change_y);
 
       limit = .45; // not sure if it should be same as above
       if (steer_amt > accuracy && steer_amt > limit) steer_amt = limit;
@@ -129,11 +140,11 @@ public class AutoBucket extends LinearOpMode {
       double min = 0.35;
       if (change_x > accuracy && change_x < min) change_x = min;
       else if (change_x > -min && change_x < -accuracy) change_x = -min;
-      else if(change_x > -accuracy && change_x < accuracy) change_x = 0;
+      else if (change_x > -accuracy && change_x < accuracy) change_x = 0;
       if (change_y > accuracy && change_y < min) change_y = min;
       else if (change_y > -min && change_y < -accuracy) change_y = -min;
-      else if(change_y > -accuracy && change_y < accuracy) change_y = 0;
-      telemetry.addLine(""+change_y);
+      else if (change_y > -accuracy && change_y < accuracy) change_y = 0;
+      telemetry.addLine("" + change_y);
 
       min = 0.15; //idk if it should be the same as the ones above
       if (steer_amt < min && steer_amt > accuracy) steer_amt = min;
