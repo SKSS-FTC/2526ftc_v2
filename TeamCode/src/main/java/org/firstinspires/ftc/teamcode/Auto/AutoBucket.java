@@ -4,7 +4,6 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.EncoderDirection.FORWARD;
-import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.EncoderDirection.REVERSED;
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -17,7 +16,7 @@ import org.firstinspires.ftc.teamcode.Utils;
 import org.firstinspires.ftc.teamcode.Swerve.TheBestSwerve;
 
 
-@Autonomous(name = "Auto Top Bucket")
+@Autonomous(name = "Auto Top Bucket",preselectTeleOp = "Blue Bot Teleop")
 public class AutoBucket extends LinearOpMode {
   private AutoSwerve driveBase;
   private GoBildaPinpointDriver odo;
@@ -26,24 +25,28 @@ public class AutoBucket extends LinearOpMode {
 
   @Override
   public void runOpMode() throws InterruptedException {
+    telemetry.addLine("starting program");
     initOdo();
     driveBase = new AutoSwerve(this, odo);
     mek = new Mekanism(this);
     amazingSwerve = new TheBestSwerve(this, odo, driveBase);
 
+    telemetry.addLine("waiting for start");
     waitForStart();
     mek.arm.homeArm();
     mek.grabber.initWrist();
     mek.grabber.setWrist(-1.0);
     mek.grabber.setGrabber(0, 0);
     mek.update();
+    telemetry.addLine("finished inits");
 
     // raise arm to top bucket
     //topBucket();
 
     //Move robot to pick up second block
-    moveRobot(.37, .12, 0.0);
-    //sleepWithAmazingSwerve(500);
+    moveRobot(.12, .12, 0.0);
+    telemetry.addLine("going to move robot");
+    //moveRobot(0.0,0.0,.2);
     sleep(10000);
   }
 
@@ -97,21 +100,24 @@ public class AutoBucket extends LinearOpMode {
     odo.setOffsets(110, 30);
     sleep(100);
     odo.setEncoderResolution(goBILDA_4_BAR_POD);
-    odo.setEncoderDirections(REVERSED, FORWARD);
+    odo.setEncoderDirections(FORWARD, FORWARD);
     odo.resetHeading(Rotation2d.fromRadians(1.88));
   }
 
   public void moveRobot(double change_x, double change_y, double steer_amt) {
-    //double odo_multiplier = 5;
     double current_x = odo.getPosX();
     double current_y = odo.getPosY();
+    double current_h = odo.getHeading().getRadians();
     double wanted_x = current_x + change_x;
     double wanted_y = current_y + change_y;
+    double wanted_h = current_h - steer_amt;
 
-    while (!(change_x < 0.05 && change_x > -0.05)   ||   !(change_y < 0.05 && change_y > -0.05)) {
+    telemetry.addLine("entering moveRobot loop");
+    while ((!(change_x < 0.05 && change_x > -0.05)   ||   !(change_y < 0.05 && change_y > -0.05)) && opModeIsActive()) {
 
-      //reduce input of motor speed
-      double limit = 0.45;
+      //reduce joystick input for reduction of motor speed
+      telemetry.addLine("checking limit");
+      double limit = .50;
       if(change_x > limit)
         change_x = limit;
       if(change_x < -limit)
@@ -120,8 +126,36 @@ public class AutoBucket extends LinearOpMode {
         change_y = limit;
       if(change_y < -limit)
         change_y = -limit;
+      if(steer_amt > limit)
+        steer_amt = limit;
+      if(steer_amt < -limit)
+        steer_amt = -limit;
+
+      //increase joystick input so that motors actually move
+      telemetry.addLine("checking min");
+      double min = 0.30;
+      if(change_x < min && change_x > 0.05)
+        change_x = min;
+      else if(change_x > -min && change_x < 0.05)
+        change_x = -min;
+      else
+        change_x = 0;
+      if(change_y < min && change_y > 0.05)
+        change_y = min;
+      else if(change_y > -min && change_y < 0.05)
+        change_y = -min;
+      else
+        change_y = 0;
+      min = 0.15; //idk if it should be the same as the ones above
+      if(steer_amt < min && steer_amt > 0.05)
+        steer_amt = min;
+      if(steer_amt > -min && steer_amt < 0.05)
+        steer_amt = -min;
+      else
+        steer_amt = 0;
 
       //actually move robot
+      telemetry.addLine("going to TheBestSwerve.java");
       amazingSwerve.swerveTheThing(change_x, change_y, 0.0);
 
       //update variables "current" and "change"
@@ -129,13 +163,12 @@ public class AutoBucket extends LinearOpMode {
       current_y = odo.getPosY();
       change_x = wanted_x - current_x;
       change_y = wanted_y - current_y;
-      change_x *= -1;
       change_y *= -1;
 
       //print
       outputPosition();
       telemetry.addLine("change x: " + change_x);
-      telemetry.addLine("change y: " + -change_y);
+      telemetry.addLine("change y: " + change_y);
       telemetry.update();
       odo.update();
     }
