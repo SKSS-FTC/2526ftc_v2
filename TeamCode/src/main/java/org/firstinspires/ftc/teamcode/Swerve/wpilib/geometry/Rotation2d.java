@@ -6,6 +6,7 @@ package org.firstinspires.ftc.teamcode.Swerve.wpilib.geometry;
 import java.util.Objects;
 import org.firstinspires.ftc.teamcode.Swerve.wpilib.MathUtil;
 import org.firstinspires.ftc.teamcode.Swerve.wpilib.interpolation.Interpolatable;
+import org.firstinspires.ftc.teamcode.Swerve.wpilib.util.Units;
 
 /**
  * A rotation in a 2D coordinate frame represented by a point on the unit circle (cosine and sine).
