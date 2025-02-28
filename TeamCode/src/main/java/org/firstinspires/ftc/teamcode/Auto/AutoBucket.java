@@ -10,6 +10,7 @@ import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.GoBildaOd
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Mekanism.Mekanism;
 import org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.Swerve.wpilib.geometry.Rotation2d;
@@ -25,12 +26,12 @@ public class AutoBucket extends LinearOpMode {
   TheBestSwerve amazingSwerve;
 
   private void stop_movement() {
-    amazingSwerve.swerveTheThing(0.0,0.0,0.0);
-    sleepWithAmazingSwerve(1000);
+    amazingSwerve.swerveTheThing(0.0, 0.0, 0.0);
+    sleepWithAmazingSwerve(100);
   }
 
   private void move_robot(double left_x, double left_y, double right_x, int sleep_ms) {
-    amazingSwerve.swerveTheThing(left_x,left_y,right_x);
+    amazingSwerve.swerveTheThing(left_x, left_y, right_x);
     sleepWithAmazingSwerve(sleep_ms);
     stop_movement();
   }
@@ -50,39 +51,78 @@ public class AutoBucket extends LinearOpMode {
     mek.update();
 
     // raise arm to top bucket
-    //topBucket();
+    topBucket();
+    sleep(100);
 
-    //Move robot to pick up second block
-    //moveRobot(0, .1, 0.0);
+    telemetry.addLine("out");
+    move_robot(0.55, 0.0, 0.0, 1700);
 
-    // Put block in top bucket
+    telemetry.addLine("Rotate to pick up");
+    move_robot(0.0, 0.0, -.5454, 1300);
+    mek.arm.setSlide(1500);
+    mek.grabber.setGrabber(-1,-1);
+    sleepWithMekUpdate(750);
+    telemetry.addLine("pivot down");
+    mek.arm.setPivot(86);
+    sleepWithMekUpdate(1850);
+    move_robot(0.0,0.0,0.1,100);
+//    sleepWithMekUpdate(100);
+//    mek.arm.setSlide(1450);
+    sleepWithMekUpdate(100);
+    telemetry.addLine("pivot up");
+    mek.arm.setPivot(0);
+    sleepWithMekUpdate(2000);
+    telemetry.addLine("mek angle: "+mek.arm.pivot.getCurrentPosition());
+    sleep(1500);
 
-    // Move left away from wall
-    sleep(2000);
+    telemetry.addLine("Rotate to drop");
+    move_robot(0.0, 0.0, 0.56, 2100);
+    sleep(50);
+    telemetry.addLine("top bucket");
+    mek.arm.setSlide(4100);
+    mek.arm.setPivot(0);
+    sleepWithMekUpdate(2250);
+    mek.arm.setPivot(13);
+    sleepWithMekUpdate(750);
+    mek.grabber.setGrabber(0.75, 0.5);
+    sleepWithMekUpdate(1250);
+    mek.grabber.setGrabber(0, 0);
+    mek.update();
+    mek.arm.setPivot(0);
+    sleepWithMekUpdate(500);
+    mek.arm.setSlide(0);
+    sleepWithMekUpdate(1750);
 
-    move_robot(0.5, 0.0, 0.0, 1500);
-    move_robot(0.0, 0.0, -.5, 1350);
+    //about 3 seconds remaining here ----------------------------------------- //
+
+    telemetry.addLine("Rotate back out to up");
+    move_robot(0.0, 0.0, -.55, 1700);
+    telemetry.addLine("back");
+    move_robot(0.0, .8, 0.0, 1500);
+//    telemetry.addLine("into corner");
+//    move_robot(0.8, 0.0, 0.0, 3000);
 
     odo.update();
     telemetry.update();
 
 //    amazingSwerve.swerveTheThing(0,0,-0.1);
 //    sleepWithAmazingSwerve(250);
-    while (opModeIsActive());
+    while (opModeIsActive()) ;
   }// end runOpMode
 
   public void topBucket() {
+    telemetry.addLine("slide out");
     mek.arm.setSlide(4100);
-    sleepWithMekUpdate(2500);
-    mek.arm.setPivot(15);
-    sleepWithMekUpdate(1500);
-    mek.grabber.setGrabber(1, .75);
-    sleepWithMekUpdate(1000);
+    sleepWithMekUpdate(2250);
+    mek.arm.setPivot(14);
+    sleepWithMekUpdate(750);
+    mek.grabber.setGrabber(.75, .5);
+    sleepWithMekUpdate(1250);
     mek.grabber.setGrabber(0, 0);
     mek.arm.setPivot(0);
-    sleepWithMekUpdate(500);
+    sleepWithMekUpdate(750);
     mek.arm.setSlide(0);
-    sleepWithMekUpdate(2500);
+    sleepWithMekUpdate(1500);
   }
 
   public void sleepWithMekUpdate(int timeInMS) {
@@ -90,6 +130,8 @@ public class AutoBucket extends LinearOpMode {
     double endTime = Utils.getTimeMiliSeconds() + timeInMS;
     while (currentTime < endTime && opModeIsActive()) {
       mek.update();
+      mek.arm.update();
+      mek.grabber.update();
       currentTime = Utils.getTimeMiliSeconds();
       try {
         telemetry.addData("Slide pos: ", mek.arm.slide.getCurrentPosition());
@@ -128,7 +170,7 @@ public class AutoBucket extends LinearOpMode {
 
   public void drive(double x, double y, double heading) {
     double heading2 = Math.atan2(x, y);
-    if(heading2<0)
+    if (heading2 < 0)
       heading2 += 360;
     driveBase.set_wheels(heading2, heading2, heading2, heading2, odo.getHeading().getRadians());
   }

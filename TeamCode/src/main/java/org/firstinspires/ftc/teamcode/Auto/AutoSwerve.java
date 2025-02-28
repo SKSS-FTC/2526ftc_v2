@@ -6,6 +6,7 @@ package org.firstinspires.ftc.teamcode.Auto;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver;
@@ -16,7 +17,7 @@ public class AutoSwerve {
 
   public AnalogInput servoInputFL, servoInputFR, servoInputBR, servoInputBL;
   public Servo servoFL, servoFR, servoBR, servoBL;
-  public DcMotor motorFL, motorFR, motorBR, motorBL;
+  public DcMotorEx motorFL, motorFR, motorBR, motorBL;
   LinearOpMode opMode;
   static double countsPerRevolution = 537.7;
   static double gearRatio = 1.1;
@@ -46,28 +47,28 @@ public class AutoSwerve {
     servoInputFL = opMode.hardwareMap.analogInput.get("FLEncoder");
     servoFL = opMode.hardwareMap.servo.get("FLServo");
     servoFL.setDirection(Servo.Direction.REVERSE);
-    motorFL = opMode.hardwareMap.dcMotor.get("FLMotor");
+    motorFL = (DcMotorEx) opMode.hardwareMap.dcMotor.get("FLMotor");
     motorFL.setDirection(DcMotorSimple.Direction.REVERSE);
 
     //FR
     servoInputFR = opMode.hardwareMap.analogInput.get("FREncoder");
     servoFR = opMode.hardwareMap.servo.get("FRServo");
     servoFR.setDirection(Servo.Direction.REVERSE);
-    motorFR = opMode.hardwareMap.dcMotor.get("FRMotor");
+    motorFR = (DcMotorEx) opMode.hardwareMap.dcMotor.get("FRMotor");
     motorFR.setDirection(DcMotorSimple.Direction.REVERSE);
 
     //BR
     servoInputBR = opMode.hardwareMap.analogInput.get("BREncoder");
     servoBR = opMode.hardwareMap.servo.get("BRServo");
     servoBR.setDirection(Servo.Direction.REVERSE);
-    motorBR = opMode.hardwareMap.dcMotor.get("BRMotor");
+    motorBR = (DcMotorEx) opMode.hardwareMap.dcMotor.get("BRMotor");
     motorBR.setDirection(DcMotorSimple.Direction.FORWARD);
 
     //BL
     servoInputBL = opMode.hardwareMap.analogInput.get("BLEncoder");
     servoBL = opMode.hardwareMap.servo.get("BLServo");
     servoBL.setDirection(Servo.Direction.REVERSE);
-    motorBL = opMode.hardwareMap.dcMotor.get("BLMotor");
+    motorBL = (DcMotorEx) opMode.hardwareMap.dcMotor.get("BLMotor");
     motorBL.setDirection(DcMotorSimple.Direction.FORWARD);
 
     double currentTime = Utils.getTimeSeconds();
