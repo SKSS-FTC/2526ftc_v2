@@ -83,7 +83,7 @@ public class WheelDriver implements NKNComponent {
 
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
-        wheelHandler.relativeVectorToMotion(forwardStick.getValue(gamepad) * moveSpeedMultiplier, strafeStick.getValue(gamepad) * moveSpeedMultiplier, turnStick.getValue(gamepad) * moveSpeedMultiplier);
+        wheelHandler.relativeVectorToMotion(strafeStick.getValue(gamepad) * moveSpeedMultiplier, forwardStick.getValue(gamepad) * moveSpeedMultiplier, turnStick.getValue(gamepad) * moveSpeedMultiplier);
 //        double y = 0; double x = 0;
 //        if (GamePadHandler.GamepadButtons.DPAD_UP.detect(gamepad)) {
 //            y = 0.4;

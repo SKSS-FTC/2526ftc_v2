@@ -29,6 +29,8 @@ public class WheelHandler implements NKNComponent {
                 return true;
             }
         }
+
+
         return false;
     }
 
@@ -86,15 +88,18 @@ public class WheelHandler implements NKNComponent {
     }
 
 
-    // Key function of the class
-    // Takes in y, x, and turning components of the vector, and converts them to power instructions for omni wheels
-    public void relativeVectorToMotion(double y, double x, double turning) {
-        relativeVectorToMotion(y, x, turning, 0);
-    }
-
-    public void relativeVectorToMotion(double y, double x, double turning, int priority) {
+    /**
+     * Takes in a combination of x, y, and turning powers and moves the wheels accordingly to reach that desired motion.
+     * The instructions will only go through if the given priority value is greater than the set priority for the wheels.
+     * This allows you to have one driver control the wheels while others have their instructions ignored.
+     * The default priority is 0.
+     * @param x Amount of force to move rightwards
+     * @param y Amount of force to move forwards
+     * @param turning Amount of force to turn clockwise
+     * @param priority Given priority value to compare to the set priority
+     */
+    public void relativeVectorToMotion(double x, double y, double turning, int priority) {
         if (priority >= this.priority) {
-            // some intern should change all instances of rVTM to use x, y, turning instead of y, x, turning
             turning *= 0.7;
             motorBR.setPower(y + x - turning);
             motorBL.setPower(y - x + turning);
@@ -103,35 +108,61 @@ public class WheelHandler implements NKNComponent {
         }
     }
 
+    /**
+     * Takes in a combination of x, y, and turning powers and moves the wheels accordingly to reach that desired motion.
+     * Uses a default priority of 0, so any call of set priority will overpower this function.
+     * @param x Amount of force to move rightwards
+     * @param y Amount of force to move forwards
+     * @param turning Amount of force to turn clockwise
+     */
+    public void relativeVectorToMotion(double x, double y, double turning) {
+        relativeVectorToMotion(x, y, turning, 0);
+    }
+
+    /**
+     * Takes in a combination of x, y, and turning powers and moves the wheels accordingly to reach that desired motion.
+     * This function differs from the relativeVectorToMotion function by having forward and rightwards be relative to the given yaw instead of to the robot.
+     * Uses a default priority of 0, so any call of set priority will overpower this function.
+     * @param x Amount of force to move rightwards (relative to yaw)
+     * @param y Amount of force to move rightwards (relative to yaw)
+     * @param turning Amount of force to turn clockwise
+     * @param yaw The yaw to account for. 0 will be relative to the robot
+     */
     public void absoluteVectorToMotion(double x, double y, double turning, double yaw) {
         absoluteVectorToMotion(x, y, turning, yaw, 0);
     }
 
+    /**
+     * Takes in a combination of x, y, and turning powers and moves the wheels accordingly to reach that desired motion.
+     * This function differs from the relativeVectorToMotion function by having forward and rightwards be relative to the given yaw instead of to the robot.
+     * The instructions will only go through if the given priority value is greater than the set priority for the wheels.
+     * This allows you to have one driver control the wheels while others have their instructions ignored.
+     * The default priority is 0.
+     * @param x Amount of force to move rightwards (relative to yaw)
+     * @param y Amount of force to move rightwards (relative to yaw)
+     * @param turning Amount of force to turn clockwise
+     * @param priority Given priority value to compare to the set priority
+     */
     public void absoluteVectorToMotion(double x, double y, double turning, double yaw, int priority) {
         double angle = (yaw * Math.PI) / 180;
         double x2 = (Math.cos(angle) * x) - (Math.sin(angle) * y);
         double y2 = (Math.sin(angle) * x) + (Math.cos(angle) * y);
 
-        relativeVectorToMotion(y2, x2, turning, priority);
+        relativeVectorToMotion(x2, y2, turning, priority);
     }
 
-    @Deprecated //this code does some strange behavior. Keeping it in in case it's still wanted but it's not used anywhere.
-    public void collyMotion(double x, double y, double turning, double yaw, Telemetry telemetry) {
-        double angle = (yaw * Math.PI) / 180;
-        double x2 = (Math.cos(angle) * x);
-        double y2 = (Math.sin(angle) * x);
-
-        relativeVectorToMotion(y2 + y, x2, turning);
-    }
-    // Unless usage is needed this fnct won't be integrated into the priority system.
-
-
-    // The wheel handler has a priority system. Requests to move the wheels require you to send a priority level with them (default 0) and if
-    // it's equal to or higher than the set priority it can move. (Otherwise it can't)
+    /**
+     * Sets the priority to compare when using one of the functions that use priority.
+     * @param priority Given priority value to set priority to
+     */
     public void setPriority(int priority) {
         this.priority = priority;
     }
 
+    /**
+     * Returns the set priority that is compared to when using a vector to motion function
+     * @return The set priority
+     */
     public int getPriority() {
         return priority;
     }
