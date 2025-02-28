@@ -24,6 +24,17 @@ public class AutoBucket extends LinearOpMode {
   private Mekanism mek;
   TheBestSwerve amazingSwerve;
 
+  private void stop_movement() {
+    amazingSwerve.swerveTheThing(0.0,0.0,0.0);
+    sleepWithAmazingSwerve(1000);
+  }
+
+  private void move_robot(double left_x, double left_y, double right_x, int sleep_ms) {
+    amazingSwerve.swerveTheThing(left_x,left_y,right_x);
+    sleepWithAmazingSwerve(sleep_ms);
+    stop_movement();
+  }
+
   @Override
   public void runOpMode() throws InterruptedException {
     initOdo();
@@ -43,12 +54,22 @@ public class AutoBucket extends LinearOpMode {
 
     //Move robot to pick up second block
     //moveRobot(0, .1, 0.0);
-    amazingSwerve.swerveTheThing(0,-0.25,0);
-    sleepWithAmazingSwerve(250);
-    amazingSwerve.swerveTheThing(0,0,-0.1);
-    sleepWithAmazingSwerve(250);
-    sleep(10000);
-  }
+
+    // Put block in top bucket
+
+    // Move left away from wall
+    sleep(2000);
+
+    move_robot(0.5, 0.0, 0.0, 1500);
+    move_robot(0.0, 0.0, -.5, 1350);
+
+    odo.update();
+    telemetry.update();
+
+//    amazingSwerve.swerveTheThing(0,0,-0.1);
+//    sleepWithAmazingSwerve(250);
+    while (opModeIsActive());
+  }// end runOpMode
 
   public void topBucket() {
     mek.arm.setSlide(4100);
@@ -98,7 +119,7 @@ public class AutoBucket extends LinearOpMode {
     odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
     odo.resetPosAndIMU();
     sleep(250);
-    odo.setOffsets(110, 30);
+    odo.setOffsets(100, 90);
     sleep(100);
     odo.setEncoderResolution(goBILDA_4_BAR_POD);
     odo.setEncoderDirections(FORWARD, REVERSED);

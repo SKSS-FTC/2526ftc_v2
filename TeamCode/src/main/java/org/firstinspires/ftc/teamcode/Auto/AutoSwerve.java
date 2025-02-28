@@ -163,9 +163,9 @@ public class AutoSwerve {
       motorBR.setPower(pwr);
     else
       motorBR.setPower(pwr);
-    motorBL.setPower(pwr);
-    motorFL.setPower(pwr);
-    motorFR.setPower(pwr);
+      motorBL.setPower(pwr);
+      motorFL.setPower(pwr);
+      motorFR.setPower(pwr);
   }
 
   public double set_Servo_Angle(AnalogInput analogInput, Servo servo, double desired_normalized_angle) {
