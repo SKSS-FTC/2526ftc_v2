@@ -9,8 +9,8 @@ import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.GoBildaOd
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Mekanism.Mekanism;
 import org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.Swerve.wpilib.geometry.Rotation2d;
@@ -24,6 +24,8 @@ public class AutoBucket extends LinearOpMode {
   private GoBildaPinpointDriver odo;
   private Mekanism mek;
   TheBestSwerve amazingSwerve;
+  private double perfect_voltage;
+  private double power_volt;
 
   private void stop_movement() {
     amazingSwerve.swerveTheThing(0.0, 0.0, 0.0);
@@ -31,6 +33,9 @@ public class AutoBucket extends LinearOpMode {
   }
 
   private void move_robot(double left_x, double left_y, double right_x, int sleep_ms) {
+    left_x *= power_volt;
+    left_y *= power_volt;
+    right_x *= power_volt;
     amazingSwerve.swerveTheThing(left_x, left_y, right_x);
     sleepWithAmazingSwerve(sleep_ms);
     stop_movement();
@@ -38,6 +43,11 @@ public class AutoBucket extends LinearOpMode {
 
   @Override
   public void runOpMode() throws InterruptedException {
+    // two adjustable values are
+    VoltageSensor voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+    double initialVoltage = voltageSensor.getVoltage();
+    perfect_voltage = 13.5;
+    power_volt = perfect_voltage / initialVoltage;
     initOdo();
     driveBase = new AutoSwerve(this, odo);
     mek = new Mekanism(this);
@@ -46,37 +56,106 @@ public class AutoBucket extends LinearOpMode {
     waitForStart();
     mek.arm.homeArm();
     mek.grabber.initWrist();
-    mek.grabber.setWrist(-1.0);
+    mek.grabber.setWrist(1.0);
     mek.grabber.setGrabber(0, 0);
     mek.update();
 
     // raise arm to top bucket
     topBucket();
     sleep(100);
+    //secondTopBucket();
+    telemetry.update();
+    telemetry.addLine("top bucket done");
+    move_robot(0.0, 0.0, -0.7, 800);
+    sleep(2000);
+    //move_robot(0.0, 0.8, -0.25, 4000);
+    //move_robot(0.0, 0.0, -0.55, 900);
 
+    // to make the main method simpler and have two different options of code, one where it runs both top buckets and the other where it does one and parks  ---------------------------------------- //
+
+//    telemetry.addLine("out");
+//    move_robot(0.55, 0.0, 0.0, 1700);
+//
+//    telemetry.addLine("Rotate to pick up");
+//    move_robot(0.0, 0.0, -.545, 1300);
+//    //sleep(20000);
+//
+//    mek.arm.setSlide(1500);
+//    mek.grabber.setGrabber(-1,-1);
+//    sleepWithMekUpdate(750);
+//    telemetry.addLine("pivot down");
+//    mek.arm.setPivot(86);
+//    sleepWithMekUpdate(1850);
+//    move_robot(0.0,0.0,0.1,100);
+////    sleepWithMekUpdate(100);
+////    mek.arm.setSlide(1450);
+//    sleepWithMekUpdate(100);
+//    telemetry.addLine("pivot up");
+//    mek.arm.setPivot(0);
+//    sleepWithMekUpdate(2000);
+//    telemetry.addLine("mek angle: "+mek.arm.pivot.getCurrentPosition());
+//    sleep(1500);
+//
+//    telemetry.addLine("Rotate to drop");
+//    move_robot(0.0, 0.0, 0.55, 2100);
+//    sleep(50);
+//    telemetry.addLine("top bucket");
+//    mek.arm.setSlide(4100);
+//    mek.arm.setPivot(0);
+//    sleepWithMekUpdate(2250);
+//    mek.arm.setPivot(13);
+//    sleepWithMekUpdate(750);
+//    mek.grabber.setGrabber(0.75, 0.5);
+//    sleepWithMekUpdate(1250);
+//    mek.grabber.setGrabber(0, 0);
+//    mek.update();
+//    mek.arm.setPivot(0);
+//    sleepWithMekUpdate(500);
+//    mek.arm.setSlide(0);
+//    sleepWithMekUpdate(1750);
+//
+//    //about 3-4 seconds remaining here ----------------------------------------- //
+//
+//    telemetry.addLine("Rotate back out to up");
+//    move_robot(0.0, 0.0, -.55, 1700);
+//    telemetry.addLine("back");
+//    move_robot(0.0, .8, 0.0, 1500);
+////    telemetry.addLine("into corner");
+////    move_robot(0.8, 0.0, 0.0, 3000);
+//
+//    odo.update();
+//    telemetry.update();
+//
+////    amazingSwerve.swerveTheThing(0,0,-0.1);
+////    sleepWithAmazingSwerve(250);
+    while (opModeIsActive()) ;
+  }// end runOpMode
+
+  public void secondTopBucket() {
     telemetry.addLine("out");
     move_robot(0.55, 0.0, 0.0, 1700);
 
     telemetry.addLine("Rotate to pick up");
-    move_robot(0.0, 0.0, -.5454, 1300);
-    mek.arm.setSlide(1500);
-    mek.grabber.setGrabber(-1,-1);
+    move_robot(0.0, 0.0, -.545, 1300);
+    //sleep(20000);
+
+    mek.arm.setSlide(1350);
+    mek.grabber.setGrabber(-1, -1);
     sleepWithMekUpdate(750);
     telemetry.addLine("pivot down");
     mek.arm.setPivot(86);
     sleepWithMekUpdate(1850);
-    move_robot(0.0,0.0,0.1,100);
-//    sleepWithMekUpdate(100);
-//    mek.arm.setSlide(1450);
+    mek.arm.setSlide(1450);
     sleepWithMekUpdate(100);
+
     telemetry.addLine("pivot up");
     mek.arm.setPivot(0);
     sleepWithMekUpdate(2000);
-    telemetry.addLine("mek angle: "+mek.arm.pivot.getCurrentPosition());
+    telemetry.addLine("mek angle: " + mek.arm.pivot.getCurrentPosition());
     sleep(1500);
 
     telemetry.addLine("Rotate to drop");
-    move_robot(0.0, 0.0, 0.56, 2100);
+    move_robot(0.0, 0.0, 0.55, 2100);
     sleep(50);
     telemetry.addLine("top bucket");
     mek.arm.setSlide(4100);
@@ -96,25 +175,18 @@ public class AutoBucket extends LinearOpMode {
     //about 3 seconds remaining here ----------------------------------------- //
 
     telemetry.addLine("Rotate back out to up");
-    move_robot(0.0, 0.0, -.55, 1700);
+    move_robot(0.0, 0.0, -.54, 1700);
     telemetry.addLine("back");
-    move_robot(0.0, .8, 0.0, 1500);
+    move_robot(-0.2, .8, 0.0, 1500);
 //    telemetry.addLine("into corner");
 //    move_robot(0.8, 0.0, 0.0, 3000);
-
-    odo.update();
-    telemetry.update();
-
-//    amazingSwerve.swerveTheThing(0,0,-0.1);
-//    sleepWithAmazingSwerve(250);
-    while (opModeIsActive()) ;
-  }// end runOpMode
+  }
 
   public void topBucket() {
     telemetry.addLine("slide out");
     mek.arm.setSlide(4100);
     sleepWithMekUpdate(2250);
-    mek.arm.setPivot(14);
+    mek.arm.setPivot(15);
     sleepWithMekUpdate(750);
     mek.grabber.setGrabber(.75, .5);
     sleepWithMekUpdate(1250);

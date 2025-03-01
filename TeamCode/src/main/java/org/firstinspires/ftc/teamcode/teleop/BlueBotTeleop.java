@@ -70,6 +70,12 @@ public class BlueBotTeleop extends LinearOpMode {
 
       amazingSwerve.swerveTheThing(left_joy_x, left_joy_y, right_joy_x);
 
+      //just in case auto get's screwed up
+      if(gamepad1.b && gamepad1.a){
+        amazingSwerve.odometry.resetHeading(new Rotation2d());
+        sleep(250);
+      }
+
       /*
         Everything before this is for Driving.
         Everything below is for Mekanism
