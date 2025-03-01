@@ -66,68 +66,17 @@ public class AutoBucket extends LinearOpMode {
     //secondTopBucket();
     telemetry.update();
     telemetry.addLine("top bucket done");
-    move_robot(0.0, 0.0, -0.7, 800);
+    move_robot(0.0, 0.0, 0.7, 900);
     sleep(2000);
-    //move_robot(0.0, 0.8, -0.25, 4000);
-    //move_robot(0.0, 0.0, -0.55, 900);
 
-    // to make the main method simpler and have two different options of code, one where it runs both top buckets and the other where it does one and parks  ---------------------------------------- //
+//    telemetry.addLine("into corner");
+//    move_robot(0.8, 0.0, 0.0, 3000);
 
-//    telemetry.addLine("out");
-//    move_robot(0.55, 0.0, 0.0, 1700);
-//
-//    telemetry.addLine("Rotate to pick up");
-//    move_robot(0.0, 0.0, -.545, 1300);
-//    //sleep(20000);
-//
-//    mek.arm.setSlide(1500);
-//    mek.grabber.setGrabber(-1,-1);
-//    sleepWithMekUpdate(750);
-//    telemetry.addLine("pivot down");
-//    mek.arm.setPivot(86);
-//    sleepWithMekUpdate(1850);
-//    move_robot(0.0,0.0,0.1,100);
-////    sleepWithMekUpdate(100);
-////    mek.arm.setSlide(1450);
-//    sleepWithMekUpdate(100);
-//    telemetry.addLine("pivot up");
-//    mek.arm.setPivot(0);
-//    sleepWithMekUpdate(2000);
-//    telemetry.addLine("mek angle: "+mek.arm.pivot.getCurrentPosition());
-//    sleep(1500);
-//
-//    telemetry.addLine("Rotate to drop");
-//    move_robot(0.0, 0.0, 0.55, 2100);
-//    sleep(50);
-//    telemetry.addLine("top bucket");
-//    mek.arm.setSlide(4100);
-//    mek.arm.setPivot(0);
-//    sleepWithMekUpdate(2250);
-//    mek.arm.setPivot(13);
-//    sleepWithMekUpdate(750);
-//    mek.grabber.setGrabber(0.75, 0.5);
-//    sleepWithMekUpdate(1250);
-//    mek.grabber.setGrabber(0, 0);
-//    mek.update();
-//    mek.arm.setPivot(0);
-//    sleepWithMekUpdate(500);
-//    mek.arm.setSlide(0);
-//    sleepWithMekUpdate(1750);
-//
-//    //about 3-4 seconds remaining here ----------------------------------------- //
-//
-//    telemetry.addLine("Rotate back out to up");
-//    move_robot(0.0, 0.0, -.55, 1700);
-//    telemetry.addLine("back");
-//    move_robot(0.0, .8, 0.0, 1500);
-////    telemetry.addLine("into corner");
-////    move_robot(0.8, 0.0, 0.0, 3000);
-//
-//    odo.update();
-//    telemetry.update();
-//
-////    amazingSwerve.swerveTheThing(0,0,-0.1);
-////    sleepWithAmazingSwerve(250);
+    odo.update();
+    telemetry.update();
+
+//    amazingSwerve.swerveTheThing(0,0,-0.1);
+//    sleepWithAmazingSwerve(250);
     while (opModeIsActive()) ;
   }// end runOpMode
 
@@ -394,8 +343,7 @@ public class AutoBucket extends LinearOpMode {
     drivebase.drive(new ChassisSpeeds(0, 0, 0), 0);
   }
   */
-  private double calculatePID(double error, double deltaTime, double kP, double kI, double kD,
-                              double integral, double previousError) {
+  private double calculatePID(double error, double deltaTime, double kP, double kI, double kD, double integral, double previousError) {
     double derivative = (error - previousError) / deltaTime;
     return kP * error + kI * integral + kD * derivative;
   }

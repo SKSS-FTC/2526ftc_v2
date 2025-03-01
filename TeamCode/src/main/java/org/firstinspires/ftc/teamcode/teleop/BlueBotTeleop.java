@@ -3,6 +3,8 @@
 
 package org.firstinspires.ftc.teamcode.teleop;
 
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.EncoderDirection.FORWARD;
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
 
@@ -71,7 +73,7 @@ public class BlueBotTeleop extends LinearOpMode {
       amazingSwerve.swerveTheThing(left_joy_x, left_joy_y, right_joy_x);
 
       //just in case auto get's screwed up
-      if(gamepad1.b && gamepad1.a){
+      if (gamepad1.b && gamepad1.a) {
         amazingSwerve.odometry.resetHeading(new Rotation2d());
         sleep(250);
       }
@@ -114,6 +116,12 @@ public class BlueBotTeleop extends LinearOpMode {
       // Grabber power
       double grabberSpeed = g2_rt - g2_lt;
       mek.grabber.setGrabber(grabberSpeed, grabberSpeed);
+      if (gamepad2.a && gamepad2.b) {
+        mek.arm.slide.setMode(STOP_AND_RESET_ENCODER);
+        mek.arm.slide2.setMode(STOP_AND_RESET_ENCODER);
+        mek.arm.slide.setMode(RUN_USING_ENCODER);
+        mek.arm.slide2.setMode(RUN_USING_ENCODER);
+      }
       mek.update();
       telemetry.addLine("Grabber speed: " + grabberSpeed);
       telemetry.addLine("intake 1 power: " + mek.grabber.intake1.getPosition());

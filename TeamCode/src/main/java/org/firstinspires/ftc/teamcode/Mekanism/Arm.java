@@ -116,6 +116,13 @@ public class Arm {
       slide.setPower(slidePower);
       slide2.setPower(slidePower);
     }
+
+    if(slide.getCurrentPosition() < -100) {
+      slide.setMode(STOP_AND_RESET_ENCODER);
+      slide2.setMode(STOP_AND_RESET_ENCODER);
+      slide.setMode(RUN_USING_ENCODER);
+      slide2.setMode(RUN_USING_ENCODER);
+    }
   }
 
 
@@ -307,6 +314,9 @@ public class Arm {
       telemetry.addLine("Slide under 0");
       power = 0;
     }
+
+    if (slide.getCurrentPosition() <= 0 && power <= 0)
+      power = -0.25;
     telemetry.addLine("Power after checks: " + power);
     slidePower = power;
   }
