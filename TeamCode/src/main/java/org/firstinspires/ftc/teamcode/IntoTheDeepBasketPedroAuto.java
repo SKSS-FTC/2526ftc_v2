@@ -23,9 +23,10 @@ import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Wrist;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 
+@Deprecated
 @Autonomous(name = "Basket Auto", group = ".Competition Modes", preselectTeleOp = "MainOp")
 @Config
-public class BasketPedroAuto extends OpMode {
+public class IntoTheDeepBasketPedroAuto extends OpMode {
     private static Path initialDropInBasket;
     private static Path grabSample1;
     private static Path grabSample2;
@@ -41,6 +42,7 @@ public class BasketPedroAuto extends OpMode {
     /**
      * This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method.
+     * @noinspection FieldHasSetterButNoGetter
      */
     private int pathState;
 

@@ -22,16 +22,16 @@ import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.ViperSlide;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 
+@Deprecated
 @Autonomous(name = "Chamber Auto", group = ".Competition Modes", preselectTeleOp = "MainOp")
 @Config
-public class ChamberPedroAuto extends OpMode {
+public class IntoTheDeepChamberPedroAuto extends OpMode {
     public double hpSpecimensPlaced = 0;
     private Follower follower;
     private MechanismManager mechanisms;
     private Timer pathTimer, actionTimer, opmodeTimer;
     private double actionState;
     private Telemetry visualization;
-    public static double[] testOffset = {1.5, 6};
     /**
      * This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method.
@@ -126,7 +126,7 @@ public class ChamberPedroAuto extends OpMode {
         initialGrabFromHumanPlayer = new Path(
                 // Line 8
                 new BezierCurve(
-                        new Point(17.599 + testOffset[1], 8.677, Point.CARTESIAN),
+                        new Point(17.599, 8.677, Point.CARTESIAN),
                         new Point(46.584, 28.615, Point.CARTESIAN),
                         new Point(11.178, 31.631, Point.CARTESIAN)
                 )
@@ -195,19 +195,19 @@ public class ChamberPedroAuto extends OpMode {
                 }
                 break;
             case 2:
-                double harsithAlignmentLengthSeconds = 0.1; // 0.1 seconds to give harsith time
+                double harshithAlignmentLengthSeconds = 0.1; // 0.1 seconds to give harshith time
                 //noinspection SpellCheckingInspection
                 double grabLengthSeconds = 0.35; // half a second to yoinky sploinky
 
                 if (!follower.isBusy() && actionState == 0) {
-                    // once the robot is in position to grab, wait a bit for harsith to align
+                    // once the robot is in position to grab, wait a bit for harshith to align
                     actionState = 1;
                     actionTimer.resetTimer();
                 }
 
                 if (actionState == 1) {
-                    // once we have waited a bit, grab from harsith
-                    if (actionTimer.getElapsedTimeSeconds() > harsithAlignmentLengthSeconds) {
+                    // once we have waited a bit, grab from harshith
+                    if (actionTimer.getElapsedTimeSeconds() > harshithAlignmentLengthSeconds) {
                         actionState = 2;
                         actionTimer.resetTimer();
                         grab();

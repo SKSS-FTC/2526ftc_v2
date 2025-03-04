@@ -1,6 +1,6 @@
 Code for TBD, the 2025-2026 FTC Season
 
-Quicklinks:
+Quick links:
 adb connect 192.168.43.1:5555
 https://192.168.43.1/dash
 https://github.com/24358-ragnarok/TBD-25-26/
