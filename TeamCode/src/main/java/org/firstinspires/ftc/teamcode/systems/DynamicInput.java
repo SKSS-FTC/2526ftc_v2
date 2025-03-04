@@ -296,6 +296,7 @@ public class DynamicInput {
             case RIGHT_STICK_Y:
                 return gamepad.right_stick_y;
             default:
+
                 throw new IllegalArgumentException("Unexpected axis: " + axis);
         }
     }

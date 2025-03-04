@@ -33,6 +33,8 @@ public class MainOp extends LinearOpMode {
     Drivetrain drivetrain;
     GoBildaPinpointDriver manualPinpoint;
     boolean CHASSIS_DISABLED = false;
+    double flip = Settings.Teleop.initial_flip;
+
     boolean prevGamepadTriangle;
     LimelightManager.LimelightPipeline pipeline = LimelightManager.LimelightPipeline.BLUE;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -48,8 +50,8 @@ public class MainOp extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Show profile selection menu for both controllers
-        AtomicReference<ControllerProfile> mainProfile = new AtomicReference<>(Settings.AGNEY_PROFILE);
-        AtomicReference<ControllerProfile> subProfile = new AtomicReference<>(Settings.DEFAULT_PROFILE);
+        AtomicReference<ControllerProfile> mainProfile = new AtomicReference<>(Settings.Profiles.Agney);
+        AtomicReference<ControllerProfile> subProfile = new AtomicReference<>(Settings.Profiles.Ben);
         boolean menuConfirmed = false;
         AtomicInteger mainSelection = new AtomicInteger();
         AtomicInteger subSelection = new AtomicInteger();
@@ -195,7 +197,7 @@ public class MainOp extends LinearOpMode {
         /*
          * Drives the motors based on the given power/rotation
          */
-        drivetrain.mecanumDrive(drivePower, strafePower, rotation);
+        drivetrain.mecanumDrive(drivePower, strafePower, rotation, flip);
     }
 
     public void gamepadAuxiliary() {
@@ -283,7 +285,7 @@ public class MainOp extends LinearOpMode {
             }
 
             if (contextualActions.justFlipMovement) {
-                Settings.Movement.flip_movement *= -1;
+                flip *= -1;
             }
 
         }
@@ -301,7 +303,7 @@ public class MainOp extends LinearOpMode {
     }
 
     public void checkAutomationConditions() {
-        if (Settings.Movement.easeTransfer) {
+        if (Settings.Teleop.automationEnabled) {
             // automatically transfer when everything is collapsed
             if (mechanisms.intake.horizontalSlide.currentPosition.getValue() <=
                     ViperSlide.HorizontalPosition.COLLAPSED.getValue() + 10

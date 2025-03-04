@@ -5,137 +5,133 @@ import com.acmerobotics.dashboard.config.Config;
 import java.lang.reflect.Field;
 
 /**
- * @noinspection CanBeFinal, unused
+ * @noinspection CanBeFinal, ClassWithoutConstructor
  */
 @Config
 public class Settings {
 
     // Movement settings
     @Config
-    public static class Movement {
-        /**
-         * Multiplier applied to strafe movements to compensate for mechanical
-         * differences
-         */
+    public static class Teleop {
+        // Multiplier applied to strafe movements to compensate for mechanical differences
         public static double strafe_power_coefficient = 1.2;
-        /** Default speed for autonomous movements */
-        public static double default_autonomous_speed = 0.6;
-        /** Flips movement to make movement easier while the robot is backwards **/
-        public static int flip_movement = 1;
-        /**
-         * Determines if the gecko wheels outtake a little when closing the claw to ease
-         * transfer
-         **/
-        public static boolean easeTransfer = false;
+
+        // Begin the robot controls flipped (-1) or regular (1)
+        public static double initial_flip = 1;
+
+        // Enable or disable automatic functions
+        public static boolean automationEnabled = true;
+
     }
 
-    public static final ControllerProfile AGNEY_PROFILE = new ControllerProfile("Mr. Boost Button",
-            new DefaultGamepadSettings() {
-                {
-                    // Customize main gamepad settings
-                    dpad_movement_speed = 0.6;
-                    bumper_rotation_speed = 0.8;
+    /**
+     * @noinspection InnerClassTooDeeplyNested
+     */
+    @Config
+    public static class Profiles {
+        public static final ControllerProfile Agney = new ControllerProfile("Agney",
+                // Main gamepad
+                new DefaultGamepadSettings() {
+                    {
+                        dpad_movement_speed = 0.6;
+                        bumper_rotation_speed = 0.8;
+                        incremental_vertical = true;
+                    }
 
-                    incremental_vertical = true;
+                    @Override
+                    public double applyBoostCurve(double input) {
+                        return BoostCurves.exponential(input);
+                    }
+                },
+                // When using sub gamepad
+                new DefaultGamepadSettings() {
+                    {
+                        trigger_threshold = 0.1;
+                    }
                 }
+        );
+        public static final ControllerProfile Ben = new ControllerProfile("Ben",
+                new DefaultGamepadSettings() {
+                    {
+                        dpad_movement_speed = 0.8;
+                        bumper_rotation_speed = 0.7;
+                    }
 
-                @Override
-                public double applyBoostCurve(double input) {
-                    return BoostCurves.exponential(input);
-                }
-            },
-            new DefaultGamepadSettings() {
-                {
-                    // Customize sub gamepad settings
-                    trigger_threshold = 0.1;
-                }
+                    @Override
+                    public double applyBoostCurve(double input) {
+                        return BoostCurves.smooth(input);
+                    }
+                }, new DefaultGamepadSettings() {
+            {
+                // Customize sub gamepad settings
+                trigger_threshold = 0.2;
             }
-    );
-    public static final ControllerProfile BEN_PROFILE = new ControllerProfile("Ben's Secret Sauce",
-            new DefaultGamepadSettings() {
-                {
-                    // Customize main gamepad settings
-                    dpad_movement_speed = 0.8;
-                    bumper_rotation_speed = 0.7;
-                }
+        });
+        public static final ControllerProfile Conner = new ControllerProfile("Conner",
+                // Main gamepad settings
+                new DefaultGamepadSettings() {
+                    {
+                        dpad_movement_speed = 0.6;
+                        bumper_rotation_speed = 0.9;
+                    }
 
-                @Override
-                public double applyBoostCurve(double input) {
-                    return BoostCurves.smooth(input);
-                }
-            }, new DefaultGamepadSettings() {
-                {
-                    // Customize sub gamepad settings
-                    trigger_threshold = 0.2;
-                }
-    });
-    public static final ControllerProfile CONNER_PROFILE = new ControllerProfile("Conner's profile",
-            new DefaultGamepadSettings() {
-                {
-                    dpad_movement_speed = 0.6;
-                    bumper_rotation_speed = 0.9;
-                }
-
-                @Override
-                public double applyBoostCurve(double input) {
-                    return BoostCurves.quadratic(input);
-                }
-            }, new DefaultGamepadSettings() {
-                {
-                    // Customize sub gamepad settings
-                    trigger_threshold = 0.15;
-                }
-    });
-    public static final ControllerProfile RISHU_PROFILE = new ControllerProfile("Rishu (my goat)",
-            new DefaultGamepadSettings() {
-                {
-                    dpad_movement_speed = 0.5;
-                    bumper_rotation_speed = 0.9;
-                }
-
-                @Override
-                public double applyBoostCurve(double input) {
-                    return BoostCurves.linear(input);
-                }
-            }, new DefaultGamepadSettings() {
-        {
-            // Customize sub gamepad settings
-            trigger_threshold = 0.1;
-            buttonMapping.wristUp = GamepadButton.DPAD_UP;
-            buttonMapping.wristDown = GamepadButton.DPAD_DOWN;
-        }
-    });
+                    @Override
+                    public double applyBoostCurve(double input) {
+                        return BoostCurves.quadratic(input);
+                    }
+                },
+                // Sub gamepad settings
+                new DefaultGamepadSettings() {
+                    {
+                        trigger_threshold = 0.15;
+                    }
+                });
+    }
 
     // Gamepad settings
     @Config
     public static class DefaultGamepadSettings {
-        /** Sensitivity multiplier for left stick input */
+        /**
+         * Sensitivity multiplier for left stick input
+         */
         public static double left_stick_sensitivity = 1.0;
-        /** Speed for dpad-based absolute movement, from 0 to 1 */
+        /**
+         * Speed for dpad-based absolute movement, from 0 to 1
+         */
         public static double dpad_movement_speed = 0.3;
         public static double trigger_threshold = 0.1;
 
-        /** Deadzone for stick inputs to prevent drift */
+        /**
+         * Deadzone for stick inputs to prevent drift
+         */
         public static double stick_deadzone = 0.05;
 
-        /** Sensitivity multiplier for right stick input */
+        /**
+         * Sensitivity multiplier for right stick input
+         */
         public static double right_stick_sensitivity = 0.7;
 
-        /** Bumper rotation speed */
+        /**
+         * Bumper rotation speed
+         */
         public static double bumper_rotation_speed = 0.8;
 
-        /** Whether to invert Y axis controls */
+        /**
+         * Whether to invert Y axis controls
+         */
         public static boolean invert_y_axis = false;
 
-        /** Whether to invert X axis controls */
+        /**
+         * Whether to invert X axis controls
+         */
         public static boolean invert_x_axis = false;
 
-        /** Whether to use right stick for rotation instead of bumpers */
+        /**
+         * Whether to use right stick for rotation instead of bumpers
+         */
         public static boolean use_right_stick_rotation = true;
 
         /* Whether to move based on rotation or absolute heading */
-
-        public static boolean use_absolute_positioning = false;
 
         public static boolean incremental_horizontal = false;
 
@@ -152,6 +148,7 @@ public class Settings {
          *
          * @param input Raw input value between 0 and 1
          * @return Modified input value between 0 and 1
+         * @noinspection DesignForExtension
          */
         public double applyBoostCurve(double input) {
             // Default implementation: simple clamp between 0 and 1
@@ -178,10 +175,6 @@ public class Settings {
         RIGHT_TRIGGER, LEFT_TRIGGER
     }
 
-    public enum WristPosition {
-        LEFT, RIGHT
-    }
-
     public enum GamepadAxis {
         LEFT_TRIGGER, RIGHT_TRIGGER,
         LEFT_STICK_X, LEFT_STICK_Y,
@@ -195,9 +188,6 @@ public class Settings {
         public static final boolean INTAKE = true;
         public static final boolean OUTTAKE = true;
         public static final boolean LINEAR_ACTUATOR = false;
-
-        public static AutonomousMode AUTONOMOUS_MODE_LEFT = AutonomousMode.BASKET;
-        public static AutonomousMode AUTONOMOUS_MODE_RIGHT = AutonomousMode.CHAMBER;
 
         public enum AutonomousMode {
             JUST_PARK, JUST_PLACE, CHAMBER, BASKET
@@ -233,23 +223,12 @@ public class Settings {
         }
     }
 
-    public static final ControllerProfile DEFAULT_PROFILE = new ControllerProfile(
-            "default",
-            new DefaultGamepadSettings(),
-            new DefaultGamepadSettings());
     public static final ControllerProfile[] MAIN_AVAILABLE_PROFILES = {
-            DEFAULT_PROFILE,
-            AGNEY_PROFILE,
-            BEN_PROFILE,
-            CONNER_PROFILE,
-            RISHU_PROFILE
+            Profiles.Agney,
+            Profiles.Conner
     };
     public static final ControllerProfile[] SUB_AVAILABLE_PROFILES = {
-            DEFAULT_PROFILE,
-            AGNEY_PROFILE,
-            BEN_PROFILE,
-            CONNER_PROFILE,
-            RISHU_PROFILE
+            Profiles.Ben,
     };
 
     @Config
@@ -274,9 +253,13 @@ public class Settings {
     // Hardware settings
     @Config
     public static class Hardware {
-        /** Encoder counts per full motor revolution */
+        /**
+         * Encoder counts per full motor revolution
+         */
         public static final double COUNTS_PER_REVOLUTION = 10323.84; // ish? may need to recalculate later
-        /** Diameter of the odometry wheels in inches */
+        /**
+         * Diameter of the odometry wheels in inches
+         */
         public static final double WHEEL_DIAMETER_INCHES = 3.5;
 
         // Servo positions
@@ -284,13 +267,18 @@ public class Settings {
         public static class Servo {
             @Config
             public static class OuttakeClaw {
-                /** Values for open and closed positions on the outtake claw */
+                /**
+                 * Values for open and closed positions on the outtake claw
+                 */
                 public static double OPEN = 0;
                 public static double CLOSED = 1;
             }
+
             @Config
             public static class IntakeClaw {
-                /** Values for open and closed positions on the outtake claw */
+                /**
+                 * Values for open and closed positions on the outtake claw
+                 */
                 public static double OPEN = 0.5;
                 public static double CLOSED = 0.8;
             }
@@ -409,7 +397,9 @@ public class Settings {
 
         @Config
         public static class Timing {
-            /** Pause duration after claw operations (milliseconds) */
+            /**
+             * Pause duration after claw operations (milliseconds)
+             */
             public static long CLAW_PAUSE = 500;
             public static long WRIST_PAUSE = 1000;
             public static long EXTENSOR_PAUSE = 2500;

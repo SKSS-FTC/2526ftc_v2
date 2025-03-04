@@ -48,13 +48,13 @@ public class Drivetrain {
      * @param strafePower Left/right strafe power (-1.0 to 1.0)
      * @param rotation    Rotational power (-1.0 to 1.0)
      **/
-    public void mecanumDrive(double drivePower, double strafePower, double rotation) {
+    public void mecanumDrive(double drivePower, double strafePower, double rotation, double flip) {
         // Adjust the values for strafing and rotation
-        strafePower *= Settings.Movement.strafe_power_coefficient;
-        double frontLeft = (drivePower + strafePower) * Settings.Movement.flip_movement + rotation;
-        double frontRight = (drivePower - strafePower) * Settings.Movement.flip_movement - rotation;
-        double rearLeft = (drivePower - strafePower) * Settings.Movement.flip_movement + rotation;
-        double rearRight = (drivePower + strafePower) * Settings.Movement.flip_movement - rotation;
+        strafePower *= Settings.Teleop.strafe_power_coefficient;
+        double frontLeft = (drivePower + strafePower) * flip + rotation;
+        double frontRight = (drivePower - strafePower) * flip - rotation;
+        double rearLeft = (drivePower - strafePower) * flip + rotation;
+        double rearRight = (drivePower + strafePower) * flip - rotation;
 
         frontLeftMotor.setPower(frontLeft);
         frontRightMotor.setPower(frontRight);
@@ -69,5 +69,9 @@ public class Drivetrain {
         double rotation = Range.clip(offsetHeading, -Math.PI / 2, Math.PI / 2) / (Math.PI / 2);
         rotation = Math.abs(rotation) < Settings.Assistance.minimumRotationCorrectionThreshold ? 0 : rotation;
         mecanumDrive(drivePower, strafePower, rotation);
+    }
+
+    public void mecanumDrive(double drivePower, double strafePower, double rotation) {
+        mecanumDrive(drivePower, strafePower, rotation, 1);
     }
 }
