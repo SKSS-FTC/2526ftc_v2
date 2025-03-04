@@ -4,6 +4,9 @@ import com.acmerobotics.dashboard.config.Config;
 
 import java.lang.reflect.Field;
 
+/**
+ * @noinspection CanBeFinal, unused
+ */
 @Config
 public class Settings {
 
