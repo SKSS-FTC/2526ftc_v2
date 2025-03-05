@@ -4,10 +4,10 @@ import com.pedropathing.localization.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.input.CombinedControllerProfile;
-import org.firstinspires.ftc.teamcode.input.InputManager;
-import org.firstinspires.ftc.teamcode.input.MovementInputEvent;
-import org.firstinspires.ftc.teamcode.input.ProfileManager;
+import org.firstinspires.ftc.teamcode.input.ControllerProfile;
+import org.firstinspires.ftc.teamcode.input.ControllerProfileManager;
+import org.firstinspires.ftc.teamcode.input.MainController;
+import org.firstinspires.ftc.teamcode.input.SubController;
 import org.firstinspires.ftc.teamcode.mechanisms.MechanismManager;
 import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.LimelightManager;
 import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Shoulder;
@@ -18,21 +18,19 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Main TeleOp class for driver-controlled period.
  * Handles controller profile selection and robot operation during matches.
- * 
+ *
  * @noinspection HardcodedLineSeparator, CodeBlock2Expr
  */
 @TeleOp(name = "MainOp", group = ".Competition Modes")
 public class MainOp extends LinearOpMode {
 
     private MechanismManager mechanisms;
-    private InputManager inputManager;
+    private MainController mainController;
+    private SubController subController;
     private Drivetrain drivetrain;
     private GoBildaPinpointDriver manualPinpoint;
     private boolean chassisDisabled = false;
@@ -43,6 +41,21 @@ public class MainOp extends LinearOpMode {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private double storedTx;
 
+    // Store previous states for edge detection
+    private boolean prevTouchpad = false;
+    private boolean prevRightStickButton = false;
+    private boolean prevLeftStickButton = false;
+    private final boolean prevGuideButton = false;
+
+    // Controller profile management
+    private ControllerProfileManager profileManager;
+    private boolean prevShareButton = false;
+    private boolean prevOptionsButton = false;
+
+    // Control settings
+    private final boolean incrementalVertical = false;
+    private final boolean incrementalHorizontal = false;
+
     /**
      * Main execution flow:
      * 1. Displays controller profile selection menu
@@ -52,20 +65,17 @@ public class MainOp extends LinearOpMode {
      */
     @Override
     public void runOpMode() {
-        // Show profile selection menu for both controllers
-        CombinedControllerProfile mainProfile = selectControllerProfiles();
-        if (mainProfile == null) {
-            // If we didn't complete profile selection (op mode was stopped), exit
-            return;
-        }
+        // Initialize controller selection
+        setupControllerSelection();
+
+        // Initialize controller profile manager
+        profileManager = new ControllerProfileManager();
 
         // Initialize robot systems
         mechanisms = new MechanismManager(hardwareMap);
-        inputManager = new InputManager(gamepad1, gamepad2, mainProfile);
+        mainController = new MainController(gamepad1);
+        subController = new SubController(gamepad2);
         drivetrain = new Drivetrain(hardwareMap);
-
-        // Configure input handlers
-        setupInputHandlers();
 
         // Wait for start
         waitForStart();
@@ -75,116 +85,51 @@ public class MainOp extends LinearOpMode {
         manualPinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         mechanisms.intake.limelight.setCurrentPipeline(pipeline);
 
+        // Apply initial controller profiles
+        applyControllerProfiles();
+
         // Main loop
         while (opModeIsActive()) {
+            // Update controller states
+            mainController.update(gamepad1);
+            subController.update(gamepad2);
+
             // Update pinpoint localization
             manualPinpoint.update();
 
-            // Process all inputs
-            inputManager.update();
+            // Check for profile switching
+            checkProfileSwitching();
 
-            // Check automation and assistance conditions
+            // Process controller inputs
+            processControllerInputs();
+
+            // Check for automation conditions
             checkAutomationConditions();
-            checkAssistanceConditions();
 
-            // Update mechanisms
-            mechanisms.outtake.verticalSlide.checkMotors();
-            mechanisms.intake.colorSensor.update();
+            // Check for assistance conditions
+            checkAssistanceConditions();
 
             // Update telemetry
             updateTelemetry();
         }
+
+        // Stop all executor tasks
+        scheduler.shutdownNow();
     }
 
     /**
-     * Displays the controller profile selection menu and returns the selected
-     * profile
+     * Setup the initial controller selection and limelight pipeline
      */
-    private CombinedControllerProfile selectControllerProfiles() {
-        List<CombinedControllerProfile> mainProfiles = ProfileManager.getMainProfiles();
-        List<CombinedControllerProfile> subProfiles = ProfileManager.getSubProfiles();
+    private void setupControllerSelection() {
+        telemetry.addLine("=== Controller Setup ===");
+        telemetry.addLine("Press Y/triangle to toggle limelight pipeline color");
+        telemetry.addLine("Press A/cross to continue");
 
-        AtomicReference<CombinedControllerProfile> mainProfile = new AtomicReference<>(mainProfiles.get(0));
-        AtomicReference<CombinedControllerProfile> subProfile = new AtomicReference<>(subProfiles.get(0));
+        boolean setupComplete = false;
 
-        AtomicInteger mainSelection = new AtomicInteger(0);
-        AtomicInteger subSelection = new AtomicInteger(0);
-
-        AtomicBoolean mainConfirmed = new AtomicBoolean(false);
-        AtomicBoolean subConfirmed = new AtomicBoolean(false);
-
-        boolean menuConfirmed = false;
-
-        while (!isStarted() && !isStopRequested() && !menuConfirmed) {
-            // Display menu and handle selection
-            telemetry.addLine("\nSelected Profiles:");
-            telemetry.addData("Main Controller", mainProfile.get().name + (mainConfirmed.get() ? " (Confirmed)" : ""));
-            telemetry.addData("Sub Controller", subProfile.get().name + (subConfirmed.get() ? " (Confirmed)" : ""));
-            telemetry.addLine("Limelight Color: "
-                    + (pipeline == LimelightManager.LimelightPipeline.BLUE ? "BLUE" : "RED") + ". Press ▲ to switch.");
-
-            // Build options array for main profiles
-            String[] mainOptions = new String[mainProfiles.size() + 1];
-            for (int i = 0; i < mainProfiles.size(); i++) {
-                mainOptions[i] = mainProfiles.get(i).name;
-            }
-            mainOptions[mainOptions.length - 1] = "Confirm";
-
-            // Build options array for sub profiles
-            String[] subOptions = new String[subProfiles.size() + 1];
-            for (int i = 0; i < subProfiles.size(); i++) {
-                subOptions[i] = subProfiles.get(i).name;
-            }
-            subOptions[subOptions.length - 1] = "Confirm";
-
-            // Display menu header
-            telemetry.addLine("=== Controller Profile Selection ===");
-
-            // Main Controller Menu
-            if (!mainConfirmed.get()) {
-                telemetry.addLine("\nMain Controller (Gamepad 1):");
-                MenuHelper.displayMenuOptions(telemetry, mainOptions, mainSelection.get());
-            }
-
-            // Sub Controller Menu
-            if (!subConfirmed.get()) {
-                telemetry.addLine("\nSub Controller (Gamepad 2):");
-                MenuHelper.displayMenuOptions(telemetry, subOptions, subSelection.get());
-            }
-
-            // Handle controller inputs with debounce
-            MenuHelper.handleControllerInput(this, gamepad1, !mainConfirmed.get(), () -> {
-                if (gamepad1.dpad_up) {
-                    mainSelection.set((mainSelection.get() - 1 + mainOptions.length) % mainOptions.length);
-                } else if (gamepad1.dpad_down) {
-                    mainSelection.set((mainSelection.get() + 1) % mainOptions.length);
-                } else if (gamepad1.cross) {
-                    if (mainSelection.get() < mainProfiles.size()) {
-                        mainProfile.set(mainProfiles.get(mainSelection.get()));
-                    } else {
-                        mainConfirmed.set(true);
-                        gamepad1.rumble(200);
-                    }
-                }
-            });
-
-            MenuHelper.handleControllerInput(this, gamepad2, !subConfirmed.get(), () -> {
-                if (gamepad2.dpad_up) {
-                    subSelection.set((subSelection.get() - 1 + subOptions.length) % subOptions.length);
-                } else if (gamepad2.dpad_down) {
-                    subSelection.set((subSelection.get() + 1) % subOptions.length);
-                } else if (gamepad2.cross) {
-                    if (subSelection.get() < subProfiles.size()) {
-                        subProfile.set(subProfiles.get(subSelection.get()));
-                    } else {
-                        subConfirmed.set(true);
-                        gamepad2.rumble(200);
-                    }
-                }
-            });
-
+        while (!isStarted() && !isStopRequested() && !setupComplete) {
             // Handle pipeline selection
-            if (gamepad1.triangle) {
+            if (gamepad1.triangle || gamepad1.y) {
                 if (!prevGamepadTriangle) {
                     pipeline = pipeline == LimelightManager.LimelightPipeline.BLUE
                             ? LimelightManager.LimelightPipeline.RED
@@ -201,195 +146,216 @@ public class MainOp extends LinearOpMode {
             if (pipeline == LimelightManager.LimelightPipeline.BLUE) {
                 gamepad1.setLedColor(0, 0, 255, 1000);
                 gamepad2.setLedColor(0, 0, 255, 1000);
+                telemetry.addLine("Current Pipeline: BLUE");
             } else {
                 gamepad1.setLedColor(255, 0, 0, 1000);
                 gamepad2.setLedColor(255, 0, 0, 1000);
+                telemetry.addLine("Current Pipeline: RED");
             }
 
-            // Check for menu completion
-            menuConfirmed = mainConfirmed.get() && subConfirmed.get();
+            // Check for completion
+            if (gamepad1.cross || gamepad1.a) {
+                setupComplete = true;
+                gamepad1.rumble(200);
+                gamepad2.rumble(200);
+            }
 
             telemetry.update();
             sleep(50); // Small delay to prevent CPU hogging
         }
-
-        // If we were stopped during selection, return null
-        if (isStopRequested()) {
-            return null;
-        }
-
-        // Create a combined profile with the main gamepad settings and sub gamepad
-        // settings
-        return new CombinedControllerProfile(
-                mainProfile.get().name + " + " + subProfile.get().name,
-                mainProfile.get().mainGamepadSettings,
-                subProfile.get().subGamepadSettings);
     }
 
     /**
-     * Sets up all input handlers for the robot
+     * Apply the currently active controller profiles
      */
-    private void setupInputHandlers() {
-        // Movement handler
-        inputManager.on("movement", event -> {
-            if (!chassisDisabled) {
-                MovementInputEvent movementEvent = (MovementInputEvent) event;
-                drivetrain.mecanumDrive(
-                        movementEvent.forward,
-                        movementEvent.strafe,
-                        movementEvent.rotation,
-                        flip);
-            }
-        });
+    private void applyControllerProfiles() {
+        mainController.setMapping(profileManager.getActiveMainProfile().getMapping());
+        subController.setMapping(profileManager.getActiveSubProfile().getMapping());
+    }
 
-        // Flip movement handler
-        inputManager.on("main.GUIDE.pressed", event -> {
+    /**
+     * Check for controller profile switching
+     */
+    private void checkProfileSwitching() {
+        // Main controller profile switching - using "share" button
+        boolean sharePressed = gamepad1.back;
+        if (sharePressed && !prevShareButton) {
+            // Cycle to the next main profile
+            ControllerProfile profile = profileManager.cycleMainProfile();
+            mainController.setMapping(profile.getMapping());
+
+            // Give feedback
+            gamepad1.rumble(200);
+            telemetry.addData("Main Controller Profile", profile.getName());
+        }
+        prevShareButton = sharePressed;
+
+        // Sub controller profile switching - using "options" button
+        boolean optionsPressed = gamepad2.start;
+        if (optionsPressed && !prevOptionsButton) {
+            // Cycle to the next sub profile
+            ControllerProfile profile = profileManager.cycleSubProfile();
+            subController.setMapping(profile.getMapping());
+
+            // Give feedback
+            gamepad2.rumble(200);
+            telemetry.addData("Sub Controller Profile", profile.getName());
+        }
+        prevOptionsButton = optionsPressed;
+    }
+
+    /**
+     * Process all inputs from both controllers
+     */
+    private void processControllerInputs() {
+        // === MAIN CONTROLLER INPUTS ===
+
+        // Chassis movement
+        if (!chassisDisabled) {
+            double forward = mainController.getValue("moveForward");
+            double strafe = mainController.getValue("moveSideways");
+            double rotate = mainController.getValue("rotate");
+
+            drivetrain.mecanumDrive(forward, strafe, rotate, flip);
+        }
+
+        // Flip movement
+        if (mainController.isPressed("guide")) {
             flip *= -1;
             gamepad1.rumble(100);
-        });
+        }
 
-        // === INTAKE CONTROLS ===
+        // Vertical slide controls - incremental mode
+        if (incrementalVertical) {
+            if (mainController.isActive("extendVertical")) {
+                mechanisms.outtake.verticalSlide.increment();
+            }
+
+            if (mainController.isActive("retractVertical")) {
+                mechanisms.outtake.verticalSlide.decrement();
+            }
+        } else { // Direct mode
+            if (mainController.isPressed("extendVertical")) {
+                mechanisms.outtake.verticalSlide.extend();
+            }
+
+            if (mainController.isPressed("retractVertical")) {
+                mechanisms.outtake.verticalSlide.retract();
+            }
+        }
+
+        // Vertical slide position presets
+        if (mainController.isPressed("triangle")) {
+            mechanisms.outtake.verticalSlide.setPosition(ViperSlide.VerticalPosition.HIGH_BASKET);
+        }
+
+        if (mainController.isPressed("cross")) {
+            mechanisms.outtake.verticalSlide.setPosition(ViperSlide.VerticalPosition.HIGH_RUNG);
+        }
+
+        if (mainController.isPressed("square")) {
+            mechanisms.outtake.verticalSlide.setPosition(ViperSlide.VerticalPosition.PREP_HIGH_RUNG);
+        }
+
+        if (mainController.isPressed("circle")) {
+            mechanisms.outtake.verticalSlide.setPosition(ViperSlide.VerticalPosition.TRANSFER);
+        }
+
+        // Driver assistance toggle
+        boolean touchpad = gamepad1.touchpad;
+        if (touchpad != prevTouchpad) {
+            chassisDisabled = touchpad;
+            prevTouchpad = touchpad;
+        }
+
+        // === SUB CONTROLLER INPUTS ===
 
         // Intake claw controls
-        inputManager.on("sub.LEFT_TRIGGER.pressed", event -> {
+        if (subController.isPressed("leftTrigger")) {
             mechanisms.intake.intakeClaw.close();
             scheduleTask(() -> mechanisms.intake.wrist.setPosition(Wrist.Position.VERTICAL), 200);
             mechanisms.outtake.outtakeClaw.open();
-        });
+        }
 
-        inputManager.on("sub.RIGHT_TRIGGER.held", event -> {
+        if (subController.isActive("rightTrigger")) {
             mechanisms.intake.intakeClaw.open();
-        });
+        }
 
         // Wrist controls
-        inputManager.on("sub.DPAD_LEFT.pressed", event -> {
+        if (subController.isPressed("moveLeft")) {
             if (mechanisms.intake.horizontalSlide.currentPosition.getValue() > 30 &&
                     mechanisms.intake.intakeClaw.opened) {
                 mechanisms.intake.wrist.setPosition(Wrist.Position.READY);
             } else {
                 mechanisms.intake.wrist.setPosition(Wrist.Position.VERTICAL);
             }
-        });
+        }
 
-        inputManager.on("sub.DPAD_RIGHT.held", event -> {
+        if (subController.isActive("moveRight")) {
             mechanisms.intake.wrist.setPosition(Wrist.Position.HORIZONTAL);
-        });
+        }
 
-        // Horizontal slide controls - incremental mode
-        inputManager.on("sub.CIRCLE.held", event -> {
-            if (inputManager.profile.subGamepadSettings.incrementalHorizontal) {
+        // Horizontal slide controls
+        if (incrementalHorizontal) {
+            if (subController.isActive("extendHorizontal")) {
                 mechanisms.intake.horizontalSlide.increment();
             }
-        });
 
-        inputManager.on("sub.SQUARE.held", event -> {
-            if (inputManager.profile.subGamepadSettings.incrementalHorizontal) {
+            if (subController.isActive("retractHorizontal")) {
                 mechanisms.intake.horizontalSlide.decrement();
             }
-        });
-
-        // Horizontal slide controls - direct mode
-        inputManager.on("sub.CIRCLE.pressed", event -> {
-            if (!inputManager.profile.subGamepadSettings.incrementalHorizontal) {
+        } else {
+            if (subController.isPressed("extendHorizontal")) {
                 mechanisms.intake.horizontalSlide.extend();
             }
-        });
 
-        inputManager.on("sub.SQUARE.pressed", event -> {
-            if (!inputManager.profile.subGamepadSettings.incrementalHorizontal) {
+            if (subController.isPressed("retractHorizontal")) {
                 mechanisms.intake.horizontalSlide.retract();
                 if (mechanisms.intake.horizontalSlide.currentPosition == ViperSlide.HorizontalPosition.COLLAPSED) {
                     mechanisms.outtake.outtakeClaw.open();
                     mechanisms.intake.wrist.setPosition(Wrist.Position.VERTICAL);
                 }
             }
-        });
+        }
 
         // Rotator control
-        inputManager.on("sub.RIGHT_STICK_X", event -> {
-            double normalizedValue = (event.value + 1) / 2; // Convert from -1..1 to 0..1
+        double rotatorValue = subController.getValue("rotator");
+        if (Math.abs(rotatorValue) > 0.05) {
+            double normalizedValue = (rotatorValue + 1) / 2; // Convert from -1..1 to 0..1
             mechanisms.intake.rotator.setPosition(normalizedValue);
-        });
-
-        // === OUTTAKE CONTROLS ===
-
-        // Vertical slide controls - incremental mode
-        inputManager.on("main.RIGHT_BUMPER.held", event -> {
-            if (inputManager.profile.mainGamepadSettings.incrementalVertical) {
-                mechanisms.outtake.verticalSlide.increment();
-            }
-        });
-
-        inputManager.on("main.LEFT_BUMPER.held", event -> {
-            if (inputManager.profile.mainGamepadSettings.incrementalVertical) {
-                mechanisms.outtake.verticalSlide.decrement();
-            }
-        });
-
-        // Vertical slide controls - direct mode
-        inputManager.on("main.RIGHT_BUMPER.pressed", event -> {
-            if (!inputManager.profile.mainGamepadSettings.incrementalVertical) {
-                mechanisms.outtake.verticalSlide.extend();
-            }
-        });
-
-        inputManager.on("main.LEFT_BUMPER.pressed", event -> {
-            if (!inputManager.profile.mainGamepadSettings.incrementalVertical) {
-                mechanisms.outtake.verticalSlide.retract();
-            }
-        });
-
-        // Vertical slide position presets
-        inputManager.on("main.TRIANGLE.pressed", event -> {
-            mechanisms.outtake.verticalSlide.setPosition(ViperSlide.VerticalPosition.HIGH_BASKET);
-        });
-
-        inputManager.on("main.CROSS.pressed", event -> {
-            mechanisms.outtake.verticalSlide.setPosition(ViperSlide.VerticalPosition.HIGH_RUNG);
-        });
-
-        inputManager.on("main.SQUARE.pressed", event -> {
-            mechanisms.outtake.verticalSlide.setPosition(ViperSlide.VerticalPosition.PREP_HIGH_RUNG);
-        });
-
-        inputManager.on("main.CIRCLE.pressed", event -> {
-            mechanisms.outtake.verticalSlide.setPosition(ViperSlide.VerticalPosition.TRANSFER);
-        });
+        }
 
         // Outtake claw control
-        inputManager.on("sub.RIGHT_STICK_BUTTON.pressed", event -> {
+        boolean rightStickButton = subController.isPressed("rightStickButton");
+        if (rightStickButton && !prevRightStickButton) {
             if (mechanisms.outtake.outtakeClaw.opened) {
                 mechanisms.outtake.outtakeClaw.close();
                 scheduleTask(() -> mechanisms.intake.intakeClaw.open(), 400);
             } else {
                 mechanisms.outtake.outtakeClaw.open();
             }
-        });
+            prevRightStickButton = true;
+        } else if (!rightStickButton) {
+            prevRightStickButton = false;
+        }
 
         // Shoulder control
-        inputManager.on("sub.LEFT_STICK_BUTTON.pressed", event -> {
+        boolean leftStickButton = subController.isPressed("leftStickButton");
+        if (leftStickButton && !prevLeftStickButton) {
             mechanisms.outtake.shoulder.cyclePosition();
-        });
+            prevLeftStickButton = true;
+        } else if (!leftStickButton) {
+            prevLeftStickButton = false;
+        }
 
-        // === LINEAR ACTUATOR CONTROLS ===
-
-        inputManager.on("sub.TRIANGLE.held", event -> {
+        // Linear actuator controls
+        if (subController.isActive("triangle")) {
             mechanisms.linearActuator.extend();
-        });
+        }
 
-        inputManager.on("sub.CROSS.held", event -> {
+        if (subController.isActive("cross")) {
             mechanisms.linearActuator.retract();
-        });
-
-        // === ASSISTANCE CONTROLS ===
-
-        inputManager.on("main.TOUCHPAD.pressed", event -> {
-            chassisDisabled = true;
-        });
-
-        inputManager.on("main.TOUCHPAD.released", event -> {
-            chassisDisabled = false;
-        });
+        }
     }
 
     /**
@@ -460,9 +426,29 @@ public class MainOp extends LinearOpMode {
     }
 
     /**
-     * Updates telemetry with current robot state
+     * Updates telemetry with current system state
      */
     private void updateTelemetry() {
+        // Add controller profile information with instructions
+        telemetry.addLine("=== Controller Profiles ===");
+        telemetry.addData("Main Profile", profileManager.getActiveMainProfile().getName() + " (Press BACK to change)");
+        telemetry.addData("Sub Profile", profileManager.getActiveSubProfile().getName() + " (Press START to change)");
+
+        // Add available profiles
+        telemetry.addLine("Available Main Profiles:");
+        List<ControllerProfile> mainProfiles = profileManager.getMainProfiles();
+        for (int i = 0; i < mainProfiles.size(); i++) {
+            telemetry.addData(" " + (i + 1), mainProfiles.get(i).getName());
+        }
+
+        telemetry.addLine("Available Sub Profiles:");
+        List<ControllerProfile> subProfiles = profileManager.getSubProfiles();
+        for (int i = 0; i < subProfiles.size(); i++) {
+            telemetry.addData(" " + (i + 1), subProfiles.get(i).getName());
+        }
+
+        telemetry.addLine("=== System Status ===");
+        // Original telemetry
         telemetry.addData("limelight tx", mechanisms.intake.limelight.limelight.getLatestResult().getTx());
         telemetry.addData("limelight ty", mechanisms.intake.limelight.limelight.getLatestResult().getTy());
         telemetry.addData("limelight detects specimen?", mechanisms.intake.limelight.specimenDetected());

@@ -7,7 +7,6 @@ import java.util.Set;
 /**
  * Base class for controller mappings
  */
-@Config
 public class ControllerMapping {
     // Maps event names to inputs
     protected final Map<String, GamepadInput> eventToInputMap = new HashMap<>();
@@ -23,7 +22,7 @@ public class ControllerMapping {
      * Initializes default mappings - override in subclasses
      */
     protected void initializeDefaultMappings() {
-        // Base implementation has no mappings
+        // Implemented in SubMapping and MainMapping
     }
 
     /**
@@ -62,13 +61,5 @@ public class ControllerMapping {
      */
     public void clearMappings() {
         eventToInputMap.clear();
-    }
-
-    /**
-     * Resets to default mappings
-     */
-    public void resetToDefaults() {
-        clearMappings();
-        initializeDefaultMappings();
     }
 }

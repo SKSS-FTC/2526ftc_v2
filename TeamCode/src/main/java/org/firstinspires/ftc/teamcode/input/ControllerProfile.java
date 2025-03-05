@@ -1,51 +1,38 @@
 package org.firstinspires.ftc.teamcode.input;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Represents a controller profile with input mappings and settings
+ * Represents a named controller profile with a specific mapping
  */
 public class ControllerProfile {
-    public final String name;
-    public final Map<String, String> inputMappings; // Maps input IDs to event names
-    public final Map<String, Object> settings; // Controller-specific settings
+    private final String name;
+    private final ControllerMapping mapping;
 
-    public ControllerProfile(String name) {
+    /**
+     * Creates a new controller profile
+     *
+     * @param name    The name of the profile
+     * @param mapping The mapping for this profile
+     */
+    public ControllerProfile(String name, ControllerMapping mapping) {
         this.name = name;
-        this.inputMappings = new HashMap<>();
-        this.settings = new HashMap<>();
+        this.mapping = mapping;
     }
 
     /**
-     * Maps an input to an event
+     * Gets the name of this profile
      *
-     * @param inputId   The input identifier (e.g., "DPAD_UP", "LEFT_STICK_Y")
-     * @param eventName The event to trigger
-     * @return This profile for chaining
+     * @return The profile name
      */
-    public ControllerProfile mapInput(String inputId, String eventName) {
-        inputMappings.put(inputId, eventName);
-        return this;
+    public String getName() {
+        return name;
     }
 
     /**
-     * Adds a setting to the profile
+     * Gets the mapping for this profile
      *
-     * @param key   Setting name
-     * @param value Setting value
-     * @return This profile for chaining
+     * @return The controller mapping
      */
-    public ControllerProfile addSetting(String key, Object value) {
-        settings.put(key, value);
-        return this;
-    }
-
-    /**
-     * Gets a setting value with a default fallback
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getSetting(String key, T defaultValue) {
-        return settings.containsKey(key) ? (T) settings.get(key) : defaultValue;
+    public ControllerMapping getMapping() {
+        return mapping;
     }
 }
