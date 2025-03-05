@@ -5,11 +5,12 @@ package org.firstinspires.ftc.teamcode.input;
  */
 public enum GamepadInput {
     // Buttons
-    A, B, X, Y,
+    TRIANGLE, CIRCLE, SQUARE, CROSS,
     DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT,
     LEFT_BUMPER, RIGHT_BUMPER,
     START, BACK, GUIDE, OPTIONS,
     LEFT_STICK_BUTTON, RIGHT_STICK_BUTTON,
+    TOUCHPAD,
 
     // Axes
     LEFT_TRIGGER, RIGHT_TRIGGER,
@@ -24,4 +25,4 @@ public enum GamepadInput {
                 this == LEFT_STICK_X || this == LEFT_STICK_Y ||
                 this == RIGHT_STICK_X || this == RIGHT_STICK_Y;
     }
-} 
+}

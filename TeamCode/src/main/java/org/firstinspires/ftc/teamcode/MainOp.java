@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Main TeleOp class for driver-controlled period.
  * Handles controller profile selection and robot operation during matches.
+ * 
  * @noinspection HardcodedLineSeparator, CodeBlock2Expr
  */
 @TeleOp(name = "MainOp", group = ".Competition Modes")
@@ -157,7 +158,7 @@ public class MainOp extends LinearOpMode {
                     mainSelection.set((mainSelection.get() - 1 + mainOptions.length) % mainOptions.length);
                 } else if (gamepad1.dpad_down) {
                     mainSelection.set((mainSelection.get() + 1) % mainOptions.length);
-                } else if (gamepad1.a) {
+                } else if (gamepad1.cross) {
                     if (mainSelection.get() < mainProfiles.size()) {
                         mainProfile.set(mainProfiles.get(mainSelection.get()));
                     } else {
@@ -172,7 +173,7 @@ public class MainOp extends LinearOpMode {
                     subSelection.set((subSelection.get() - 1 + subOptions.length) % subOptions.length);
                 } else if (gamepad2.dpad_down) {
                     subSelection.set((subSelection.get() + 1) % subOptions.length);
-                } else if (gamepad2.a) {
+                } else if (gamepad2.cross) {
                     if (subSelection.get() < subProfiles.size()) {
                         subProfile.set(subProfiles.get(subSelection.get()));
                     } else {
@@ -275,26 +276,26 @@ public class MainOp extends LinearOpMode {
         });
 
         // Horizontal slide controls - incremental mode
-        inputManager.on("sub.B.held", event -> {
+        inputManager.on("sub.CIRCLE.held", event -> {
             if (inputManager.profile.subGamepadSettings.incrementalHorizontal) {
                 mechanisms.intake.horizontalSlide.increment();
             }
         });
 
-        inputManager.on("sub.X.held", event -> {
+        inputManager.on("sub.SQUARE.held", event -> {
             if (inputManager.profile.subGamepadSettings.incrementalHorizontal) {
                 mechanisms.intake.horizontalSlide.decrement();
             }
         });
 
         // Horizontal slide controls - direct mode
-        inputManager.on("sub.B.pressed", event -> {
+        inputManager.on("sub.CIRCLE.pressed", event -> {
             if (!inputManager.profile.subGamepadSettings.incrementalHorizontal) {
                 mechanisms.intake.horizontalSlide.extend();
             }
         });
 
-        inputManager.on("sub.X.pressed", event -> {
+        inputManager.on("sub.SQUARE.pressed", event -> {
             if (!inputManager.profile.subGamepadSettings.incrementalHorizontal) {
                 mechanisms.intake.horizontalSlide.retract();
                 if (mechanisms.intake.horizontalSlide.currentPosition == ViperSlide.HorizontalPosition.COLLAPSED) {
@@ -339,19 +340,19 @@ public class MainOp extends LinearOpMode {
         });
 
         // Vertical slide position presets
-        inputManager.on("main.Y.pressed", event -> {
+        inputManager.on("main.TRIANGLE.pressed", event -> {
             mechanisms.outtake.verticalSlide.setPosition(ViperSlide.VerticalPosition.HIGH_BASKET);
         });
 
-        inputManager.on("main.A.pressed", event -> {
+        inputManager.on("main.CROSS.pressed", event -> {
             mechanisms.outtake.verticalSlide.setPosition(ViperSlide.VerticalPosition.HIGH_RUNG);
         });
 
-        inputManager.on("main.X.pressed", event -> {
+        inputManager.on("main.SQUARE.pressed", event -> {
             mechanisms.outtake.verticalSlide.setPosition(ViperSlide.VerticalPosition.PREP_HIGH_RUNG);
         });
 
-        inputManager.on("main.B.pressed", event -> {
+        inputManager.on("main.CIRCLE.pressed", event -> {
             mechanisms.outtake.verticalSlide.setPosition(ViperSlide.VerticalPosition.TRANSFER);
         });
 
@@ -372,11 +373,11 @@ public class MainOp extends LinearOpMode {
 
         // === LINEAR ACTUATOR CONTROLS ===
 
-        inputManager.on("sub.Y.held", event -> {
+        inputManager.on("sub.TRIANGLE.held", event -> {
             mechanisms.linearActuator.extend();
         });
 
-        inputManager.on("sub.A.held", event -> {
+        inputManager.on("sub.CROSS.held", event -> {
             mechanisms.linearActuator.retract();
         });
 

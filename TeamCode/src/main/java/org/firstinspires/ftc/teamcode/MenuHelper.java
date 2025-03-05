@@ -7,7 +7,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class MenuHelper {
     public static void handleControllerInput(LinearOpMode opMode, Gamepad gamepad, boolean active, Runnable handler) {
-        if (active && (gamepad.dpad_up || gamepad.dpad_down || gamepad.a)) {
+        if (active && (gamepad.dpad_up || gamepad.dpad_down || gamepad.cross)) {
             handler.run();
             opMode.sleep(250); // Debounce
         }
