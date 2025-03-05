@@ -16,7 +16,7 @@ public class MainController extends Controller {
     }
 
     /**
-     * Creates a new MainController with custom mapping
+     * Creates a new MainController with the provided mapping
      *
      * @param gamepad The gamepad to wrap
      * @param mapping The mapping to use
@@ -26,7 +26,18 @@ public class MainController extends Controller {
     }
 
     /**
-     * Gets the current mapping as a MainMapping
+     * Creates a new MainController with the provided mapping and settings
+     *
+     * @param gamepad  The gamepad to wrap
+     * @param mapping  The mapping to use
+     * @param settings The settings to use
+     */
+    public MainController(Gamepad gamepad, MainMapping mapping, ControllerSettings settings) {
+        super(gamepad, mapping, settings);
+    }
+
+    /**
+     * Gets the current mapping
      *
      * @return The current mapping
      */
@@ -34,5 +45,4 @@ public class MainController extends Controller {
     public MainMapping getMapping() {
         return (MainMapping) mapping;
     }
-
 }

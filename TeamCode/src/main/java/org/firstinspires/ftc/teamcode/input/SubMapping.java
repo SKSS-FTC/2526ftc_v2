@@ -12,31 +12,29 @@ public class SubMapping extends ControllerMapping {
      */
     @Override
     protected void initializeDefaultMappings() {
-        // Claw controls
+        // Intake controls
         mapEvent("intakeIn", GamepadInput.LEFT_TRIGGER);
         mapEvent("intakeOut", GamepadInput.RIGHT_TRIGGER);
-        mapEvent("intakeStop", GamepadInput.OPTIONS);
-        mapEvent("clawIn", GamepadInput.OPTIONS);
-        mapEvent("clawOut", GamepadInput.START);
-        mapEvent("clawToggle", GamepadInput.RIGHT_STICK_BUTTON);
-        mapEvent("rotator", GamepadInput.RIGHT_STICK_X);
+        mapEvent("closeClaw", GamepadInput.RIGHT_BUMPER);
+        mapEvent("openClaw", GamepadInput.LEFT_BUMPER);
 
         // Wrist controls
-        mapEvent("wristUp", GamepadInput.DPAD_LEFT);
-        mapEvent("wristDown", GamepadInput.DPAD_RIGHT);
+        mapEvent("wristHorizontal", GamepadInput.DPAD_LEFT);
+        mapEvent("wristVertical", GamepadInput.DPAD_RIGHT);
 
-        // Shoulder controls
-        mapEvent("shoulderUp", GamepadInput.LEFT_STICK_BUTTON);
-        mapEvent("shoulderDown", GamepadInput.RIGHT_STICK_BUTTON);
+        // Horizontal slide controls
+        mapEvent("extendHorizontal", GamepadInput.DPAD_UP);
+        mapEvent("retractHorizontal", GamepadInput.DPAD_DOWN);
+        mapEvent("horizontalSlide", GamepadInput.RIGHT_STICK_Y);
 
-        // Linear actuator controls
-        mapEvent("linearActuatorExtend", GamepadInput.CIRCLE);
-        mapEvent("linearActuatorRetract", GamepadInput.SQUARE);
+        // Face buttons
+        mapEvent("triangle", GamepadInput.TRIANGLE);
+        mapEvent("circle", GamepadInput.CIRCLE);
+        mapEvent("cross", GamepadInput.CROSS);
+        mapEvent("square", GamepadInput.SQUARE);
 
-        // Ascend extensor controls
-        mapEvent("ascendExtensorExtend", GamepadInput.DPAD_RIGHT);
-        mapEvent("ascendExtensorRetract", GamepadInput.DPAD_LEFT);
-        mapEvent("ascendExtensorGround", GamepadInput.DPAD_DOWN);
-        mapEvent("ascendExtensorCeiling", GamepadInput.DPAD_UP);
+        // Advanced controls
+        mapEvent("rightStickButton", GamepadInput.RIGHT_STICK_BUTTON);
+        mapEvent("leftStickButton", GamepadInput.LEFT_STICK_BUTTON);
     }
 }

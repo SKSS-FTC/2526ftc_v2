@@ -35,5 +35,17 @@ public class MainMapping extends ControllerMapping {
         mapEvent("retractHorizontal", GamepadInput.SQUARE);
         mapEvent("extendVertical", GamepadInput.RIGHT_BUMPER);
         mapEvent("retractVertical", GamepadInput.LEFT_BUMPER);
+
+        // Add touchpad for driver assistance
+        mapEvent("touchpad", GamepadInput.TOUCHPAD);
+
+        // Common face buttons
+        mapEvent("triangle", GamepadInput.TRIANGLE);
+        mapEvent("circle", GamepadInput.CIRCLE);
+        mapEvent("cross", GamepadInput.CROSS);
+        mapEvent("square", GamepadInput.SQUARE);
+
+        // Add guide button for special functions
+        mapEvent("guide", GamepadInput.GUIDE);
     }
 }

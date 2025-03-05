@@ -30,15 +30,24 @@ public class ControllerMapping {
      *
      * @param eventName The name of the event
      * @param input     The input to map to
+     * @param override  Whether to wipe other existing mappings
      * @return This mapping for chaining
      */
-    public ControllerMapping mapEvent(String eventName, GamepadInput input) {
+    public ControllerMapping mapEvent(String eventName, GamepadInput input, boolean override) {
+        if (override) {
+            eventToInputMap.remove(eventName);
+        }
         eventToInputMap.put(eventName, input);
         return this;
     }
 
+    public ControllerMapping mapEvent(String eventName, GamepadInput input) {
+        return mapEvent(eventName, input, false);
+    }
+
+
     /**
-     * Gets the input mapped to a specific event
+     * Gets the input mapped to an event
      *
      * @param eventName The name of the event
      * @return The input mapped to the event, or null if not mapped
@@ -50,7 +59,7 @@ public class ControllerMapping {
     /**
      * Gets all event names in this mapping
      *
-     * @return A set of all event names
+     * @return Set of event names
      */
     public Set<String> getEventNames() {
         return eventToInputMap.keySet();
