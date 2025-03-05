@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages controller profiles for both main and sub controllers
+ * Manages controller profiles for driver preferences
  */
 public class ControllerProfileManager {
     private final List<ControllerProfile> mainProfiles = new ArrayList<>();
@@ -28,17 +28,63 @@ public class ControllerProfileManager {
     }
 
     /**
-     * Initializes the default set of profiles
-     * Override this method to add your custom profiles
+     * Initialize default profiles including alternate configurations
+     * Override this to add custom profiles
      */
     protected void initializeDefaultProfiles() {
-        // Add our custom profiles
-        mainProfiles.add(new ControllerProfile("Custom", new CustomMainProfile()));
-        subProfiles.add(new ControllerProfile("Custom", new CustomSubProfile()));
+        // Create a custom main profile
+        MainMapping customMain = new MainMapping();
+        customMain.clearMappings();
 
-        // Add a second main profile with alternative mappings (the original example)
+        // Custom main mappings
+        customMain.mapEvent("moveForward", GamepadInput.RIGHT_STICK_Y);
+        customMain.mapEvent("moveSideways", GamepadInput.RIGHT_STICK_X);
+        customMain.mapEvent("rotate", GamepadInput.LEFT_STICK_X);
+
+        // Add other mappings
+        customMain.mapEvent("guide", GamepadInput.GUIDE);
+        customMain.mapEvent("extendVertical", GamepadInput.LEFT_BUMPER);
+        customMain.mapEvent("retractVertical", GamepadInput.RIGHT_BUMPER);
+        customMain.mapEvent("triangle", GamepadInput.TRIANGLE);
+        customMain.mapEvent("cross", GamepadInput.CROSS);
+        customMain.mapEvent("square", GamepadInput.SQUARE);
+        customMain.mapEvent("circle", GamepadInput.CIRCLE);
+
+        // Create settings with custom values
+        ControllerSettings customMainSettings = new ControllerSettings();
+        customMainSettings.setDoubleSetting("leftStickDeadzone", 0.08);
+        customMainSettings.setDoubleSetting("rightStickDeadzone", 0.08);
+        customMainSettings.setDoubleSetting("stickSensitivity", 1.2);
+        customMainSettings.setStringSetting("leftStickCurve", "cubic");
+        customMainSettings.setStringSetting("rightStickCurve", "quadratic");
+        customMainSettings.setBooleanSetting("invertLeftY", true);
+
+        mainProfiles.add(new ControllerProfile("Custom", customMain, customMainSettings));
+
+        // Create a custom sub profile
+        SubMapping customSub = new SubMapping();
+        customSub.clearMappings();
+
+        // Custom sub mappings
+        customSub.mapEvent("intakeIn", GamepadInput.RIGHT_TRIGGER);
+        customSub.mapEvent("intakeOut", GamepadInput.LEFT_TRIGGER);
+        customSub.mapEvent("wristUp", GamepadInput.DPAD_UP);
+        customSub.mapEvent("wristDown", GamepadInput.DPAD_DOWN);
+        customSub.mapEvent("moveLeft", GamepadInput.DPAD_LEFT);
+        customSub.mapEvent("moveRight", GamepadInput.DPAD_RIGHT);
+        customSub.mapEvent("horizontalExtend", GamepadInput.TRIANGLE);
+        customSub.mapEvent("horizontalRetract", GamepadInput.CROSS);
+
+        // Create settings with custom values
+        ControllerSettings customSubSettings = new ControllerSettings();
+        customSubSettings.setDoubleSetting("triggerDeadzone", 0.1);
+        customSubSettings.setDoubleSetting("triggerSensitivity", 1.5);
+        customSubSettings.setStringSetting("triggerCurve", "exponential");
+
+        subProfiles.add(new ControllerProfile("Custom", customSub, customSubSettings));
+
+        // Add a second main profile with alternative mappings and settings
         MainMapping alternativeMain = new MainMapping();
-        // Clear default mappings and set custom ones
         alternativeMain.clearMappings();
 
         // Example of an alternative mapping where controls are different
@@ -55,7 +101,13 @@ public class ControllerProfileManager {
         alternativeMain.mapEvent("square", GamepadInput.SQUARE);
         alternativeMain.mapEvent("circle", GamepadInput.CIRCLE);
 
-        mainProfiles.add(new ControllerProfile("Alternative", alternativeMain));
+        // Create settings with smooth response curves
+        ControllerSettings smoothSettings = new ControllerSettings();
+        smoothSettings.setStringSetting("leftStickCurve", "smooth");
+        smoothSettings.setStringSetting("rightStickCurve", "smooth");
+        smoothSettings.setDoubleSetting("stickSensitivity", 0.8);
+
+        mainProfiles.add(new ControllerProfile("Alternative", alternativeMain, smoothSettings));
 
         // Add a second sub profile with alternative mappings
         SubMapping alternativeSub = new SubMapping();
@@ -67,11 +119,28 @@ public class ControllerProfileManager {
         alternativeSub.mapEvent("moveLeft", GamepadInput.DPAD_LEFT);
         alternativeSub.mapEvent("moveRight", GamepadInput.DPAD_RIGHT);
 
-        subProfiles.add(new ControllerProfile("Alternative", alternativeSub));
+        // Create square root response curve settings for more precision at lower inputs
+        ControllerSettings precisionSettings = new ControllerSettings();
+        precisionSettings.setStringSetting("triggerCurve", "squareRoot");
+        precisionSettings.setDoubleSetting("triggerSensitivity", 1.2);
+
+        subProfiles.add(new ControllerProfile("Alternative", alternativeSub, precisionSettings));
+
+        // Add a high sensitivity profile for advanced users
+        MainMapping expertMain = new MainMapping();
+
+        ControllerSettings expertSettings = new ControllerSettings();
+        expertSettings.setDoubleSetting("leftStickDeadzone", 0.03);
+        expertSettings.setDoubleSetting("rightStickDeadzone", 0.03);
+        expertSettings.setDoubleSetting("stickSensitivity", 1.5);
+        expertSettings.setStringSetting("leftStickCurve", "exponential");
+        expertSettings.setStringSetting("rightStickCurve", "exponential");
+
+        mainProfiles.add(new ControllerProfile("Expert", expertMain, expertSettings));
     }
 
     /**
-     * Adds a main controller profile
+     * Adds a main profile to the manager
      *
      * @param profile The profile to add
      */
@@ -80,7 +149,7 @@ public class ControllerProfileManager {
     }
 
     /**
-     * Adds a sub controller profile
+     * Adds a sub profile to the manager
      *
      * @param profile The profile to add
      */
@@ -89,7 +158,7 @@ public class ControllerProfileManager {
     }
 
     /**
-     * Gets the current active main controller profile
+     * Gets the active main profile
      *
      * @return The active main profile
      */
@@ -98,7 +167,7 @@ public class ControllerProfileManager {
     }
 
     /**
-     * Gets the current active sub controller profile
+     * Gets the active sub profile
      *
      * @return The active sub profile
      */
@@ -127,7 +196,7 @@ public class ControllerProfileManager {
     }
 
     /**
-     * Gets all available main profiles
+     * Gets a list of all main profiles
      *
      * @return List of main profiles
      */
@@ -136,7 +205,7 @@ public class ControllerProfileManager {
     }
 
     /**
-     * Gets all available sub profiles
+     * Gets a list of all sub profiles
      *
      * @return List of sub profiles
      */
@@ -145,9 +214,9 @@ public class ControllerProfileManager {
     }
 
     /**
-     * Sets the active main profile by index
+     * Sets the main profile by index
      *
-     * @param index The index of the profile to set active
+     * @param index The index of the profile to set
      * @return The newly active profile
      */
     public ControllerProfile setMainProfileIndex(int index) {
@@ -158,9 +227,9 @@ public class ControllerProfileManager {
     }
 
     /**
-     * Sets the active sub profile by index
+     * Sets the sub profile by index
      *
-     * @param index The index of the profile to set active
+     * @param index The index of the profile to set
      * @return The newly active profile
      */
     public ControllerProfile setSubProfileIndex(int index) {
