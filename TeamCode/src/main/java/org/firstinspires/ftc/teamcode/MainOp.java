@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * Main TeleOp class for driver-controlled period.
  * Handles controller profile selection and robot operation during matches.
  *
- * @noinspection HardcodedLineSeparator, CodeBlock2Expr
+ * @noinspection HardcodedLineSeparator
  */
 @TeleOp(name = "MainOp", group = ".Competition Modes")
 public class MainOp extends LinearOpMode {
@@ -34,7 +34,6 @@ public class MainOp extends LinearOpMode {
     private SubController subController;
     private Drivetrain drivetrain;
     private GoBildaPinpointDriver manualPinpoint;
-    private final boolean chassisDisabled = false;
     private double flip = 1.0;
 
     // Add back these important variables
@@ -42,7 +41,7 @@ public class MainOp extends LinearOpMode {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private Deadeye deadeye;
-    private double storedTx;
+
 
     // Controller profile management
     private ControllerProfileManager profileManager;
@@ -80,21 +79,16 @@ public class MainOp extends LinearOpMode {
 
         // Main loop
         while (opModeIsActive()) {
-            // Update controller states
+            // Update states
             mainController.update(mainController);
             subController.update(subController);
-
-            // Update pinpoint localization
             manualPinpoint.update();
 
-            // Process inputs
             processControllerInputs();
 
-            // Check automation and assistance conditions
             checkAutomationConditions();
             checkAssistanceConditions();
 
-            // Update telemetry
             updateTelemetry();
         }
 
@@ -191,9 +185,7 @@ public class MainOp extends LinearOpMode {
         double rotate = mainController.getValue("rotate");
 
         // Apply the values to drivetrain
-        if (!chassisDisabled) {
-            drivetrain.mecanumDrive(drive, strafe, rotate);
-        }
+        drivetrain.mecanumDrive(drive, strafe, rotate, flip);
 
         // Flip controls - using Controller's edge detection
         if (mainController.wasJustPressed("flip")) {

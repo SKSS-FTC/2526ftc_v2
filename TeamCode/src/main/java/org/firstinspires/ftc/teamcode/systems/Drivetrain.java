@@ -49,8 +49,8 @@ public class Drivetrain {
      * @param strafePower Left/right strafe power (-1.0 to 1.0)
      * @param rotation    Rotational power (-1.0 to 1.0)
      **/
-    public void mecanumDrive(double drivePower, double strafePower, double rotation, double flip) {
-        if (state == State.DEADEYE_ENABLED) {
+    public void mecanumDrive(double drivePower, double strafePower, double rotation, double flip, boolean asDeadeye) {
+        if (state == State.DEADEYE_ENABLED && !asDeadeye) {
             return; // deadeye is handling driving, do not manually drive
         }
         // Adjust the values for strafing and rotation
@@ -66,6 +66,11 @@ public class Drivetrain {
         rearRightMotor.setPower(rearRight);
     }
 
+    // mecanum drive assumes you are not driving as deadeye
+    public void mecanumDrive(double drivePower, double strafePower, double rotation, double flip) {
+        mecanumDrive(drivePower, strafePower, rotation, flip, false);
+    }
+
     public void interpolateToOffset(double offsetX, double offsetY, double offsetHeading) {
         double drivePower = -offsetY;
         double strafePower = Range.clip((-offsetX * 1.2) / Settings.Assistance.inverseLateralMultiplier, -1, 1);
@@ -76,7 +81,7 @@ public class Drivetrain {
     }
 
     public void mecanumDrive(double drivePower, double strafePower, double rotation) {
-        mecanumDrive(drivePower, strafePower, rotation, 1);
+        mecanumDrive(drivePower, strafePower, rotation, 1, true);
     }
 
     public enum State {
