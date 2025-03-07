@@ -22,11 +22,13 @@ import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.ViperSlide;
 import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Wrist;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
+import org.firstinspires.ftc.teamcode.systems.Echolocation;
 
-@Deprecated
+import java.util.List;
+
 @Autonomous(name = "Basket Auto", group = ".Competition Modes", preselectTeleOp = "MainOp")
 @Config
-public class IntoTheDeepBasketPedroAuto extends OpMode {
+public class OffseasonBasketPedroAuto extends OpMode {
     private static Path initialDropInBasket;
     private static Path grabSample1;
     private static Path grabSample2;
@@ -37,6 +39,7 @@ public class IntoTheDeepBasketPedroAuto extends OpMode {
     private Follower follower;
     private MechanismManager mechanisms;
     private Timer pathTimer, actionTimer, opmodeTimer;
+    private List<Echolocation.Position> randomizedSamplePositions;
     private double actionState;
     private Telemetry visualization;
     /**
@@ -318,6 +321,7 @@ public class IntoTheDeepBasketPedroAuto extends OpMode {
         visualization = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         mechanisms.intake.horizontalSlide.reset();
         mechanisms.outtake.verticalSlide.reset();
+        randomizedSamplePositions = Echolocation.phonate(telemetry, gamepad1, Echolocation.PositionType.PEDRO); // TODO use this
     }
 
     /**

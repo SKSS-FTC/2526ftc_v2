@@ -21,11 +21,13 @@ import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Shoulder;
 import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.ViperSlide;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
+import org.firstinspires.ftc.teamcode.systems.Echolocation;
 
-@Deprecated
+import java.util.List;
+
 @Autonomous(name = "Chamber Auto", group = ".Competition Modes", preselectTeleOp = "MainOp")
 @Config
-public class IntoTheDeepChamberPedroAuto extends OpMode {
+public class OffseasonChamberPedroAuto extends OpMode {
     public double hpSpecimensPlaced = 0;
     private Follower follower;
     private MechanismManager mechanisms;
@@ -49,6 +51,7 @@ public class IntoTheDeepChamberPedroAuto extends OpMode {
     private static Path grabFromHumanPlayer;
     private static Path park;
 
+    private List<Echolocation.Position> randomizedSamplePositions;
 
 
     /**
@@ -347,6 +350,7 @@ public class IntoTheDeepChamberPedroAuto extends OpMode {
         visualization = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         mechanisms.intake.horizontalSlide.reset();
         mechanisms.outtake.verticalSlide.reset();
+        randomizedSamplePositions = Echolocation.phonate(telemetry, gamepad1, Echolocation.PositionType.PEDRO); // TODO use this
     }
 
     /**
