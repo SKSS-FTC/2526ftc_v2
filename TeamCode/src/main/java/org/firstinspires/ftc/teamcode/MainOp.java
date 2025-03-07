@@ -193,7 +193,7 @@ public class MainOp extends LinearOpMode {
         }
 
         // Flip controls - using Controller's edge detection
-        if (mainController.isPressed("flip")) {
+        if (mainController.wasJustPressed("flip")) {
             flip *= -1;
             mainController.rumble(100);
         }
@@ -207,23 +207,23 @@ public class MainOp extends LinearOpMode {
                 mechanisms.outtake.verticalSlide.decrement();
             }
         } else { // Direct mode
-            if (mainController.isPressed("extendVertical")) {
+            if (mainController.wasJustPressed("extendVertical")) {
                 mechanisms.outtake.verticalSlide.extend();
             }
-            if (mainController.isPressed("retractVertical")) {
+            if (mainController.wasJustPressed("retractVertical")) {
                 mechanisms.outtake.verticalSlide.retract();
             }
 
         }
 
         // Intake controls using Controller's isPressed
-        if (subController.isPressed("closeClaw")) {
+        if (subController.wasJustPressed("closeClaw")) {
             mechanisms.intake.intakeClaw.close();
             scheduleTask(() -> mechanisms.intake.wrist.setPosition(Wrist.Position.VERTICAL), 200);
             mechanisms.outtake.outtakeClaw.open();
         }
 
-        if (subController.isPressed("openClaw")) {
+        if (subController.wasJustPressed("openClaw")) {
             mechanisms.intake.intakeClaw.open();
             if (mechanisms.intake.horizontalSlide.currentPosition.getValue() > 30 &&
                     mechanisms.intake.intakeClaw.opened) {
@@ -247,11 +247,11 @@ public class MainOp extends LinearOpMode {
                 mechanisms.intake.horizontalSlide.decrement();
             }
         } else {
-            if (subController.isPressed("extendHorizontal")) {
+            if (subController.wasJustPressed("extendHorizontal")) {
                 mechanisms.intake.horizontalSlide.extend();
             }
 
-            if (subController.isPressed("retractHorizontal")) {
+            if (subController.wasJustPressed("retractHorizontal")) {
                 mechanisms.intake.horizontalSlide.retract();
                 if (mechanisms.intake.horizontalSlide.currentPosition == ViperSlide.HorizontalPosition.COLLAPSED) {
                     mechanisms.outtake.outtakeClaw.open();
@@ -311,7 +311,7 @@ public class MainOp extends LinearOpMode {
         boolean headingAligned = Math.abs(wrappedHeading()) < 10;
 
         if (specimenDetected && headingAligned) {
-            if (mainController.isActive("deadeye")) {
+            if (mainController.isActive("deadeye")) { // TODO make deadeye it's own file/system
                 mainController.setLedColor(0, 0, 255, 1000);
                 drivetrain.interpolateToOffset(
                         mechanisms.intake.limelight.limelight.getLatestResult().getTx(),

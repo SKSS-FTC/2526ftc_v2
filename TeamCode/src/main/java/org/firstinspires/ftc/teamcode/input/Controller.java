@@ -106,7 +106,7 @@ public class Controller extends Gamepad {
      * @param eventName The name of the event to check
      * @return True if the event was just pressed, false otherwise
      */
-    public boolean isPressed(String eventName) {
+    public boolean wasJustPressed(String eventName) {
         boolean previousState = previousButtonStates.getOrDefault(eventName, false);
         boolean currentState = isActive(eventName);
         return currentState && !previousState;
@@ -118,7 +118,7 @@ public class Controller extends Gamepad {
      * @param eventName The name of the event to check
      * @return True if the event was just released, false otherwise
      */
-    public boolean isReleased(String eventName) {
+    public boolean wasJustReleased(String eventName) {
         boolean previousState = previousButtonStates.getOrDefault(eventName, false);
         boolean currentState = isActive(eventName);
         return !currentState && previousState;
@@ -149,7 +149,6 @@ public class Controller extends Gamepad {
             return settings.processStickInput(rawValue, "rightStick", "Y");
         } else if (input == GamepadInput.LEFT_TRIGGER || input == GamepadInput.RIGHT_TRIGGER) {
             // Process trigger input with deadzone and sensitivity
-            String triggerName = (input == GamepadInput.LEFT_TRIGGER) ? "leftTrigger" : "rightTrigger";
             double deadzone = settings.getDoubleSetting("triggerDeadzone", 0.05);
 
             if (rawValue < deadzone) {
