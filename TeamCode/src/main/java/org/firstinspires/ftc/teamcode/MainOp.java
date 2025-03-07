@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.LimelightManager;
 import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Shoulder;
 import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.ViperSlide;
 import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Wrist;
+import org.firstinspires.ftc.teamcode.systems.Deadeye;
 import org.firstinspires.ftc.teamcode.systems.Drivetrain;
 
 import java.util.concurrent.Executors;
@@ -33,13 +34,14 @@ public class MainOp extends LinearOpMode {
     private SubController subController;
     private Drivetrain drivetrain;
     private GoBildaPinpointDriver manualPinpoint;
-    private boolean chassisDisabled = false;
+    private final boolean chassisDisabled = false;
     private double flip = 1.0;
 
     // Add back these important variables
     private LimelightManager.LimelightPipeline pipeline = LimelightManager.LimelightPipeline.BLUE;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+    private Deadeye deadeye;
     private double storedTx;
 
     // Controller profile management
@@ -62,6 +64,7 @@ public class MainOp extends LinearOpMode {
         mainController = new MainController(gamepad1);
         subController = new SubController(gamepad2);
         drivetrain = new Drivetrain(hardwareMap);
+        deadeye = new Deadeye(mainController, drivetrain, mechanisms, manualPinpoint);
 
         // Initialize controller selection and profiles before waiting for start
         // This will also handle pipeline selection
@@ -307,40 +310,7 @@ public class MainOp extends LinearOpMode {
      * Check for assistance conditions
      */
     private void checkAssistanceConditions() {
-        boolean specimenDetected = mechanisms.intake.limelight.specimenDetected();
-        boolean headingAligned = Math.abs(wrappedHeading()) < 10;
-
-        if (specimenDetected && headingAligned) {
-            if (mainController.isActive("deadeye")) { // TODO make deadeye it's own file/system
-                mainController.setLedColor(0, 0, 255, 1000);
-                drivetrain.interpolateToOffset(
-                        mechanisms.intake.limelight.limelight.getLatestResult().getTx(),
-                        Settings.Assistance.approachSpeed,
-                        wrappedHeading());
-                storedTx = mechanisms.intake.limelight.limelight.getLatestResult().getTx();
-                chassisDisabled = true;
-            } else {
-                mainController.rumble(50);
-                mainController.setLedColor(0, 255, 0, 1000);
-                chassisDisabled = false;
-            }
-        } else if (chassisDisabled && mainController.isActive("touchpad") && storedTx != 0) {
-            mainController.setLedColor(255, 0, 255, 1000);
-            drivetrain.interpolateToOffset(
-                    mechanisms.intake.limelight.limelight.getLatestResult().getTx(),
-                    0.35,
-                    wrappedHeading());
-        } else {
-            storedTx = 0;
-            if (mainController.isActive("touchpad")) {
-                mainController.setLedColor(0, 255, 255, 1000);
-                drivetrain.interpolateToOffset(0, 0, wrappedHeading());
-                chassisDisabled = true;
-            } else {
-                mainController.setLedColor(255, 0, 0, 1000);
-                chassisDisabled = false;
-            }
-        }
+        deadeye.check();
     }
 
     /**

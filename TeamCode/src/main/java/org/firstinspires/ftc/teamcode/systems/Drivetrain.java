@@ -15,6 +15,7 @@ public class Drivetrain {
     public final DcMotor frontRightMotor;
     public final DcMotor rearLeftMotor;
     public final DcMotor rearRightMotor;
+    public State state = State.DEFAULT;
 
     public final Map<String, DcMotor> motors = new HashMap<>();
 
@@ -49,6 +50,9 @@ public class Drivetrain {
      * @param rotation    Rotational power (-1.0 to 1.0)
      **/
     public void mecanumDrive(double drivePower, double strafePower, double rotation, double flip) {
+        if (state == State.DEADEYE_ENABLED) {
+            return; // deadeye is handling driving, do not manually drive
+        }
         // Adjust the values for strafing and rotation
         strafePower *= Settings.Teleop.strafe_power_coefficient;
         double frontLeft = (drivePower + strafePower) * flip + rotation;
@@ -73,5 +77,10 @@ public class Drivetrain {
 
     public void mecanumDrive(double drivePower, double strafePower, double rotation) {
         mecanumDrive(drivePower, strafePower, rotation, 1);
+    }
+
+    public enum State {
+        DEFAULT,
+        DEADEYE_ENABLED,
     }
 }
