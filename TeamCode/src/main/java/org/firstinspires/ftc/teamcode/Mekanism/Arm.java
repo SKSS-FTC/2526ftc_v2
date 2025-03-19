@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Arm {
@@ -312,7 +311,7 @@ public class Arm {
       telemetry.addLine("Slide over robot length limit");
     } else if (slide.getCurrentPosition() < 0 && power < 0) {
       telemetry.addLine("Slide under 0");
-      power = 0;
+      power = 0.1;
     }
 
     if (slide.getCurrentPosition() <= 0 && power <= 0)
