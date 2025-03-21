@@ -145,7 +145,7 @@ public class BlueBotTeleop extends LinearOpMode {
     odometry = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
     odometry.recalibrateIMU();
     odometry.resetPosAndIMU();
-    odometry.setOffsets(160, 42.5);
+    odometry.setOffsets(160, 32.5);
     odometry.setEncoderResolution(goBILDA_4_BAR_POD);
     odometry.setEncoderDirections(FORWARD, FORWARD);
     odometry.resetHeading(Rotation2d.fromDegrees(120));
