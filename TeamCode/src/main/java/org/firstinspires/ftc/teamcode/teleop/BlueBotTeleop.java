@@ -132,7 +132,6 @@ public class BlueBotTeleop extends LinearOpMode {
       telemetry.addLine("X Pos: " + odometry.getPosX());
       telemetry.addLine("Y Pos: " + odometry.getPosY());
       telemetry.update();
-//      odometry.update();
     }
   }
 
