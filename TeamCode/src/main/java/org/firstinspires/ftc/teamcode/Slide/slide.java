@@ -3,8 +3,12 @@
 
 package org.firstinspires.ftc.teamcode.Slide;
 
-public class slide {
-  /*
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
+
+public class slide extends LinearOpMode {
 
   DcMotor slide, pivot;
 
@@ -22,7 +26,6 @@ public class slide {
 
   private DigitalChannel limitSwitch;
 
-  @Override
   public void runOpMode() throws InterruptedException {
 
       initRobot();
@@ -51,10 +54,6 @@ public class slide {
       }
   }
 
-  public void slide(opMode this) {
-
-  }
-
   public void initRobot() {
       slide = hardwareMap.get(DcMotor.class, "slide");
       pivot = hardwareMap.get(DcMotor.class, "pivot");
@@ -71,8 +70,8 @@ public class slide {
       slide.setPower(.00);
       pivot.setPower(.00);
 
-      slide.setDirection(DcMotorSimple.Direction.FORWARD);
-      pivot.setDirection(DcMotorSimple.Direction.FORWARD);
+      slide.setDirection(DcMotor.Direction.FORWARD);
+      pivot.setDirection(DcMotor.Direction.FORWARD);
 
       limitSlide = 4750;
       limitPivot = 3200;
@@ -140,6 +139,4 @@ public class slide {
           slide.setPower(-x*2);
       pivot.setPower(x);
   }
-
-   */
 }
