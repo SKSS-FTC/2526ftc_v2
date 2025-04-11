@@ -7,11 +7,13 @@ import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.EncoderDi
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.Mekanism.Mekanism;
 import org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.Swerve.wpilib.geometry.Rotation2d;
 
+@Disabled
 @Autonomous(name = "Comp Bot Auto")
 public class CompBotAuto extends LinearOpMode {
 
