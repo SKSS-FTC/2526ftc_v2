@@ -26,10 +26,10 @@ public class Swerve {
     odo.update();
     double vector_ang = Math.atan2(x, y) * (180 / Math.PI);
     double vector_pow = Math.sqrt((x * x + y * y));
-    telemetry.addLine("vector angle: " + vector_ang);
-    telemetry.addLine("vector power: " + vector_pow);
+    telemetry.addLine("input vector angle: " + vector_ang);
+    telemetry.addLine("input vector power: " + vector_pow);
     vector_ang = (vector_ang - 90) % 360;
     vector_ang /= 360;
-    telemetry.addLine("vector angle: " + vector_ang);
+    telemetry.addLine("input vector angle: " + vector_ang);
   }
 }

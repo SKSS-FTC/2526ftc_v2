@@ -180,6 +180,7 @@ public class BlueBotTeleop extends LinearOpMode {
       // 7. Updates the target position of the slide
       mek.setSlide((int) mek.slideTarget);
 
+      telemetry.addLine("odo: " + odometry.getHeading());
       telemetry.update();
       lastTime = currentTime;
       telemetry.update();
