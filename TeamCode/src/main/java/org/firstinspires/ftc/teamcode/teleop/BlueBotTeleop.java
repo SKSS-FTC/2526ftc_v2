@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Mekanism.Mekanism;
 import org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver;
+import org.firstinspires.ftc.teamcode.Swerve.Swerve;
 import org.firstinspires.ftc.teamcode.Swerve.wpilib.geometry.Rotation2d;
 import org.firstinspires.ftc.teamcode.Utils;
 import org.firstinspires.ftc.teamcode.Auto.AutoSwerve;
@@ -41,6 +42,7 @@ public class BlueBotTeleop extends LinearOpMode {
     // Does this move the robot? because if so we need it to move after the waitForStart()
     // or add the movement to the Autonomous
     Mekanism mek = new Mekanism(this);
+    Swerve swerve = new Swerve(this, odometry);
 
     double slideSpeed = 100;
     boolean bPressed = false;
@@ -93,7 +95,7 @@ public class BlueBotTeleop extends LinearOpMode {
 
       // 2. takes inputs and makes them work for swerve auto
       double strafe_joystick = gamepad1.left_stick_x;
-      double drive_joystick = -1 * gamepad1.left_stick_y;
+      double drive_joystick = -gamepad1.left_stick_y;
       double rotate_joystick = gamepad1.right_stick_x;
       Double vector_angle = Math.atan2(drive_joystick, strafe_joystick) * (180.0 / Math.PI);
       double vector_length = Math.sqrt(Math.pow(strafe_joystick, 2.0) + Math.pow(drive_joystick, 2.0));
@@ -104,19 +106,6 @@ public class BlueBotTeleop extends LinearOpMode {
         vector_angle = Math.abs(1.0 + vector_angle);
       }
       vector_angle += 0.125;
-//      telemetry.addLine("Drive:        " + drive_joystick);
-//      telemetry.addLine("Strafe:       " + strafe_joystick);
-//      telemetry.addLine("Vector len:   " + vector_length);
-//      telemetry.addLine("Vector angle: " + vector_angle);
-//      telemetry.addLine("-------------------------");
-      telemetry.addData("fr offset: ", frOffset);
-      telemetry.addData("fl offset: ", flOffset);
-      telemetry.addData("br offset: ", brOffset);
-      telemetry.addData("bl offset: ", blOffset);
-      telemetry.addData("fr Rotation offset: ", frRotationOffset);
-      telemetry.addData("fl Rotation offset: ", flRotationOffset);
-      telemetry.addData("br Rotation offset: ", brRotationOffset);
-      telemetry.addData("bl Rotation offset: ", blRotationOffset);
 
       // 2.5 puts values through swerve auto
       if (vector_angle == null || vector_angle == 0.0)
@@ -191,15 +180,6 @@ public class BlueBotTeleop extends LinearOpMode {
       // 7. Updates the target position of the slide
       mek.setSlide((int) mek.slideTarget);
 
-      telemetry.addData("fr angle: ", vector_angle + frOffset);
-      telemetry.addData("fl angle: ", vector_angle + flOffset);
-      telemetry.addData("br angle: ", vector_angle + brOffset);
-      telemetry.addData("bl angle: ", vector_angle + blOffset);
-      telemetry.addLine("----------------------------------------");
-      telemetry.addData("X Pos: ", odometry.getPosX());
-      telemetry.addData("Y Pos: ", odometry.getPosY());
-      telemetry.addData("pivot input: ", -gamepad2.right_stick_y);
-      telemetry.addData("pivot pow: ", mek.pivot.getPower());
       telemetry.update();
       lastTime = currentTime;
       telemetry.update();
