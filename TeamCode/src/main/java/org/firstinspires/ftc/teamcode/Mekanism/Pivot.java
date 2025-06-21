@@ -24,5 +24,5 @@ public class Pivot extends LinearOpMode {
   }
 
 
-}// I need to change the pivot class to have init and methods to operate pivot
+}// I(Ella) need to change the pivot class to have init and methods to operate pivot
 
