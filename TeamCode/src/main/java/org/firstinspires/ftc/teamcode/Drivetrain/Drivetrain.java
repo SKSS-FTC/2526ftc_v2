@@ -51,6 +51,18 @@ public class TuneValues{
     public static double maxVoltage = 12.5;
 }
 
+/**
+ * Drivetrain class manages the robot's drive system, including motor control, odometry, and path following.
+ * It provides methods for both autonomous and manual control, as well as telemetry updates.
+ * This class is designed for use in FTC robots with mecanum or omni drive systems.
+ *
+ *    Inclues
+ * - Motor initialization and configuration
+ * - Odometry-based localization
+ * - Path following and pose targeting
+ * - Manual control via controller inputs
+ * - Telemetry reporting for dashboard and driver station
+ */
 @Config
 public class Drivetrain {
     HardwareMap hardwareMap;
@@ -75,7 +87,10 @@ public class Drivetrain {
     SimpleMatrix initialState = new SimpleMatrix(6,1);
     public PoseController poseControl = new PoseController();
     /**
-     * Sets the Position of the bot in its start position
+     * Sets the Position of the bot in its start position.
+     * @param x Initial X position (inches)
+     * @param y Initial Y position (inches)
+     * @param theta Initial heading (radians)
      */
     public void setInitialPosition(double x, double y, double theta){
         initialState.set(0,0,x);
@@ -141,15 +156,17 @@ public class Drivetrain {
     }
 
     /**
-     * Localizes the Robot, determines the location of the Robot using odometry and previous locations.
+     * Localizes the Robot, determines the current location of the Robot using odometry and previous locations.
+     * Updates the internal state matrix with the current estimated pose.
      */
     public void localize() {
         state = initialState.plus(twoWheelOdo.calculate());
     }
 
     /**
-     * Sets the power to the wheels & records Previous Power
-     * @param powers
+     * Sets the power to the wheels & records Previous Power.
+     * Only updates power if the change exceeds acceptablePowerDifference to save battery.
+     * @param powers matrix of wheel power values (order:lfm, lbm, rbm, rfm)
      */
     public void setPower(SimpleMatrix powers) {
         double u0 = powers.get(0, 0);
@@ -171,7 +188,7 @@ public class Drivetrain {
     }
 
     /**
-     * Sets the Wheels speed
+     * Sets the Wheels speed and acceleration.
      * @param wheelSpeeds Current Wheel Speed
      * @param wheelAccelerations Increment of Wheel Speed
      */
@@ -180,8 +197,9 @@ public class Drivetrain {
     }
 
     /**
-     * Hardware call to move the Robot to a position
-     * @param desiredPose Desired Position of the Robot based off of current Position
+     * Moves the robot to a desired pose using PID control.
+     * @param desiredPose The target pose [x, y, theta] in field coordinates.
+     * @return An Action that runs until the robot is within distanceThreshold and angleThreshold of the target.
      */
     public Action goToPose(SimpleMatrix desiredPose) {
         //Rename goToPosition
@@ -214,10 +232,10 @@ public class Drivetrain {
     }
 
     /**
-     * Variation of GoToPosition with higher room for error.
-     *     Used to save time in movements where precision is unneccessary
-     * @param desiredPose Desired Position of the Robot based off of current Position
-     * @return
+     * Variation of goToPose with higher tolerance for error.
+     * Used for faster, less precise movements.
+     * @param desiredPose The target pose [x, y, theta] in field coordinates.
+     * @return An Action that runs until the robot is within 10x distanceThreshold and angleThreshold of the target.
      */
     public Action goToPoseImpresice(SimpleMatrix desiredPose) {
         return new Action() {
@@ -250,12 +268,19 @@ public class Drivetrain {
     }
 
     /**
-     * Stops the Motors of the drivetrain
+     * Stops the Motors of the drivetrain immediately.
+     * @return An InstantAction that sets all wheel powers to zero.
      */
     public InstantAction stopMotors() {
         return new InstantAction(()->setPower(stopMatrix));
     }
 
+    /**
+     * Follows a given path using geometric control and a motion profile.
+     * Scales wheel speeds based on the path's velocity profile.
+     * @param path The Path object to follow.
+     * @return An Action that runs until the robot reaches the end of the path within distanceThreshold.
+     */
     public Action followPath(Path path) {
         return new Action() {
             ElapsedTime elapsedTimer = new ElapsedTime();
@@ -292,8 +317,9 @@ public class Drivetrain {
     }
 
     /**
-     * Updates telemetry packet
-     * @return
+     * Updates telemetry packet with current pose and motor power values.
+     * Useful for dashboard or driver station monitoring.
+     * @return An Action that always returns false (for continuous telemetry updates).
      */
     public Action updateTelemetry() {
         return new Action() {
@@ -314,11 +340,11 @@ public class Drivetrain {
     }
 
     /**
-     * Allows for manual control of Robot using controller
-     * @param ly
-     * @param lx
-     * @param rX
-     * @return
+     * Allows for manual control of Robot using controller joystick.
+     * @param ly Left stick Y axis (forward/backward)
+     * @param lx Left stick X axis (strafe left/right)
+     * @param rX Right stick X axis (rotation)
+     * @return An Action that applies the joystick values to the drivetrain for manual driving.
      */
     public Action manualControl(double ly, double lx, double rX){
         return new Action() {
