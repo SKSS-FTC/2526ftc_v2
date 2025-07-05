@@ -13,6 +13,7 @@ public class Utils {
         );
         return rotation;
     }
+     //Inverse kinematics Matrix
     public static SimpleMatrix rotateBodyToGlobal(SimpleMatrix vectorBody, double th) {
         return R(th).mult(vectorBody);
     }
