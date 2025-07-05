@@ -10,7 +10,7 @@ public class MecanumKinematicModel {
     public static double w = 5.31496; //in
 
     // 4 x 3 SimpleMatrix used to represent the relative positions of each wheel
-    // Used in inverseKinematics to get the target speed for each of 4 wheels and their x, y, theta
+    // Used in inverseKinematics to get the target speed for each of 4 wheels and their x, y, θ
     static SimpleMatrix H_inv = new SimpleMatrix(
             new double[][]{
                     new double[]{1d, -1d, -(l + w)},
@@ -22,8 +22,8 @@ public class MecanumKinematicModel {
 
     /***
      * Returns target robot wheel speeds
-     * @param twist chassis twist as a {@link org.ejml.simple.SimpleMatrix}
-     * @return wheel speeds as a {@link org.ejml.simple.SimpleMatrix}
+     * @param twist chassis twist
+     * @return wheel speeds as a 4 x 3 SimpleMatrix representing each wheel's respective x, y, θ
      */
     public static SimpleMatrix inverseKinematics(SimpleMatrix twist) {
         SimpleMatrix wheelSpeeds = H_inv.scale(1 / r).mult(twist);
