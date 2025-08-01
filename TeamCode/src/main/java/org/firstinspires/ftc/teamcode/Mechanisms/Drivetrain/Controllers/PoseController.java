@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.Mechanisms.Utils.Controllers.PID;
 import org.firstinspires.ftc.teamcode.Mechanisms.Utils.Controllers.PID.functionType;
 import org.firstinspires.ftc.teamcode.Mechanisms.Drivetrain.Utils.Utils;
 
-@Config // Allows tuning these parameters through FTC Dashboard.
+@Config //  Allows tuning these parameters through FTC Dashboard.
 public class PoseController {
 
     // PID Controllers for X, Y, and Theta (heading).
