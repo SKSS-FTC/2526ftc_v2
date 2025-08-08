@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
  * Main TeleOp class for driver-controlled period.
  * Handles controller profile selection and robot operation during matches.
  *
- * @noinspection HardcodedLineSeparator
  */
 @TeleOp(name = "MainOp", group = ".Competition Modes")
 public class MainOp extends LinearOpMode {
