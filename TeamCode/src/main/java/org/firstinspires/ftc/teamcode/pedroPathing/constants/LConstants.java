@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.pedroPathing.constants;
 import com.pedropathing.localization.*;
 import com.pedropathing.localization.constants.*;
 
-// TODO TUNE
 public class LConstants {
     static {
         ThreeWheelConstants.forwardTicksToInches = .001989436789;

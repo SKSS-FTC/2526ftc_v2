@@ -13,7 +13,6 @@ import com.pedropathing.util.Constants;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.pedropathing.localization.constants.*;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.mechanisms.MechanismManager;
@@ -316,7 +315,7 @@ public class OffseasonBasketPedroAuto extends OpMode {
         mechanisms = new MechanismManager(hardwareMap);
 
         Constants.setConstants(FConstants.class, LConstants.class);
-        follower = new Follower(hardwareMap, FConstants, LConstants);
+        follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(new Pose(9.757, 84.983));
         buildPaths();
         visualization = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());

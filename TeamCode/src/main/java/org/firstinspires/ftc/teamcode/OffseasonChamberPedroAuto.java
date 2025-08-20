@@ -344,7 +344,7 @@ public class OffseasonChamberPedroAuto extends OpMode {
         mechanisms = new MechanismManager(hardwareMap);
 
         Constants.setConstants(FConstants.class, LConstants.class);
-        follower = new Follower(hardwareMap);
+        follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(new Pose(10.767, 59.940));
         buildPaths();
         visualization = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
