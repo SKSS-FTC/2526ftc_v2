@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class Controller extends Gamepad {
     private final Gamepad gamepad;
-    private HashMap<Control, Double> previousControlState = new HashMap<>();
+    private final HashMap<Control, Double> previousControlState;
 
     // Define your Action enum
     public enum Action {
@@ -31,7 +31,7 @@ public class Controller extends Gamepad {
         this.previousControlState = new HashMap<>();
     }
 
-    public void saveLastState() {
+    public final void saveLastState() {
         for (Control control : Control.values()) {
             previousControlState.put(control, getRawValue(control));
         }
@@ -65,7 +65,8 @@ public class Controller extends Gamepad {
     public final double getProcessedValue(Action action) {
         return getProcessedValue(getControlForAction(action));
     }
-    private final double getRawValue(Control control) {
+
+    private double getRawValue(Control control) {
         switch (control) {
             case LEFT_TRIGGER:
                 return gamepad.left_trigger;

@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
  * Main TeleOp class for driver-controlled period.
  * Handles controller profile selection and robot operation during matches.
  *
+ * @noinspection ClassWithoutConstructor
  */
 @TeleOp(name = "MainOp", group = ".Competition Modes")
 public class MainOp extends LinearOpMode {
@@ -30,7 +31,7 @@ public class MainOp extends LinearOpMode {
     private Controller subController;
     private Drivetrain drivetrain;
     private GoBildaPinpointDriver manualPinpoint;
-    private LimelightManager.LimelightPipeline pipeline = LimelightManager.LimelightPipeline.BLUE;
+    private final LimelightManager.LimelightPipeline pipeline = LimelightManager.LimelightPipeline.BLUE;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private Deadeye deadeye;
@@ -44,7 +45,7 @@ public class MainOp extends LinearOpMode {
      * 4. Handles shutdown when OpMode ends
      */
     @Override
-    public void runOpMode() {;
+    public final void runOpMode() {
         // Pull stored settings from auto
         // TODO why cant we use the blackboard object?
         matchSettings = new MatchSettings(new HashMap<>());
