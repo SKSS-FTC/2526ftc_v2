@@ -2,8 +2,9 @@ package org.firstinspires.ftc.teamcode.systems;
 
 import com.pedropathing.localization.GoBildaPinpointDriver;
 
+import org.firstinspires.ftc.teamcode.MatchSettings;
 import org.firstinspires.ftc.teamcode.Settings;
-import org.firstinspires.ftc.teamcode.input.Controller;
+import org.firstinspires.ftc.teamcode.Controller;
 import org.firstinspires.ftc.teamcode.mechanisms.MechanismManager;
 
 public class Deadeye {
@@ -11,13 +12,15 @@ public class Deadeye {
     private final Drivetrain drivetrain;
     private final MechanismManager mechanisms;
     private final GoBildaPinpointDriver pinpoint;
+    private final MatchSettings matchSettings;
     private double storedTx;
 
-    public Deadeye(Controller controller, Drivetrain drivetrain, MechanismManager mechanisms, GoBildaPinpointDriver pinpoint) {
+    public Deadeye(Controller controller, MatchSettings matchSettings, Drivetrain drivetrain, MechanismManager mechanisms, GoBildaPinpointDriver pinpoint) {
         this.controller = controller;
         this.drivetrain = drivetrain;
         this.mechanisms = mechanisms;
         this.pinpoint = pinpoint;
+        this.matchSettings = matchSettings;
         this.storedTx = 0;
     }
 
@@ -26,7 +29,7 @@ public class Deadeye {
         boolean headingAligned = Math.abs(wrappedHeading()) < 10; // TODO make this a setting
 
         if (specimenDetected && headingAligned) {
-            if (controller.isActive("deadeye")) {
+            if (Settings.Assistance.use_deadeye) {
                 drivetrain.state = Drivetrain.State.DEADEYE_ENABLED;
                 double Tx = mechanisms.intake.limelight.limelight.getLatestResult().getTx();
                 controller.setLedColor(0, 0, 255, 1000);
@@ -40,7 +43,7 @@ public class Deadeye {
                 controller.rumble(50);
                 drivetrain.state = Drivetrain.State.DEFAULT;
             }
-        } else if ((drivetrain.state == Drivetrain.State.DEADEYE_ENABLED) && controller.isActive("deadeye") && storedTx != 0) {
+        } else if ((drivetrain.state == Drivetrain.State.DEADEYE_ENABLED) && Settings.Assistance.use_deadeye && storedTx != 0) {
             controller.setLedColor(255, 0, 255, 1000);
             drivetrain.interpolateToOffset(
                     mechanisms.intake.limelight.limelight.getLatestResult().getTx(),
@@ -48,7 +51,7 @@ public class Deadeye {
                     wrappedHeading());
         } else {
             storedTx = 0;
-            if (controller.isActive("deadeye")) {
+            if (Settings.Assistance.use_deadeye) {
                 controller.setLedColor(0, 255, 255, 1000);
                 drivetrain.interpolateToOffset(0, 0, wrappedHeading());
                 drivetrain.state = Drivetrain.State.DEADEYE_ENABLED;

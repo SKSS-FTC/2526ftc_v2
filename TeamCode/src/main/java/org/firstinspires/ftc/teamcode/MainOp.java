@@ -4,10 +4,6 @@ import com.pedropathing.localization.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.input.ControllerProfile;
-import org.firstinspires.ftc.teamcode.input.ControllerProfileManager;
-import org.firstinspires.ftc.teamcode.input.MainController;
-import org.firstinspires.ftc.teamcode.input.SubController;
 import org.firstinspires.ftc.teamcode.mechanisms.MechanismManager;
 import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.LimelightManager;
 import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Shoulder;
@@ -16,6 +12,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Wrist;
 import org.firstinspires.ftc.teamcode.systems.Deadeye;
 import org.firstinspires.ftc.teamcode.systems.Drivetrain;
 
+import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -29,21 +26,15 @@ import java.util.concurrent.TimeUnit;
 public class MainOp extends LinearOpMode {
 
     private MechanismManager mechanisms;
-    private MainController mainController;
-    private SubController subController;
+    private Controller mainController;
+    private Controller subController;
     private Drivetrain drivetrain;
     private GoBildaPinpointDriver manualPinpoint;
-    private double flip = 1.0;
-
-    // Add back these important variables
     private LimelightManager.LimelightPipeline pipeline = LimelightManager.LimelightPipeline.BLUE;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private Deadeye deadeye;
-
-
-    // Controller profile management
-    private ControllerProfileManager profileManager;
+    public MatchSettings matchSettings;
 
     /**
      * Main execution flow:
@@ -53,20 +44,17 @@ public class MainOp extends LinearOpMode {
      * 4. Handles shutdown when OpMode ends
      */
     @Override
-    public void runOpMode() {
-        // Initialize controller profile manager first
-        profileManager = new ControllerProfileManager();
+    public void runOpMode() {;
+        // Pull stored settings from auto
+        // TODO why cant we use the blackboard object?
+        matchSettings = new MatchSettings(new HashMap<>());
 
         // Initialize robot systems
         mechanisms = new MechanismManager(hardwareMap);
-        mainController = new MainController(gamepad1);
-        subController = new SubController(gamepad2);
+        mainController = new Controller(gamepad1);
+        subController = new Controller(gamepad2);
         drivetrain = new Drivetrain(hardwareMap);
-        deadeye = new Deadeye(mainController, drivetrain, mechanisms, manualPinpoint);
-
-        // Initialize controller selection and profiles before waiting for start
-        // This will also handle pipeline selection
-        configureMatchSettings();
+        deadeye = new Deadeye(mainController, matchSettings, drivetrain, mechanisms, manualPinpoint);
 
         // Wait for start
         waitForStart();
@@ -78,9 +66,6 @@ public class MainOp extends LinearOpMode {
 
         // Main loop
         while (opModeIsActive()) {
-            // Update states
-            mainController.update(mainController);
-            subController.update(subController);
             manualPinpoint.update();
 
             processControllerInputs();
@@ -89,6 +74,9 @@ public class MainOp extends LinearOpMode {
             checkAssistanceConditions();
 
             updateTelemetry();
+
+            mainController.saveLastState();
+            subController.saveLastState();
         }
 
         // Stop all executor tasks at the end
@@ -96,128 +84,43 @@ public class MainOp extends LinearOpMode {
     }
 
     /**
-     * Sets up controller selection and profile selection before the OpMode starts
-     */
-    private void configureMatchSettings() {
-        telemetry.addLine("=== Match Setup ===");
-        telemetry.addLine("Press triangle to toggle limelight pipeline color");
-        telemetry.addLine("Press square to select profile");
-        telemetry.addLine("Press A/cross to continue");
-
-        boolean setupComplete = false;
-        boolean pipelineButtonState = false;
-        boolean mainProfileButtonState = false;
-        boolean subProfileButtonState = false;
-
-        while (!isStarted() && !isStopRequested() && !setupComplete) {
-            // Handle pipeline selection
-            if (mainController.triangle) {
-                if (!pipelineButtonState) {
-                    pipeline = pipeline == LimelightManager.LimelightPipeline.BLUE
-                            ? LimelightManager.LimelightPipeline.RED
-                            : LimelightManager.LimelightPipeline.BLUE;
-                    mainController.rumble(50);
-                    subController.rumble(50);
-                    pipelineButtonState = true;
-                }
-            } else {
-                pipelineButtonState = false;
-            }
-
-            // Handle main profile selection
-            if (mainController.square) {
-                if (!mainProfileButtonState) {
-                    ControllerProfile profile = profileManager.cycleMainProfile();
-                    mainController.setMapping(profile.getMapping());
-                    mainController.rumble(50);
-                    mainProfileButtonState = true;
-                }
-            } else {
-                mainProfileButtonState = false;
-            }
-
-            // Handle sub profile selection
-            if (subController.square) {
-                if (!subProfileButtonState) {
-                    ControllerProfile profile = profileManager.cycleSubProfile();
-                    subController.setMapping(profile.getMapping());
-                    subController.rumble(50);
-                    subProfileButtonState = true;
-                }
-            } else {
-                subProfileButtonState = false;
-            }
-
-            // Set game controller colors based on pipeline
-            if (pipeline == LimelightManager.LimelightPipeline.BLUE) {
-                mainController.setLedColor(0, 0, 255, 1000);
-                subController.setLedColor(0, 0, 255, 1000);
-                telemetry.addLine("Current Pipeline: BLUE");
-            } else {
-                mainController.setLedColor(255, 0, 0, 1000);
-                subController.setLedColor(255, 0, 0, 1000);
-                telemetry.addLine("Current Pipeline: RED");
-            }
-
-            // Display selected profiles
-            telemetry.addData("Main Profile", profileManager.getActiveMainProfile().getName());
-            telemetry.addData("Sub Profile", profileManager.getActiveSubProfile().getName());
-
-            // Check for completion
-            if (mainController.cross) {
-                setupComplete = true;
-                mainController.rumble(200);
-                subController.rumble(200);
-            }
-
-            telemetry.update();
-        }
-    }
-
-    /**
      * Process controller inputs
      */
     private void processControllerInputs() {
         // Get drivetrain controls
-        double drive = -mainController.getValue("moveForward") * flip;
-        double strafe = mainController.getValue("moveSideways") * flip;
-        double rotate = mainController.getValue("rotate");
+        double drive = mainController.getProcessedValue(Controller.Action.MOVE_Y);
+        double strafe = mainController.getProcessedValue(Controller.Action.MOVE_X);
+        double rotate = mainController.getProcessedValue(Controller.Action.ROTATE);
 
         // Apply the values to drivetrain
-        drivetrain.mecanumDrive(drive, strafe, rotate, flip);
-
-        // Flip controls - using Controller's edge detection
-        if (mainController.wasJustPressed("flip")) {
-            flip *= -1;
-            mainController.rumble(100);
-        }
+        drivetrain.mecanumDrive(drive, strafe, rotate);
 
         // Vertical slide controls - incremental mode
-        if (mainController.getSettings().getBooleanSetting("incrementalVertical")) {
-            if (mainController.isActive("extendVertical")) {
+        if (Settings.Controls.incrementalVertical) {
+            if (mainController.getProcessedValue(Controller.Action.EXTEND_VERTICAL) > 0.0) {
                 mechanisms.outtake.verticalSlide.increment();
             }
-            if (mainController.isActive("retractVertical")) {
+            if (mainController.getProcessedValue(Controller.Action.RETRACT_VERTICAL) > 0.0) {
                 mechanisms.outtake.verticalSlide.decrement();
             }
         } else { // Direct mode
-            if (mainController.wasJustPressed("extendVertical")) {
+            if (mainController.wasJustPressed(Controller.Action.EXTEND_VERTICAL)) {
                 mechanisms.outtake.verticalSlide.extend();
             }
-            if (mainController.wasJustPressed("retractVertical")) {
+            if (mainController.wasJustPressed(Controller.Action.RETRACT_VERTICAL)) {
                 mechanisms.outtake.verticalSlide.retract();
             }
 
         }
 
         // Intake controls using Controller's isPressed
-        if (subController.wasJustPressed("closeClaw")) {
+        if (subController.wasJustPressed(Controller.Action.CLOSE_CLAW)) {
             mechanisms.intake.intakeClaw.close();
             scheduleTask(() -> mechanisms.intake.wrist.setPosition(Wrist.Position.VERTICAL), 200);
             mechanisms.outtake.outtakeClaw.open();
         }
 
-        if (subController.wasJustPressed("openClaw")) {
+        if (subController.wasJustPressed(Controller.Action.OPEN_CLAW)) {
             mechanisms.intake.intakeClaw.open();
             if (mechanisms.intake.horizontalSlide.currentPosition.getValue() > 30 &&
                     mechanisms.intake.intakeClaw.opened) {
@@ -227,25 +130,25 @@ public class MainOp extends LinearOpMode {
             }
         }
 
-        if (subController.isActive("wristHorizontal")) {
+        if (subController.getProcessedValue(Controller.Action.WRIST_HORIZONTAL) > 0) {
             mechanisms.intake.wrist.setPosition(Wrist.Position.HORIZONTAL);
         }
 
         // Horizontal slide controls
-        if (mainController.getSettings().getBooleanSetting("incrementalHorizontal")) {
-            if (subController.isActive("extendHorizontal")) {
+        if (Settings.Controls.incrementalHorizontal) {
+            if (subController.getProcessedValue(Controller.Action.EXTEND_HORIZONTAL) > 0) {
                 mechanisms.intake.horizontalSlide.increment();
             }
 
-            if (subController.isActive("retractHorizontal")) {
+            if (subController.getProcessedValue(Controller.Action.RETRACT_HORIZONTAL) > 0) {
                 mechanisms.intake.horizontalSlide.decrement();
             }
         } else {
-            if (subController.wasJustPressed("extendHorizontal")) {
+            if (subController.wasJustPressed(Controller.Action.EXTEND_HORIZONTAL)) {
                 mechanisms.intake.horizontalSlide.extend();
             }
 
-            if (subController.wasJustPressed("retractHorizontal")) {
+            if (subController.wasJustPressed(Controller.Action.RETRACT_VERTICAL)) {
                 mechanisms.intake.horizontalSlide.retract();
                 if (mechanisms.intake.horizontalSlide.currentPosition == ViperSlide.HorizontalPosition.COLLAPSED) {
                     mechanisms.outtake.outtakeClaw.open();
@@ -255,17 +158,17 @@ public class MainOp extends LinearOpMode {
         }
 
         // Rotator control
-        double rotatorValue = subController.getValue("rotator");
+        double rotatorValue = subController.getProcessedValue(Controller.Action.ROTATOR);
         if (Math.abs(rotatorValue) > 0.05) {
             double normalizedValue = (rotatorValue + 1) / 2; // Convert from -1..1 to 0..1
             mechanisms.intake.rotator.setPosition(normalizedValue);
         }
 
-        if (subController.isActive("hangExtend")) {
+        if (subController.getProcessedValue(Controller.Action.HANG_EXTEND) > 0) {
             mechanisms.linearActuator.extend();
         }
 
-        if (subController.isActive("hangRetract")) {
+        if (subController.getProcessedValue(Controller.Action.HANG_EXTEND) > 0) {
             mechanisms.linearActuator.retract();
         }
     }
@@ -309,23 +212,8 @@ public class MainOp extends LinearOpMode {
      */
     private void updateTelemetry() {
         // Add controller profile information
-        telemetry.addLine("=== Controller Profiles ===");
-        telemetry.addData("Main Profile", profileManager.getActiveMainProfile().getName());
-        telemetry.addData("Sub Profile", profileManager.getActiveSubProfile().getName());
-
-        // Original telemetry
-        telemetry.addData("limelight tx", mechanisms.intake.limelight.limelight.getLatestResult().getTx());
-        telemetry.addData("limelight ty", mechanisms.intake.limelight.limelight.getLatestResult().getTy());
-        telemetry.addData("limelight detects specimen?", mechanisms.intake.limelight.specimenDetected());
-        telemetry.addData("heading", wrappedHeading());
+        telemetry.addLine("Ready to go!");
         telemetry.update();
-    }
-
-    /**
-     * Normalizes heading to range -π to π
-     */
-    private double wrappedHeading() {
-        return (manualPinpoint.getHeading() + Math.PI) % (2 * Math.PI) - Math.PI;
     }
 
     /**

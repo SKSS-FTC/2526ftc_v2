@@ -1,14 +1,44 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
-
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.EnumMap;
 
-/**
- * @noinspection CanBeFinal, ClassWithoutConstructor
- */
 @Config
 public class Settings {
+    private final HashMap blackboard;
+
+    public Settings(HashMap blackboard) {
+        this.blackboard = blackboard;
+    }
+
+    @Config
+    public static class Controls {
+        public static boolean incrementalVertical = false;
+        public static boolean incrementalHorizontal = false;
+        // Using EnumMap for better performance and type safety with Enum keys
+        // The keys are the physical controller inputs, the values are the game actions.
+        public static EnumMap<Controller.Action, Controller.Control> actionControlMap =
+                new EnumMap<>(Controller.Action.class); // Initialize with the Control enum class
+
+        static {
+            actionControlMap.put(Controller.Action.OPEN_CLAW, Controller.Control.RIGHT_TRIGGER);
+            actionControlMap.put(Controller.Action.CLOSE_CLAW, Controller.Control.LEFT_TRIGGER);
+            actionControlMap.put(Controller.Action.EXTEND_VERTICAL, Controller.Control.DPAD_UP);
+            actionControlMap.put(Controller.Action.RETRACT_VERTICAL, Controller.Control.DPAD_DOWN);
+            actionControlMap.put(Controller.Action.EXTEND_HORIZONTAL, Controller.Control.DPAD_LEFT);
+            actionControlMap.put(Controller.Action.RETRACT_HORIZONTAL, Controller.Control.DPAD_RIGHT);
+            actionControlMap.put(Controller.Action.MOVE_Y, Controller.Control.LEFT_STICK_Y);
+            actionControlMap.put(Controller.Action.MOVE_X, Controller.Control.LEFT_STICK_X);
+            actionControlMap.put(Controller.Action.ROTATE, Controller.Control.RIGHT_STICK_X);
+
+            // Everything else is "UNSET"
+            for (Controller.Action action : Controller.Action.values()) {
+                actionControlMap.putIfAbsent(action, Controller.Control.UNKNOWN); // Ensures all controls have a mapping
+            }
+        }
+    }
 
     // Movement settings
     @Config
@@ -67,6 +97,7 @@ public class Settings {
 
     @Config
     public static class Assistance {
+        public static boolean use_deadeye = true;
         public static double inverseLateralMultiplier = 50; // move at full power at 30 inches laterally away, going down to 0.0333333333 at 1 inch away
         public static double minimumRotationCorrectionThreshold = Math.PI / 70; // Don't correct heading within 0.1570796327
         public static double approachSpeed = 0.5; // if within an inch it's good enough

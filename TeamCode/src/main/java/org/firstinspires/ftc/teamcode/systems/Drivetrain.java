@@ -49,16 +49,16 @@ public class Drivetrain {
      * @param strafePower Left/right strafe power (-1.0 to 1.0)
      * @param rotation    Rotational power (-1.0 to 1.0)
      **/
-    public void mecanumDrive(double drivePower, double strafePower, double rotation, double flip, boolean asDeadeye) {
+    public void mecanumDrive(double drivePower, double strafePower, double rotation, boolean asDeadeye) {
         if (state == State.DEADEYE_ENABLED && !asDeadeye) {
             return; // deadeye is handling driving, do not manually drive
         }
         // Adjust the values for strafing and rotation
         strafePower *= Settings.Teleop.strafe_power_coefficient;
-        double frontLeft = (drivePower + strafePower) * flip + rotation;
-        double frontRight = (drivePower - strafePower) * flip - rotation;
-        double rearLeft = (drivePower - strafePower) * flip + rotation;
-        double rearRight = (drivePower + strafePower) * flip - rotation;
+        double frontLeft = (drivePower + strafePower) + rotation;
+        double frontRight = (drivePower - strafePower) - rotation;
+        double rearLeft = (drivePower - strafePower) + rotation;
+        double rearRight = (drivePower + strafePower) - rotation;
 
         frontLeftMotor.setPower(frontLeft);
         frontRightMotor.setPower(frontRight);
@@ -67,9 +67,6 @@ public class Drivetrain {
     }
 
     // mecanum drive assumes you are not driving as deadeye
-    public void mecanumDrive(double drivePower, double strafePower, double rotation, double flip) {
-        mecanumDrive(drivePower, strafePower, rotation, flip, false);
-    }
 
     public void interpolateToOffset(double offsetX, double offsetY, double offsetHeading) {
         double drivePower = -offsetY;
@@ -81,7 +78,7 @@ public class Drivetrain {
     }
 
     public void mecanumDrive(double drivePower, double strafePower, double rotation) {
-        mecanumDrive(drivePower, strafePower, rotation, 1, true);
+        mecanumDrive(drivePower, strafePower, rotation, false);
     }
 
     public enum State {
