@@ -1,6 +1,8 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.configuration;
 
 import com.acmerobotics.dashboard.config.Config;
+
+import org.firstinspires.ftc.teamcode.Controller;
 
 import java.util.EnumMap;
 
@@ -17,9 +19,12 @@ public class Settings {
     public static class Controls {
         public static boolean incrementalVertical = false;
         public static boolean incrementalHorizontal = false;
+        /**
+         * @noinspection PublicStaticCollectionField (i dont car)
+         */
         // Using EnumMap for better performance and type safety with Enum keys
         // The keys are the physical controller inputs, the values are the game actions.
-        protected static EnumMap<Controller.Action, Controller.Control> actionControlMap =
+        public static EnumMap<Controller.Action, Controller.Control> actionControlMap =
                 new EnumMap<>(Controller.Action.class); // Initialize with the Control enum class
 
         static {

@@ -16,12 +16,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.mechanisms.MechanismManager;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Shoulder;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.ViperSlide;
+import org.firstinspires.ftc.teamcode.configuration.MatchConfigurationWizard;
+import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
+import org.firstinspires.ftc.teamcode.configuration.Settings;
+import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.Shoulder;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.ViperSlide;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
-import org.firstinspires.ftc.teamcode.systems.Echolocation;
+import org.firstinspires.ftc.teamcode.software.Echolocation;
 
 import java.util.List;
 
@@ -34,6 +37,8 @@ public class OffseasonChamberPedroAuto extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
     private double actionState;
     private Telemetry visualization;
+    private MatchConfigurationWizard configWizard;
+    private MatchSettings matchSettings;
     /**
      * This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method.
@@ -53,19 +58,18 @@ public class OffseasonChamberPedroAuto extends OpMode {
 
     private List<Echolocation.Position> randomizedSamplePositions;
 
-
     /**
-     * Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
-     * It is necessary to do this so that all the paths are built before the auto starts.
+     * Build the paths for the auto (adds, for example, constant/linear headings
+     * while doing paths)
+     * It is necessary to do this so that all the paths are built before the auto
+     * starts.
      **/
     public void buildPaths() {
         initialPlaceOnChamber = new Path(
                 // Line 1
                 new BezierLine(
                         new Point(10.767, 59.940, Point.CARTESIAN),
-                        new Point(40.008, 70.105, Point.CARTESIAN)
-                )
-        );
+                        new Point(40.008, 70.105, Point.CARTESIAN)));
         initialPlaceOnChamber.setConstantHeadingInterpolation(Math.toRadians(0));
 
         prepSample1 = new Path(
@@ -74,56 +78,43 @@ public class OffseasonChamberPedroAuto extends OpMode {
                         new Point(6.891, 32.677, Point.CARTESIAN),
                         new Point(69.199, 32.631, Point.CARTESIAN),
                         new Point(75.737, 26.162, Point.CARTESIAN),
-                        new Point(61.168, 24.500, Point.CARTESIAN)
-                )
-        );
+                        new Point(61.168, 24.500, Point.CARTESIAN)));
         prepSample1.setConstantHeadingInterpolation(Math.toRadians(0));
 
         pushSample1 = new Path(
                 // Line 3
                 new BezierLine(
                         new Point(61.168, 24.50, Point.CARTESIAN),
-                        new Point(31.16653084252758, 23.685, Point.CARTESIAN))
-        );
+                        new Point(31.16653084252758, 23.685, Point.CARTESIAN)));
         pushSample1.setConstantHeadingInterpolation(Math.toRadians(0));
-
 
         prepSample2 = new Path(
                 // Line 4
                 new BezierCurve(
                         new Point(17.230, 24.185, Point.CARTESIAN),
                         new Point(70.768, 27.138, Point.CARTESIAN),
-                        new Point(60.245, 15.923, Point.CARTESIAN)
-                )
-        );
+                        new Point(60.245, 15.923, Point.CARTESIAN)));
         prepSample2.setConstantHeadingInterpolation(Math.toRadians(0));
-
 
         pushSample2 = new Path(
                 // Line 5
                 new BezierLine(
                         new Point(60.245, 15.923, Point.CARTESIAN),
-                        new Point(31.16653084252758, 16.292, Point.CARTESIAN)
-                )
-        );
+                        new Point(31.16653084252758, 16.292, Point.CARTESIAN)));
         pushSample2.setConstantHeadingInterpolation(Math.toRadians(0));
 
         prepSample3 = new Path(
                 new BezierCurve(
                         new Point(17.784, 13.292, Point.CARTESIAN),
                         new Point(72.045, 18.092, Point.CARTESIAN),
-                        new Point(60.061, 8.492 + 1, Point.CARTESIAN)
-                )
-        );
+                        new Point(60.061, 8.492 + 1, Point.CARTESIAN)));
         prepSample3.setConstantHeadingInterpolation(Math.toRadians(0));
 
         pushSample3 = new Path(
                 // Line 7
                 new BezierLine(
                         new Point(60.164, 10.544 + 2, Point.CARTESIAN),
-                        new Point(11.2, 10.544 + 2, Point.CARTESIAN)
-                )
-        );
+                        new Point(11.2, 10.544 + 2, Point.CARTESIAN)));
         pushSample3.setConstantHeadingInterpolation(Math.toRadians(0));
 
         initialGrabFromHumanPlayer = new Path(
@@ -131,24 +122,23 @@ public class OffseasonChamberPedroAuto extends OpMode {
                 new BezierCurve(
                         new Point(17.599, 8.677, Point.CARTESIAN),
                         new Point(46.584, 28.615, Point.CARTESIAN),
-                        new Point(11.178, 31.631, Point.CARTESIAN)
-                )
-        );
+                        new Point(11.178, 31.631, Point.CARTESIAN)));
         initialGrabFromHumanPlayer.setConstantHeadingInterpolation(Math.toRadians(0));
 
         grabFromHumanPlayer = new Path(
                 new BezierLine(
                         new Point(39.864, 63.984, Point.CARTESIAN),
-                        new Point(11.244, 31.631, Point.CARTESIAN)
-                )
-        );
+                        new Point(11.244, 31.631, Point.CARTESIAN)));
         grabFromHumanPlayer.setConstantHeadingInterpolation(Math.toRadians(0));
     }
 
     /**
-     * This switch is called continuously and runs the pathing, at certain points, it triggers the action state.
-     * Everytime the switch changes case, it will reset the timer. (This is because of the setPathState() method)
-     * The followPath() function sets the follower to run the specific path, but does NOT wait for it to finish before moving on.
+     * This switch is called continuously and runs the pathing, at certain points,
+     * it triggers the action state.
+     * Everytime the switch changes case, it will reset the timer. (This is because
+     * of the setPathState() method)
+     * The followPath() function sets the follower to run the specific path, but
+     * does NOT wait for it to finish before moving on.
      */
     public void autonomousPathUpdate() {
         switch (pathState) {
@@ -185,21 +175,24 @@ public class OffseasonChamberPedroAuto extends OpMode {
                     if (actionTimer.getElapsedTimeSeconds() > thirdActionLengthSeconds) {
                         setPathState(2);
                         actionState = 0;
-                        /* Prep and push all the samples in a chain, then prep to grab the first specimen */
+                        /*
+                         * Prep and push all the samples in a chain, then prep to grab the first
+                         * specimen
+                         */
                         mechanisms.outtake.moveShoulderToBack();
                         prepGrab();
                         follower.followPath(new PathChain(
                                 prepSample1, pushSample1,
                                 prepSample2, pushSample2,
                                 prepSample3, pushSample3
-//                                ,initialGrabFromHumanPlayer
+                                // ,initialGrabFromHumanPlayer
                         ), false);
                     }
                 }
                 break;
             case 2:
                 double harshithAlignmentLengthSeconds = 0.1; // 0.1 seconds to give harshith time
-                //noinspection SpellCheckingInspection
+                // noinspection SpellCheckingInspection
                 double grabLengthSeconds = 0.35; // half a second to yoinky sploinky
 
                 if (!follower.isBusy() && actionState == 0) {
@@ -228,9 +221,7 @@ public class OffseasonChamberPedroAuto extends OpMode {
                                 new BezierCurve(
                                         new Point(11.478, 31.631, Point.CARTESIAN),
                                         new Point(16.032, 60.951, Point.CARTESIAN),
-                                        new Point(40.008, 67.105 - (hpSpecimensPlaced * 2), Point.CARTESIAN)
-                                )
-                        );
+                                        new Point(40.008, 67.105 - (hpSpecimensPlaced * 2), Point.CARTESIAN)));
                         placeOnChamber.setConstantHeadingInterpolation(Math.toRadians(0));
                         follower.followPath(placeOnChamber);
                         setPathState(3);
@@ -264,7 +255,9 @@ public class OffseasonChamberPedroAuto extends OpMode {
                 }
                 break;
             case 4:
-                /* We have placed all specimens from the HP, so now either park or do echolocate */
+                /*
+                 * We have placed all specimens from the HP, so now either park or do echolocate
+                 */
                 if (!follower.isBusy()) {
                     if (Settings.Assistance.ECHOLOCATE_ENABLED) {
                         setPathState(1000); // TODO
@@ -287,7 +280,8 @@ public class OffseasonChamberPedroAuto extends OpMode {
     }
 
     /**
-     * This is the main loop of the OpMode, it will run repeatedly after clicking "Play".
+     * This is the main loop of the OpMode, it will run repeatedly after clicking
+     * "Play".
      **/
     @Override
     public void loop() {
@@ -331,7 +325,6 @@ public class OffseasonChamberPedroAuto extends OpMode {
         mechanisms.outtake.outtakeClaw.close();
     }
 
-
     /**
      * This method is called once at the init of the OpMode.
      **/
@@ -350,7 +343,13 @@ public class OffseasonChamberPedroAuto extends OpMode {
         visualization = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         mechanisms.intake.horizontalSlide.reset();
         mechanisms.outtake.verticalSlide.reset();
-        randomizedSamplePositions = Echolocation.phonate(telemetry, gamepad1, Echolocation.PositionType.PEDRO); // TODO use this
+        randomizedSamplePositions = Echolocation.phonate(telemetry, gamepad1, Echolocation.PositionType.PEDRO); // TODO
+        // use
+        // this
+
+        // Initialize match configuration wizard
+        matchSettings = new MatchSettings(blackboard);
+        configWizard = new MatchConfigurationWizard(matchSettings, gamepad1, telemetry);
     }
 
     /**
@@ -358,11 +357,13 @@ public class OffseasonChamberPedroAuto extends OpMode {
      **/
     @Override
     public void init_loop() {
+        configWizard.refresh();
     }
 
     /**
      * This method is called once at the start of the OpMode.
-     * It runs all the setup actions, including building paths and starting the path system
+     * It runs all the setup actions, including building paths and starting the path
+     * system
      **/
     @Override
     public void start() {
@@ -379,4 +380,3 @@ public class OffseasonChamberPedroAuto extends OpMode {
     public void stop() {
     }
 }
-

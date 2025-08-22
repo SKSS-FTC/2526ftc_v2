@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.mechanisms.submechanisms;
+package org.firstinspires.ftc.teamcode.hardware.submechanisms;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevColorSensorV3;

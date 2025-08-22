@@ -1,6 +1,6 @@
-package org.firstinspires.ftc.teamcode.mechanisms.submechanisms;
+package org.firstinspires.ftc.teamcode.hardware.submechanisms;
 
-import org.firstinspires.ftc.teamcode.Settings;
+import org.firstinspires.ftc.teamcode.configuration.Settings;
 
 public interface ViperSlide {
 

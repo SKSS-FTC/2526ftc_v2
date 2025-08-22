@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.teamcode.configuration.Settings;
+
 import java.util.HashMap;
 
 public class Controller extends Gamepad {

@@ -1,32 +1,28 @@
-package org.firstinspires.ftc.teamcode.mechanisms.submechanisms;
+package org.firstinspires.ftc.teamcode.hardware.submechanisms;
 
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Settings;
+import org.firstinspires.ftc.teamcode.configuration.Settings;
 
 /**
  * @noinspection unused
  */
-public class OuttakeClaw {
+public class IntakeClaw {
     public final Servo clawServo;
     public boolean opened = true;
 
-    public OuttakeClaw(Servo clawServo) {
+    public IntakeClaw(Servo clawServo) {
         this.clawServo = clawServo;
     }
 
-    public void init() {
-        close();
-    }
-
     public void open() {
-        clawServo.setPosition(Settings.Hardware.Servo.OuttakeClaw.OPEN);
+        clawServo.setPosition(Settings.Hardware.Servo.IntakeClaw.OPEN);
         opened = true;
     }
 
     /* Close both servos */
     public void close() {
-        clawServo.setPosition(Settings.Hardware.Servo.OuttakeClaw.CLOSED);
+        clawServo.setPosition(Settings.Hardware.Servo.IntakeClaw.CLOSED);
         opened = false;
     }
 
@@ -38,8 +34,10 @@ public class OuttakeClaw {
         }
     }
 
-    public void reset() {
+    public void init() {
+        close();
     }
 
-
+    public void reset() {
+    }
 }

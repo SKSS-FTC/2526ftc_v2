@@ -1,12 +1,12 @@
-package org.firstinspires.ftc.teamcode.mechanisms;
+package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.OuttakeClaw;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Shoulder;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.VerticalSlide;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.OuttakeClaw;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.Shoulder;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.VerticalSlide;
 
 public class Outtake {
     public final VerticalSlide verticalSlide;

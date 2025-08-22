@@ -1,10 +1,10 @@
-package org.firstinspires.ftc.teamcode.systems;
+package org.firstinspires.ftc.teamcode.software;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.Settings;
+import org.firstinspires.ftc.teamcode.configuration.Settings;
 
 import java.util.HashMap;
 import java.util.Map;

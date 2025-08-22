@@ -1,16 +1,16 @@
-package org.firstinspires.ftc.teamcode.mechanisms;
+package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.ColorSensor;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.HorizontalSlide;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.IntakeClaw;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.LimelightManager;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Rotator;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Wrist;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.ColorSensor;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.HorizontalSlide;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.IntakeClaw;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.LimelightManager;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.Rotator;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.Wrist;
 
 public class Intake {
     public final Rotator rotator;

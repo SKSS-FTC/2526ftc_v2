@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode.systems;
+package org.firstinspires.ftc.teamcode.software;
 
 import com.pedropathing.localization.GoBildaPinpointDriver;
 
-import org.firstinspires.ftc.teamcode.MatchSettings;
-import org.firstinspires.ftc.teamcode.Settings;
 import org.firstinspires.ftc.teamcode.Controller;
-import org.firstinspires.ftc.teamcode.mechanisms.MechanismManager;
+import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
+import org.firstinspires.ftc.teamcode.configuration.Settings;
+import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
 
 public class Deadeye {
     private final Controller controller;

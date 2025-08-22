@@ -1,14 +1,14 @@
-package org.firstinspires.ftc.teamcode.mechanisms.submechanisms;
+package org.firstinspires.ftc.teamcode.hardware.submechanisms;
 
-import static org.firstinspires.ftc.teamcode.Settings.Hardware.VerticalSlide.IDLE_POWER;
-import static org.firstinspires.ftc.teamcode.Settings.Hardware.VerticalSlide.MOVEMENT_POWER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Hardware.VerticalSlide.IDLE_POWER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Hardware.VerticalSlide.MOVEMENT_POWER;
 
 import androidx.annotation.NonNull;
 
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.Settings;
+import org.firstinspires.ftc.teamcode.configuration.Settings;
 
 public class VerticalSlide implements ViperSlide {
     public final DcMotor verticalMotorLeft;

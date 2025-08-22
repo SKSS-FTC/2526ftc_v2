@@ -1,9 +1,9 @@
-package org.firstinspires.ftc.teamcode.mechanisms.submechanisms;
+package org.firstinspires.ftc.teamcode.hardware.submechanisms;
 
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.Settings;
+import org.firstinspires.ftc.teamcode.configuration.Settings;
 
 /**
  * @noinspection unused

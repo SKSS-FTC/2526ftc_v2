@@ -15,14 +15,16 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.mechanisms.MechanismManager;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Rotator;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Shoulder;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.ViperSlide;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Wrist;
+import org.firstinspires.ftc.teamcode.configuration.MatchConfigurationWizard;
+import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
+import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.Rotator;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.Shoulder;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.ViperSlide;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.Wrist;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
-import org.firstinspires.ftc.teamcode.systems.Echolocation;
+import org.firstinspires.ftc.teamcode.software.Echolocation;
 
 import java.util.List;
 
@@ -42,16 +44,21 @@ public class OffseasonBasketPedroAuto extends OpMode {
     private List<Echolocation.Position> randomizedSamplePositions;
     private double actionState;
     private Telemetry visualization;
+    private MatchConfigurationWizard configWizard;
+    private MatchSettings matchSettings;
     /**
      * This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method.
+     *
      * @noinspection FieldHasSetterButNoGetter
      */
     private int pathState;
 
     /**
-     * Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
-     * It is necessary to do this so that all the paths are built before the auto starts.
+     * Build the paths for the auto (adds, for example, constant/linear headings
+     * while doing paths)
+     * It is necessary to do this so that all the paths are built before the auto
+     * starts.
      **/
     public void buildPaths() {
         initialDropInBasket = new Path(
@@ -59,60 +66,51 @@ public class OffseasonBasketPedroAuto extends OpMode {
                 new BezierCurve(
                         new Point(9.757, 84.983, Point.CARTESIAN),
                         new Point(42.362, 79.294, Point.CARTESIAN),
-                        new Point(13.800, 130.423, Point.CARTESIAN)
-                )
-        );
+                        new Point(13.800, 130.423, Point.CARTESIAN)));
         initialDropInBasket.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(-45));
 
         grabSample1 = new Path(
                 // Line 2
                 new BezierLine(
                         new Point(13.800, 130.423, Point.CARTESIAN),
-                        new Point(36.33202733199599, 121.17953861584755, Point.CARTESIAN)
-                )
-        );
+                        new Point(36.33202733199599, 121.17953861584755, Point.CARTESIAN)));
         grabSample1.setLinearHeadingInterpolation(Math.toRadians(-45), Math.toRadians(0));
 
         grabSample2 = new Path(
                 // Line 4
                 new BezierLine(
                         new Point(13.728, 130.423, Point.CARTESIAN),
-                        new Point(33.804, 131.723, Point.CARTESIAN)
-                )
-        );
+                        new Point(33.804, 131.723, Point.CARTESIAN)));
         grabSample2.setLinearHeadingInterpolation(Math.toRadians(-45), Math.toRadians(0));
 
         grabSample3 = new Path(
                 new BezierLine(
                         new Point(13.728, 130.423, Point.CARTESIAN),
-                        new Point(34.960, 131.868, Point.CARTESIAN)
-                )
-        );
+                        new Point(34.960, 131.868, Point.CARTESIAN)));
         grabSample3.setLinearHeadingInterpolation(Math.toRadians(-45), Math.toRadians(45));
 
         returnSample = new Path(
                 // Lines 3, 5, 7
                 new BezierLine(
                         new Point(33.877, 120.891, Point.CARTESIAN),
-                        new Point(13.728, 130.423, Point.CARTESIAN)
-                )
-        );
+                        new Point(13.728, 130.423, Point.CARTESIAN)));
         returnSample.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(-45));
 
         park = new Path(
                 new BezierCurve(
                         new Point(13.728, 130.423, Point.CARTESIAN),
                         new Point(64.749, 129.123, Point.CARTESIAN),
-                        new Point(60.272, 96.626, Point.CARTESIAN)
-                )
-        );
+                        new Point(60.272, 96.626, Point.CARTESIAN)));
         park.setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(90));
     }
 
     /**
-     * This switch is called continuously and runs the pathing, at certain points, it triggers the action state.
-     * Everytime the switch changes case, it will reset the timer. (This is because of the setPathState() method)
-     * The followPath() function sets the follower to run the specific path, but does NOT wait for it to finish before moving on.
+     * This switch is called continuously and runs the pathing, at certain points,
+     * it triggers the action state.
+     * Everytime the switch changes case, it will reset the timer. (This is because
+     * of the setPathState() method)
+     * The followPath() function sets the follower to run the specific path, but
+     * does NOT wait for it to finish before moving on.
      */
     public void autonomousPathUpdate() {
         switch (pathState) {
@@ -127,8 +125,8 @@ public class OffseasonBasketPedroAuto extends OpMode {
                         - ViperSlide.VerticalPosition.HIGH_BASKET.getValue());
                 double dropTime = 0.1;
                 double shoulderMoveTime = 0.7;
-                boolean slideFinishedExtending =
-                        Math.abs(mechanisms.outtake.verticalSlide.verticalMotorRight.getCurrentPosition()
+                boolean slideFinishedExtending = Math
+                        .abs(mechanisms.outtake.verticalSlide.verticalMotorRight.getCurrentPosition()
                                 - ViperSlide.VerticalPosition.HIGH_BASKET.getValue()) < 50;
                 // wait until the robot finished previous trajectory and is ready to drop
                 if (!follower.isBusy() && slideFinishedExtending && actionState == 0) {
@@ -222,11 +220,12 @@ public class OffseasonBasketPedroAuto extends OpMode {
                 }
                 break;
             case 4:
-                boolean slideDoneExtending =
-                        Math.abs(mechanisms.outtake.verticalSlide.verticalMotorRight.getCurrentPosition()
+                boolean slideDoneExtending = Math
+                        .abs(mechanisms.outtake.verticalSlide.verticalMotorRight.getCurrentPosition()
                                 - ViperSlide.VerticalPosition.HANG_RUNG_1.getValue()) < 50;
                 if (!follower.isBusy() && slideDoneExtending) {
-                    // once the slide is done extending, and we are at park position, hold on the bar
+                    // once the slide is done extending, and we are at park position, hold on the
+                    // bar
                     mechanisms.outtake.moveShoulderToBack();
                     actionState = 0;
                     actionTimer.resetTimer();
@@ -246,7 +245,8 @@ public class OffseasonBasketPedroAuto extends OpMode {
     }
 
     /**
-     * This is the main loop of the OpMode, it will run repeatedly after clicking "Play".
+     * This is the main loop of the OpMode, it will run repeatedly after clicking
+     * "Play".
      **/
     @Override
     public void loop() {
@@ -302,7 +302,6 @@ public class OffseasonBasketPedroAuto extends OpMode {
         mechanisms.outtake.outtakeClaw.close();
     }
 
-
     /**
      * This method is called once at the init of the OpMode.
      **/
@@ -321,7 +320,13 @@ public class OffseasonBasketPedroAuto extends OpMode {
         visualization = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         mechanisms.intake.horizontalSlide.reset();
         mechanisms.outtake.verticalSlide.reset();
-        randomizedSamplePositions = Echolocation.phonate(telemetry, gamepad1, Echolocation.PositionType.PEDRO); // TODO use this
+        randomizedSamplePositions = Echolocation.phonate(telemetry, gamepad1, Echolocation.PositionType.PEDRO); // TODO
+        // use
+        // this
+
+        // Initialize match configuration wizard
+        matchSettings = new MatchSettings(blackboard);
+        configWizard = new MatchConfigurationWizard(matchSettings, gamepad1, telemetry);
     }
 
     /**
@@ -329,11 +334,13 @@ public class OffseasonBasketPedroAuto extends OpMode {
      **/
     @Override
     public void init_loop() {
+        configWizard.refresh();
     }
 
     /**
      * This method is called once at the start of the OpMode.
-     * It runs all the setup actions, including building paths and starting the path system
+     * It runs all the setup actions, including building paths and starting the path
+     * system
      **/
     @Override
     public void start() {
@@ -350,4 +357,3 @@ public class OffseasonBasketPedroAuto extends OpMode {
     public void stop() {
     }
 }
-

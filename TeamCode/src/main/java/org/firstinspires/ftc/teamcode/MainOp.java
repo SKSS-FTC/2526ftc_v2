@@ -4,15 +4,16 @@ import com.pedropathing.localization.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.mechanisms.MechanismManager;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.LimelightManager;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Shoulder;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.ViperSlide;
-import org.firstinspires.ftc.teamcode.mechanisms.submechanisms.Wrist;
-import org.firstinspires.ftc.teamcode.systems.Deadeye;
-import org.firstinspires.ftc.teamcode.systems.Drivetrain;
+import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
+import org.firstinspires.ftc.teamcode.configuration.Settings;
+import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.LimelightManager;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.Shoulder;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.ViperSlide;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.Wrist;
+import org.firstinspires.ftc.teamcode.software.Deadeye;
+import org.firstinspires.ftc.teamcode.software.Drivetrain;
 
-import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +49,7 @@ public class MainOp extends LinearOpMode {
     public final void runOpMode() {
         // Pull stored settings from auto
         // TODO why cant we use the blackboard object?
-        matchSettings = new MatchSettings(new HashMap<>());
+        matchSettings = new MatchSettings(blackboard);
 
         // Initialize robot systems
         mechanisms = new MechanismManager(hardwareMap);
