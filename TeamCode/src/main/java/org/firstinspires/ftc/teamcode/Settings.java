@@ -1,25 +1,25 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
-import java.lang.reflect.Field;
-import java.util.HashMap;
+
 import java.util.EnumMap;
 
+/**
+ * The Settings class houses all of the constants and configuration for the robot.
+ * Any magic numbers we may need to change later should be stored here.
+ *
+ * @noinspection ClassWithoutConstructor
+ */
 @Config
 public class Settings {
-    private final HashMap blackboard;
-
-    public Settings(HashMap blackboard) {
-        this.blackboard = blackboard;
-    }
-
+    /* The configuration for the Controllers. **/
     @Config
     public static class Controls {
         public static boolean incrementalVertical = false;
         public static boolean incrementalHorizontal = false;
         // Using EnumMap for better performance and type safety with Enum keys
         // The keys are the physical controller inputs, the values are the game actions.
-        public static EnumMap<Controller.Action, Controller.Control> actionControlMap =
+        protected static EnumMap<Controller.Action, Controller.Control> actionControlMap =
                 new EnumMap<>(Controller.Action.class); // Initialize with the Control enum class
 
         static {
@@ -46,53 +46,18 @@ public class Settings {
         // Multiplier applied to strafe movements to compensate for mechanical differences
         public static double strafe_power_coefficient = 1.2;
 
-        // Begin the robot controls flipped (-1) or regular (1)
-        public static double initial_flip = 1;
-
-        // Enable or disable automatic functions
+        // Enable or disable all automatic functions
         public static boolean automationEnabled = true;
 
     }
 
-    // Deploy flags
+    // Deploy flags control what parts of the tob
     @Config
     public static class Deploy {
         // Core Mechanisms
         public static final boolean INTAKE = true;
         public static final boolean OUTTAKE = true;
         public static final boolean LINEAR_ACTUATOR = false;
-
-        public enum AutonomousMode {
-            JUST_PARK, JUST_PLACE, CHAMBER, BASKET
-        }
-    }
-
-    public static String getDisabledFlags() {
-        StringBuilder enabledFlags = new StringBuilder();
-
-        Field[] fields = Deploy.class.getFields();
-
-        for (Field field : fields) {
-            try {
-                if (!field.getBoolean(null)) {
-                    enabledFlags.append(field.getName()).append(", ");
-                }
-            } catch (IllegalAccessException ignored) {
-            }
-        }
-
-        return enabledFlags.toString();
-    }
-
-    @Config
-    public static class Calibration {
-        /**
-         * Multiplier applied to strafe movements to compensate for mechanical
-         * differences
-         */
-        public static double headingTolerance = 0.02;
-        //        public static Vector2d spacialTolerance = new Vector2d(0.5, 0.5);
-        public static double CALIBRATION_APPROXIMATION_COEFFICIENT = 0;
     }
 
     @Config
@@ -102,20 +67,13 @@ public class Settings {
         public static double minimumRotationCorrectionThreshold = Math.PI / 70; // Don't correct heading within 0.1570796327
         public static double approachSpeed = 0.5; // if within an inch it's good enough
         public static double limelightWindowSize = 40; // degrees
+        public static boolean ECHOLOCATE_ENABLED = false;
     }
 
+    /** @noinspection InnerClassTooDeeplyNested*/
     // Hardware settings
     @Config
     public static class Hardware {
-        /**
-         * Encoder counts per full motor revolution
-         */
-        public static final double COUNTS_PER_REVOLUTION = 10323.84; // ish? may need to recalculate later
-        /**
-         * Diameter of the odometry wheels in inches
-         */
-        public static final double WHEEL_DIAMETER_INCHES = 3.5;
-
         // Servo positions
         @Config
         public static class Servo {
@@ -153,8 +111,6 @@ public class Settings {
 
             @Config
             public static class Shoulder {
-                // TODO: TUNE WHEN NEW SERVO GOES IN
-                public static double TRANSFER_POSITION = 0.1;
                 public static double PLACE_FORWARD_POSITION = 0;
                 public static double PLACE_BACKWARD_POSITION = 0.65;
 
@@ -163,8 +119,6 @@ public class Settings {
 
         @Config
         public static class IDs {
-            public static final String IMU = "imu";
-            public static final String LED = "led";
 
             // Drive motors
             public static final String FRONT_LEFT_MOTOR = "frontLeft";
@@ -183,7 +137,6 @@ public class Settings {
             public static final String RIGHT_SHOULDER = "shoulderRight";
             public static final String INTAKE_CLAW = "intakeClaw";
             public static final String OUTTAKE_CLAW = "outtakeClaw";
-            public static final String PINPOINT = "pinpoint";
             public static final String SLIDE_VERTICAL_TOUCH_SENSOR = "verticalSlideSensor";
             public static final String LIMELIGHT = "limelight";
             public static final String COLOR_SENSOR = "colorSensor";
@@ -194,8 +147,6 @@ public class Settings {
             // Positions in encoder ticks
 
             public static int TRANSFER = 0;
-            public static int LOW_RUNG = 80;
-            public static int LOW_BASKET = 550;
             public static int HANG_RUNG_1 = 3350;
 
             public static int HIGH_RUNG_PREP_AUTO = 1890;
@@ -214,7 +165,6 @@ public class Settings {
         @Config
         public static class HorizontalSlide {
             // Positions in encoder ticks
-            // TODO: TUNE
             public static int COLLAPSED = 0;
             public static int LEVEL_1 = 82;
             public static int EXPANDED = 250;
@@ -229,34 +179,11 @@ public class Settings {
             // Positions in encoder ticks
             public static int MAX = 1000;
             public static int MIN = 0;
-
-            public static double SPEED = 0.5;
         }
 
         @Config
         public static class Intake {
             public static double SPEED = -1;
-        }
-    }
-
-    // Autonomous settings
-    @Config
-    public static class Autonomous {
-        public static boolean ECHOLOCATE_ENABLED = false;
-
-        @Config
-        public static class Movement {
-            public static int ENCODERS_NEEDED_TO_CORRECT_ODOMETRY = 3;
-        }
-
-        @Config
-        public static class Timing {
-            /**
-             * Pause duration after claw operations (milliseconds)
-             */
-            public static long CLAW_PAUSE = 500;
-            public static long WRIST_PAUSE = 1000;
-            public static long EXTENSOR_PAUSE = 2500;
         }
     }
 }

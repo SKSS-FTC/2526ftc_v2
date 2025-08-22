@@ -266,7 +266,7 @@ public class OffseasonChamberPedroAuto extends OpMode {
             case 4:
                 /* We have placed all specimens from the HP, so now either park or do echolocate */
                 if (!follower.isBusy()) {
-                    if (Settings.Autonomous.ECHOLOCATE_ENABLED) {
+                    if (Settings.Assistance.ECHOLOCATE_ENABLED) {
                         setPathState(1000); // TODO
                     } else {
                         follower.followPath(park);
