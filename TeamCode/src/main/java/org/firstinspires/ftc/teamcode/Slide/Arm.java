@@ -49,6 +49,7 @@ public class Arm {
   public void set_Arm_Len(double len) {
     rEXT.setPower(len);
     lEXT.setPower(len);
+    pivot.setPower(-len/1.5);
   }
 
   public double get_Arm_Len() { // 12in is roughly from -199 to -56__ 
