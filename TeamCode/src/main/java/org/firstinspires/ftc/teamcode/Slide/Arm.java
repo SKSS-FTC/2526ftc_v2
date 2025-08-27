@@ -14,32 +14,48 @@ import org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver;
 
 public class Arm {
 
-  private DcMotor arm_Len;
+  public DcMotor arm_Len, rEXT, lEXT, pivot;
   private LinearOpMode opMode;
+  public double offset = 0.0;
 
   public Arm(LinearOpMode opMode) {
     this.opMode = opMode;
     arm_Len = opMode.hardwareMap.get(DcMotor.class, "Arm odometry");
     arm_Len.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     arm_Len.setDirection(DcMotorSimple.Direction.REVERSE);
+    offset = arm_Len.getCurrentPosition();
+    rEXT = opMode.hardwareMap.get(DcMotor.class, "right extension");
+    rEXT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    rEXT.setDirection(DcMotorSimple.Direction.REVERSE);
+    rEXT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    lEXT = opMode.hardwareMap.get(DcMotor.class, "left extension");
+    lEXT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    lEXT.setDirection(DcMotorSimple.Direction.FORWARD);
+    lEXT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    pivot = opMode.hardwareMap.get(DcMotor.class, "pivot");
+    pivot.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    pivot.setDirection(DcMotorSimple.Direction.FORWARD);
+    pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
   }
 
   public void set_Arm_Pos(double len, double ang) {
 
   }
 
-  public void set_Arm_Ang(int ang) {
-
+  public void set_Arm_Ang(double ang) {
+    pivot.setPower(ang);
   }
 
   public void set_Arm_Len(double len) {
-
+    rEXT.setPower(len);
+    lEXT.setPower(len);
   }
 
   public double get_Arm_Len() { // 12in is roughly from -199 to -56__ 
-    double len = 0;
-    len = arm_Len.getCurrentPosition();
+    double len = offset;
+    len += arm_Len.getCurrentPosition();
     opMode.telemetry.addLine("Arm pos: " + len);
+    opMode.telemetry.addLine("Offset: " + offset);
     return len;
   }
 
