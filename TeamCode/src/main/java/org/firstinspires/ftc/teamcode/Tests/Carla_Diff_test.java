@@ -21,8 +21,9 @@ public class Carla_Diff_test extends LinearOpMode {
       pos = -gamepad1.left_stick_y;
       rotation = gamepad1.right_stick_x;
       diff.move(pos,rotation);
-      telemetry.addLine("left diff pos: " + diff.left.getPosition());
-      telemetry.addLine("right diff pos: " + diff.right.getPosition());
+      telemetry.addLine("left diff pow: " + diff.left.getPower());
+      telemetry.addLine("right diff pow: " + diff.right.getPower());
+      telemetry.addLine("input pos: " + pos);
       telemetry.update();
     }
   }
