@@ -30,7 +30,7 @@ import java.util.List;
 
 @Autonomous(name = "Chamber Auto", group = ".Competition Modes", preselectTeleOp = "MainOp")
 @Config
-public class OffseasonChamberPedroAuto extends OpMode {
+public class FarStartAuto extends OpMode {
     public double hpSpecimensPlaced = 0;
     private Follower follower;
     private MechanismManager mechanisms;

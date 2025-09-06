@@ -30,7 +30,7 @@ import java.util.List;
 
 @Autonomous(name = "Basket Auto", group = ".Competition Modes", preselectTeleOp = "MainOp")
 @Config
-public class OffseasonBasketPedroAuto extends OpMode {
+public class GoalStartAuto extends OpMode {
     private static Path initialDropInBasket;
     private static Path grabSample1;
     private static Path grabSample2;

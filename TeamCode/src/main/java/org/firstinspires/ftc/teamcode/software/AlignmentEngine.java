@@ -1,37 +1,43 @@
 package org.firstinspires.ftc.teamcode.software;
 
 import com.pedropathing.localization.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.LLResult;
 
 import org.firstinspires.ftc.teamcode.Controller;
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
+import org.firstinspires.ftc.teamcode.hardware.submechanisms.LimelightManager;
 
-public class Deadeye {
+public class AlignmentEngine {
     private final Controller controller;
     private final Drivetrain drivetrain;
     private final MechanismManager mechanisms;
     private final GoBildaPinpointDriver pinpoint;
     private final MatchSettings matchSettings;
+    private final LimelightManager limelightManager;
     private double storedTx;
 
-    public Deadeye(Controller controller, MatchSettings matchSettings, Drivetrain drivetrain, MechanismManager mechanisms, GoBildaPinpointDriver pinpoint) {
+    public AlignmentEngine(Controller controller, MatchSettings matchSettings, Drivetrain drivetrain, MechanismManager mechanisms, LimelightManager limelightManager, GoBildaPinpointDriver pinpoint) {
         this.controller = controller;
         this.drivetrain = drivetrain;
         this.mechanisms = mechanisms;
         this.pinpoint = pinpoint;
         this.matchSettings = matchSettings;
+        this.limelightManager = limelightManager;
         this.storedTx = 0;
     }
 
     public void check() {
-        boolean specimenDetected = mechanisms.intake.limelight.specimenDetected();
+        LLResult llResult = limelightManager.detectGoal(matchSettings);
+        boolean artifactDetected = llResult.isValid();
+        // TODO everything past this is old
         boolean headingAligned = Math.abs(wrappedHeading()) < 10; // TODO make this a setting
 
-        if (specimenDetected && headingAligned) {
+        if (artifactDetected && headingAligned) {
             if (Settings.Assistance.use_deadeye) {
                 drivetrain.state = Drivetrain.State.DEADEYE_ENABLED;
-                double Tx = mechanisms.intake.limelight.limelight.getLatestResult().getTx();
+                double Tx = limelightManager.limelight.getLatestResult().getTx();
                 controller.setLedColor(0, 0, 255, 1000);
                 drivetrain.interpolateToOffset(
                         Tx,
@@ -46,7 +52,7 @@ public class Deadeye {
         } else if ((drivetrain.state == Drivetrain.State.DEADEYE_ENABLED) && Settings.Assistance.use_deadeye && storedTx != 0) {
             controller.setLedColor(255, 0, 255, 1000);
             drivetrain.interpolateToOffset(
-                    mechanisms.intake.limelight.limelight.getLatestResult().getTx(),
+                    limelightManager.limelight.getLatestResult().getTx(),
                     Settings.Assistance.approachSpeed,
                     wrappedHeading());
         } else {

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.localization.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -11,8 +12,9 @@ import org.firstinspires.ftc.teamcode.hardware.submechanisms.LimelightManager;
 import org.firstinspires.ftc.teamcode.hardware.submechanisms.Shoulder;
 import org.firstinspires.ftc.teamcode.hardware.submechanisms.ViperSlide;
 import org.firstinspires.ftc.teamcode.hardware.submechanisms.Wrist;
-import org.firstinspires.ftc.teamcode.software.Deadeye;
+import org.firstinspires.ftc.teamcode.software.AlignmentEngine;
 import org.firstinspires.ftc.teamcode.software.Drivetrain;
+import org.firstinspires.ftc.teamcode.software.TrajectoryEngine;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,14 +30,15 @@ import java.util.concurrent.TimeUnit;
 public class MainOp extends LinearOpMode {
 
     private MechanismManager mechanisms;
+    private LimelightManager limelightManager;
     private Controller mainController;
     private Controller subController;
     private Drivetrain drivetrain;
     private GoBildaPinpointDriver manualPinpoint;
-    private final LimelightManager.LimelightPipeline pipeline = LimelightManager.LimelightPipeline.BLUE;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    private Deadeye deadeye;
+    private AlignmentEngine alignmentEngine;
+    private TrajectoryEngine trajectoryEngine;
     public MatchSettings matchSettings;
 
     /**
@@ -48,7 +51,6 @@ public class MainOp extends LinearOpMode {
     @Override
     public final void runOpMode() {
         // Pull stored settings from auto
-        // TODO why cant we use the blackboard object?
         matchSettings = new MatchSettings(blackboard);
 
         // Initialize robot systems
@@ -56,15 +58,15 @@ public class MainOp extends LinearOpMode {
         mainController = new Controller(gamepad1);
         subController = new Controller(gamepad2);
         drivetrain = new Drivetrain(hardwareMap);
-        deadeye = new Deadeye(mainController, matchSettings, drivetrain, mechanisms, manualPinpoint);
-
+        limelightManager = new LimelightManager(hardwareMap.get(Limelight3A.class, "limelight"));
+        manualPinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        alignmentEngine = new AlignmentEngine(mainController, matchSettings, drivetrain, mechanisms, limelightManager, manualPinpoint);
+        trajectoryEngine = new TrajectoryEngine(limelightManager, manualPinpoint, matchSettings);
         // Wait for start
         waitForStart();
 
         // Initialize mechanisms
         mechanisms.init();
-        manualPinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
-        mechanisms.intake.limelight.setCurrentPipeline(pipeline);
 
         // Main loop
         while (opModeIsActive()) {
@@ -206,7 +208,7 @@ public class MainOp extends LinearOpMode {
      * Check for assistance conditions
      */
     private void checkAssistanceConditions() {
-        deadeye.check();
+        alignmentEngine.check();
     }
 
     /**
