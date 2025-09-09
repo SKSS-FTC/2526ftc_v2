@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.command.logic;
+package org.firstinspires.ftc.teamcode.scheduler;
 
 public interface Command{
     void start();          // called once when scheduled
