@@ -2,11 +2,11 @@ package org.firstinspires.ftc.teamcode.scheduler;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-public class WaitCommand implements Command {
+public class Wait implements Command {
     private double time;
     private ElapsedTime timer = new ElapsedTime();
 
-    public WaitCommand(double time) {
+    public Wait(double time) {
         this.time = time;
     }
 
@@ -27,6 +27,5 @@ public class WaitCommand implements Command {
 
     @Override
     public void end() {
-
     }
 }

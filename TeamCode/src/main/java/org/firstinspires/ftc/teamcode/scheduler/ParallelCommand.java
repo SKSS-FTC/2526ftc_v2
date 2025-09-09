@@ -3,10 +3,10 @@ package org.firstinspires.ftc.teamcode.scheduler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParallelCommandGroup implements Command {
+public class ParallelCommand implements Command {
     private List<Command> commands = new ArrayList<>();
 
-    public ParallelCommandGroup(Command... cmds) {
+    public ParallelCommand(Command... cmds) {
         for (Command c : cmds) {
             commands.add(c);
         }
@@ -21,7 +21,6 @@ public class ParallelCommandGroup implements Command {
 
     @Override
     public void update() {
-        // Each child still gets its own update() tick!
         for (Command c : commands) {
             if (!c.isFinished()) {
                 c.update();
@@ -31,9 +30,10 @@ public class ParallelCommandGroup implements Command {
 
     @Override
     public boolean isFinished() {
-        // finish when ALL children are finished
         for (Command c : commands) {
-            if (!c.isFinished()) return false;
+            if (!c.isFinished()) {
+                return false;
+            }
         }
         return true;
     }
