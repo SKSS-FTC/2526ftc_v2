@@ -7,7 +7,7 @@ public class Intake {
 
     // ARC Thunder Vortex
 
-    private final double intakingPower = 0.0;
+    private final double INTAKING_POWER = 0.0;
     private MotorEx intakeMotor;
     private boolean running;
 
@@ -21,7 +21,7 @@ public class Intake {
         running = startMotor;
         if(startMotor)
         {
-            intakeMotor.set(intakingPower);
+            intakeMotor.set(INTAKING_POWER);
         }
         else {
             intakeMotor.stopMotor();
