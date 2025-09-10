@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode.software;
 
-import com.pedropathing.localization.GoBildaPinpointDriver;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Controller;
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
@@ -69,6 +70,6 @@ public class AlignmentEngine {
     }
 
     private double wrappedHeading() {
-        return (pinpoint.getHeading() + Math.PI) % (2 * Math.PI) - Math.PI;
+        return (pinpoint.getHeading(AngleUnit.RADIANS) + Math.PI) % (2 * Math.PI) - Math.PI;
     }
 }
