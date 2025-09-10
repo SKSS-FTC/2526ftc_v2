@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.software;
 
-import com.pedropathing.localization.GoBildaPinpointDriver;
+
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.hardware.submechanisms.LimelightManager;
