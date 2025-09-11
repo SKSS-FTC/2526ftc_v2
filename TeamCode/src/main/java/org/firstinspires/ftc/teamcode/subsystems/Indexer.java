@@ -78,4 +78,6 @@ public class Indexer {
         }
     }
 
+    public IndexerState numToState(int num)
+    {
 }
