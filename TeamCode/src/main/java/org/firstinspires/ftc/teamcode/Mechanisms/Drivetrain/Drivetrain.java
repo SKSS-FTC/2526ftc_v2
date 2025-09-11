@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.Mechanisms.Drivetrain;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 import static org.firstinspires.ftc.teamcode.Mechanisms.Drivetrain.Utils.Utils.inverseKinematics;
 import static org.firstinspires.ftc.teamcode.Mechanisms.Drivetrain.Utils.Utils.l;
 import static org.firstinspires.ftc.teamcode.Mechanisms.Drivetrain.Utils.Utils.r;
