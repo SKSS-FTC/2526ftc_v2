@@ -1,39 +1,61 @@
 package org.firstinspires.ftc.teamcode.Mechanisms.Drivetrain.Utils;
 
 import org.ejml.simple.SimpleMatrix;
+
 public class Utils {
-    public static double r = 2.16535; //in
-    public static double l = 5.7; //in
-    public static double w = 5.31496; //in
-    public static SimpleMatrix R(double th) {
+
+    /**
+     * Creates a 3×3 homogeneous rotation matrix for a rotation by the specified angle about the
+     * origin.
+     *
+     * @param angle The rotation angle in radians
+     *
+     * @return 3 × 3 SimpleMatrix to be used in converting coordinate frames
+     */
+    public static SimpleMatrix angleToRotationMatrix(double angle) {
         SimpleMatrix rotation = new SimpleMatrix(
                 new double[][]{
-                        new double[]{Math.cos(th), -1*Math.sin(th), 0},
-                        new double[]{Math.sin(th), Math.cos(th), 0},
+                        new double[]{Math.cos(angle), -1 * Math.sin(angle), 0},
+                        new double[]{Math.sin(angle), Math.cos(angle), 0},
                         new double[]{0, 0, 1},
-                }
+                        }
         );
         return rotation;
     }
-    static SimpleMatrix H_inv = new SimpleMatrix(
-            new double[][]{
-                    new double[]{1d, -1d, -(l + w)},
-                    new double[]{1d, 1d, -(l + w)},
-                    new double[]{1d, -1d, (l + w)},
-                    new double[]{1d, 1d, (l + w)}
-            }
-    ); //Inverse kinematics Matrix
-    public static SimpleMatrix rotateBodyToGlobal(SimpleMatrix vectorBody, double th) {
-        return R(th).mult(vectorBody);
+
+    /**
+     * Transforms a 3×1 vector from the robot’s body frame into the global (world) frame by applying
+     * a rotation by the specified heading angle.
+     *
+     * @param vectorInBodyFrame The matrix of local coordinates [x, y, θ]
+     * @param angle the θ value for the relative rotation
+     *
+     * @return the matrix of global coordinates
+     */
+    public static SimpleMatrix rotateBodyToGlobal(SimpleMatrix vectorInBodyFrame, double angle) {
+        return angleToRotationMatrix(angle).mult(vectorInBodyFrame);
     }
 
-    public static SimpleMatrix rotateGlobalToBody(SimpleMatrix vectorGlobal, double th) {
-        return R(th).invert().mult(vectorGlobal);
+    /**
+     * Transforms a 3×1 vector from the global (world) frame frame into the robot’s body frame by
+     * applying a rotation by the specified heading angle.
+     *
+     * @param vectorInBodyFrame The matrix of local coordinates [x, y, θ]
+     * @param angle the θ value for the relative rotation
+     *
+     * @return the matrix of global coordinates
+     */
+    public static SimpleMatrix rotateGlobalToBody(SimpleMatrix vectorInBodyFrame, double angle) {
+        return angleToRotationMatrix(angle).invert().mult(vectorInBodyFrame);
     }
-    public static SimpleMatrix inverseKinematics(SimpleMatrix twist) {
-        SimpleMatrix wheelSpeeds = H_inv.scale(1 / r).mult(twist);
-        return wheelSpeeds;
-    }
+
+    /**
+     * Converts an angle in radians to its equal value between -π and π
+     *
+     * @param radians Unsimplified radian value of the angle
+     *
+     * @return The equivalent radian value between -π and π
+     */
     public static double angleWrap(double radians) {
 
         while (radians > Math.PI) {
@@ -46,16 +68,47 @@ public class Utils {
         // keep in mind that the result is in radians
         return radians;
     }
-    public static double calculateDistance(double x1, double y1,double x2,double y2){
-        return Math.sqrt(Math.pow((x2-x1),2)+Math.pow((y2-y1),2));
+
+    /**
+     * Returns the simple geometric distance between two coordinates.
+     *
+     * @param xPosition1 First X coordinate
+     * @param yPosition1 First Y coordinate
+     * @param xPosition2 Second X coordinate
+     * @param yPosition2 Second Y coordinate
+     *
+     * @return calculated distance between (xPosition1, yPosition1) and (xPosition2, yPosition2)
+     */
+    public static double calculateDistance(
+            double xPosition1,
+            double yPosition1,
+            double xPosition2,
+            double yPosition2
+    ) {
+        return Math.sqrt(
+                Math.pow((xPosition2 - xPosition1), 2) + Math.pow((yPosition2 - yPosition1), 2));
     }
-    public static SimpleMatrix makePoseVector(double posX, double posY, double posTheta){
+
+    /**
+     * Returns a 3 x 1 SimpleMatrix of x, y, θ
+     *
+     * @param xPosition X Position
+     * @param yPosition Y Position
+     * @param thetaPosition Angle in degrees
+     *
+     * @return
+     */
+    public static SimpleMatrix makePoseVector(
+            double xPosition,
+            double yPosition,
+            double thetaPosition
+    ) {
         return new SimpleMatrix(
-            new double[][]{
-                new double[]{posX},
-                new double[]{posY},
-                new double[]{Math.toRadians(posTheta)}
-            }
+                new double[][]{
+                        new double[]{xPosition},
+                        new double[]{yPosition},
+                        new double[]{Math.toRadians(thetaPosition)}
+                }
         );
     }
 }
