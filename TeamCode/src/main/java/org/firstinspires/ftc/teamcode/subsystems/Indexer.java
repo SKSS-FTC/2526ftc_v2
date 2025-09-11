@@ -37,47 +37,43 @@ public class Indexer {
 
     public void quickSpin()
     {
-        switch (state) {
+        switch(state)
+        {
             case one:
-                moveInOrder(new int[]{0, 1, 2});
+                moveInOrder(new int[]{1,2,3});
                 break;
             case two:
-                moveInOrder(new int[]{1, 2, 0});
+                moveInOrder(new int[]{2,3,1});
                 break;
             case three:
-                moveInOrder(new int[]{2, 1, 0});
+                moveInOrder(new int[]{3,2,1});
+                break;
+            case oneAlt:
+                moveInOrder(new int[]{1,3,2});
                 break;
         }
     }
 
-    public void moveInOrder(int[] items)
-    {
-        for(int i : items)
-        {
-            moveTo(i);
+    public void moveInOrder(int[] arr) {
+        for(int i : arr){
+            moveTo(numToState(i));
         }
     }
 
-    public void moveTo(int toPos)
+    public void moveTo(IndexerState newState)
     {
-        switch(toPos){
-            case 0:
-                if(state == IndexerState.two) {
-                    indexerServo.turnToAngle(ANGLE_ONE);
-                    state = IndexerState.one;
-                }
-                if(state == IndexerState.three) {
-                    indexerServo.turnToAngle(ANGLE_ALT);
-                    state = IndexerState.oneAlt;
-                }
+        switch(newState){
+            case one:
+                indexerServo.turnToAngle(ANGLE_ONE);
                 break;
-            case 1:
+            case two:
                 indexerServo.turnToAngle(ANGLE_TWO);
-                state = IndexerState.two;
                 break;
-            case 2:
+            case three:
                 indexerServo.turnToAngle(ANGLE_THREE);
-                state = IndexerState.three;
+                break;
+            case oneAlt:
+                indexerServo.turnToAngle(ANGLE_ALT);
                 break;
         }
     }
