@@ -80,4 +80,47 @@ public class Indexer {
 
     public IndexerState numToState(int num)
     {
+        switch (num)
+        {
+            case 1:
+                return closestZero();
+            case 2:
+                return IndexerState.two;
+            case 3:
+                return IndexerState.three;
+        }
+        return null;
+    }
+
+    public int stateToNum(IndexerState newState)
+    {
+        switch (newState)
+        {
+            case one:
+                return 1;
+            case two:
+                return 2;
+            case three:
+                return 3;
+            case oneAlt:
+                return 4;
+        }
+        return 0;
+    }
+
+    public IndexerState nextState()
+    {
+        return numToState((stateToNum(state)%3)+1);
+    }
+
+    public IndexerState closestZero()
+    {
+        if(state == IndexerState.two) {
+            return IndexerState.one;
+        }
+        if(state == IndexerState.three) {
+            return IndexerState.oneAlt;
+        }
+        return state;
+    }
 }
