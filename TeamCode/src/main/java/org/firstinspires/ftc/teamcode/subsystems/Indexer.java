@@ -35,6 +35,29 @@ public class Indexer {
         indexerServo = new SimpleServo(hardwareMap, "index",0,360);
     }
 
+    public void quickSpin()
+    {
+        switch (state) {
+            case one:
+                moveInOrder(new int[]{0, 1, 2});
+                break;
+            case two:
+                moveInOrder(new int[]{1, 2, 0});
+                break;
+            case three:
+                moveInOrder(new int[]{2, 1, 0});
+                break;
+        }
+    }
+
+    public void moveInOrder(int[] items)
+    {
+        for(int i : items)
+        {
+            moveTo(i);
+        }
+    }
+
     public void moveTo(int toPos)
     {
         switch(toPos){
