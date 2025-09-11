@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Outtake {
     private final MotorEx motor;
+    private double power;
 
     public Outtake(HardwareMap hardwareMap)
     {
@@ -16,9 +17,24 @@ public class Outtake {
         motor.stopMotor();
     }
 
-    public void setPower(double power)
+    public void run()
     {
         motor.set(power);
+    }
+
+    public void setPower(double newPower)
+    {
+        power = newPower;
+    }
+
+    public double getPower()
+    {
+        return power;
+    }
+
+    public void runAtPower(double newPower)
+    {
+        motor.set(newPower);
     }
 
     //TODO: Make algorithm to determine power needed based on distance
