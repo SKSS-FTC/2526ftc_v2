@@ -61,7 +61,7 @@ public class MainOp extends LinearOpMode {
         limelightManager = new LimelightManager(hardwareMap.get(Limelight3A.class, "limelight"));
         alignmentEngine = new AlignmentEngine(mainController, matchSettings, drivetrain, mechanisms, limelightManager, manualPinpoint);
         trajectoryEngine = new TrajectoryEngine(limelightManager, manualPinpoint, matchSettings);
-        turret = new Turret();
+        turret = new Turret(trajectoryEngine);
         // Wait for start
         waitForStart();
 
@@ -161,7 +161,7 @@ public class MainOp extends LinearOpMode {
      */
     private void runAutomations() {
         // Skip if automation is disabled
-        if (!Settings.Teleop.automationEnabled) {
+        if (!Settings.Deploy.AUTOMATIONS) {
         }
 
         // TODO update for new automations

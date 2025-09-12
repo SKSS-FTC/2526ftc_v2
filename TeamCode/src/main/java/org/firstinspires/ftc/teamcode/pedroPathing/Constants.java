@@ -12,8 +12,10 @@ import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class Constants {
+import org.firstinspires.ftc.teamcode.configuration.Settings;
 
+public class Constants {
+    // TODO tune duh
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(13)
             .forwardZeroPowerAcceleration(-41.278)
@@ -27,10 +29,10 @@ public class Constants {
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.1, 0, 0, 0.6, 0));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .leftFrontMotorName("leftFront")
-            .leftRearMotorName("leftRear")
-            .rightFrontMotorName("rightFront")
-            .rightRearMotorName("rightRear")
+            .leftFrontMotorName(Settings.Hardware.IDs.FRONT_LEFT_MOTOR)
+            .leftRearMotorName(Settings.Hardware.IDs.REAR_LEFT_MOTOR)
+            .rightFrontMotorName(Settings.Hardware.IDs.FRONT_RIGHT_MOTOR)
+            .rightRearMotorName(Settings.Hardware.IDs.REAR_RIGHT_MOTOR)
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
@@ -46,9 +48,9 @@ public class Constants {
                     .leftPodY(1)
                     .rightPodY(-1)
                     .strafePodX(-2.5)
-                    .leftEncoder_HardwareMapName("leftFront")
-                    .rightEncoder_HardwareMapName("rightRear")
-                    .strafeEncoder_HardwareMapName("rightFront")
+                    .leftEncoder_HardwareMapName(Settings.Hardware.IDs.REAR_LEFT_MOTOR)
+                    .rightEncoder_HardwareMapName(Settings.Hardware.IDs.REAR_RIGHT_MOTOR)
+                    .strafeEncoder_HardwareMapName(Settings.Hardware.IDs.FRONT_RIGHT_MOTOR)
                     .leftEncoderDirection(Encoder.REVERSE)
                     .rightEncoderDirection(Encoder.REVERSE)
                     .strafeEncoderDirection(Encoder.FORWARD);

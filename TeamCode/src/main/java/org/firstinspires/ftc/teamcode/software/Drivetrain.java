@@ -2,9 +2,9 @@ package org.firstinspires.ftc.teamcode.software;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.configuration.Settings;
+import org.firstinspires.ftc.teamcode.configuration.Settings.Alignment;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -69,11 +69,25 @@ public class Drivetrain {
     // mecanum drive assumes you are not driving as deadeye
 
     public void interpolateToOffset(double offsetX, double offsetY, double offsetHeading) {
-        double drivePower = -offsetY;
-        double strafePower = Range.clip((-offsetX * 1.2) / Settings.Assistance.inverseLateralMultiplier, -1, 1);
-        // offsetHeading is -Pi/2 to pi/2, where 0 is the target heading
-        double rotation = Range.clip(offsetHeading, -Math.PI / 2, Math.PI / 2) / (Math.PI / 2);
-        rotation = Math.abs(rotation) < Settings.Assistance.minimumRotationCorrectionThreshold ? 0 : rotation;
+        // translational distance
+        double dist = Math.hypot(offsetX, offsetY);
+
+        // linear ramp for translational speed
+        double translationalScale = Math.min(1.0,
+                Math.max(0.0, (dist - Alignment.stopDistance) /
+                        (Alignment.fullSpeedDistance - Alignment.stopDistance)));
+
+        double drivePower = -offsetY / dist * translationalScale * Alignment.maxTranslationalSpeed;
+        double strafePower = -offsetX / dist * translationalScale * Alignment.maxTranslationalSpeed;
+
+        // rotation
+        double absErr = Math.abs(offsetHeading);
+        double rotation = 0.0;
+        if (absErr > Alignment.headingDeadband) {
+            double rotScale = Math.min(1.0, absErr / Alignment.fullSpeedHeadingError);
+            rotation = Math.copySign(rotScale * Alignment.maxRotationSpeed, offsetHeading);
+        }
+
         mecanumDrive(drivePower, strafePower, rotation);
     }
 

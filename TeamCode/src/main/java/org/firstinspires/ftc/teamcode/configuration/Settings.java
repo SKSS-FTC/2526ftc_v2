@@ -17,8 +17,6 @@ public class Settings {
     /* The configuration for the Controllers. **/
     @Config
     public static class Controls {
-        public static boolean incrementalVertical = false;
-        public static boolean incrementalHorizontal = false;
         /**
          * @noinspection PublicStaticCollectionField (i dont car)
          */
@@ -68,76 +66,23 @@ public class Settings {
     public static class Teleop {
         // Multiplier applied to strafe movements to compensate for mechanical differences
         public static double strafe_power_coefficient = 1.2;
-
-        // Enable or disable all automatic functions
-        public static boolean automationEnabled = true;
-
     }
 
-    // Deploy flags control what parts of the tob
+    // Deploy flags control what parts of the robot are on
     @Config
     public static class Deploy {
         // Core Mechanisms
         public static final boolean INTAKE = true;
-        public static final boolean OUTTAKE = true;
-        public static final boolean LINEAR_ACTUATOR = false;
-    }
-
-    @Config
-    public static class Assistance {
-        public static boolean use_deadeye = true;
-        public static double inverseLateralMultiplier = 50; // move at full power at 30 inches laterally away, going down to 0.0333333333 at 1 inch away
-        public static double minimumRotationCorrectionThreshold = Math.PI / 70; // Don't correct heading within 0.1570796327
-        public static double approachSpeed = 0.5; // if within an inch it's good enough
-        public static double limelightWindowSize = 40; // degrees
-        public static boolean ECHOLOCATE_ENABLED = false;
+        public static final boolean AUTOMATIONS = true;
     }
 
     /** @noinspection InnerClassTooDeeplyNested*/
     // Hardware settings
     @Config
     public static class Hardware {
-        // Servo positions
         @Config
-        public static class Servo {
-            @Config
-            public static class OuttakeClaw {
-                /**
-                 * Values for open and closed positions on the outtake claw
-                 */
-                public static double OPEN = 0;
-                public static double CLOSED = 1;
-            }
-
-            @Config
-            public static class IntakeClaw {
-                /**
-                 * Values for open and closed positions on the outtake claw
-                 */
-                public static double OPEN = 0.5;
-                public static double CLOSED = 0.8;
-            }
-
-            @Config
-            public static class Wrist {
-                public static double HORIZONTAL_POSITION = .53;
-                public static double VERTICAL_POSITION = 0.88;
-                public static double READY_POSITION = .65;
-            }
-
-            @Config
-            public static class Rotator {
-                public static double LEFT_LIMIT = 0.1;
-                public static double RIGHT_LIMIT = 1;
-                public static double CENTER = (LEFT_LIMIT + RIGHT_LIMIT) / 2;
-            }
-
-            @Config
-            public static class Shoulder {
-                public static double PLACE_FORWARD_POSITION = 0;
-                public static double PLACE_BACKWARD_POSITION = 0.65;
-
-            }
+        public static class Intake {
+            public static double SPEED = 0.5;
         }
 
         @Config
@@ -153,10 +98,61 @@ public class Settings {
             public static final String LIMELIGHT = "limelight";
             public static final String COLOR_SENSOR = "colorSensor";
         }
+    }
 
         @Config
-        public static class Intake {
-            public static double SPEED = -1;
-        }
+        public static class Aiming {
+            // todo tune
+            public static double muzzleSpeed;
+            public static double muzzleHeight;
+            public static double goalHeight;
+            public static double gravity = 9.81;
+
+            public static double maxYawError = 1;      // rad
+            public static double maxPitchError = 1;    // rad
+            public static double goalTolerance;    // cm (vertical tolerance window)
+    }
+
+    @Config
+    public static class Limelight {
+        /**
+         * Limelight horizontal window size (degrees)
+         */
+        public static double limelightWindowSize = 40;
+    }
+
+    @Config
+    public static class Alignment {
+        // Translational control
+        /**
+         * Max drive/strafe speed when far from target (0..1)
+         */
+        public static double maxTranslationalSpeed = 0.5;
+
+        /**
+         * Distance (inches) outside of which translational speed hits max
+         */
+        public static double fullSpeedDistance = 30.0;
+
+        /**
+         * Distance (inches) inside which translational speed tapers to near zero
+         */
+        public static double stopDistance = 1.0;
+
+        // Rotational control
+        /**
+         * Max rotation speed (0..1)
+         */
+        public static double maxRotationSpeed = 0.5;
+
+        /**
+         * Heading error (radians) at which rotation is full speed
+         */
+        public static double fullSpeedHeadingError = Math.toRadians(90);
+
+        /**
+         * Deadband: don't rotate if error below this (radians)
+         */
+        public static double headingDeadband = Math.toRadians(2.5);
     }
 }

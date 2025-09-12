@@ -6,7 +6,6 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Controller;
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
-import org.firstinspires.ftc.teamcode.configuration.Settings;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
 import org.firstinspires.ftc.teamcode.hardware.submechanisms.LimelightManager;
 
@@ -17,7 +16,7 @@ public class AlignmentEngine {
     private final GoBildaPinpointDriver pinpoint;
     private final MatchSettings matchSettings;
     private final LimelightManager limelightManager;
-    private double storedTx;
+    private final double storedTx;
 
     public AlignmentEngine(Controller controller, MatchSettings matchSettings, Drivetrain drivetrain, MechanismManager mechanisms, LimelightManager limelightManager, GoBildaPinpointDriver pinpoint) {
         this.controller = controller;
@@ -35,38 +34,38 @@ public class AlignmentEngine {
         // TODO everything past this is old
         boolean headingAligned = Math.abs(wrappedHeading()) < 10; // TODO make this a setting
 
-        if (artifactDetected && headingAligned) {
-            if (Settings.Assistance.use_deadeye) {
-                drivetrain.state = Drivetrain.State.AIMING;
-                double Tx = limelightManager.limelight.getLatestResult().getTx();
-                controller.setLedColor(0, 0, 255, 1000);
-                drivetrain.interpolateToOffset(
-                        Tx,
-                        Settings.Assistance.approachSpeed,
-                        wrappedHeading());
-                storedTx = Tx;
-            } else {
-                controller.setLedColor(0, 255, 0, 1000);
-                controller.rumble(50);
-                drivetrain.state = Drivetrain.State.MANUAL;
-            }
-        } else if ((drivetrain.state == Drivetrain.State.AIMING) && Settings.Assistance.use_deadeye && storedTx != 0) {
-            controller.setLedColor(255, 0, 255, 1000);
-            drivetrain.interpolateToOffset(
-                    limelightManager.limelight.getLatestResult().getTx(),
-                    Settings.Assistance.approachSpeed,
-                    wrappedHeading());
-        } else {
-            storedTx = 0;
-            if (Settings.Assistance.use_deadeye) {
-                controller.setLedColor(0, 255, 255, 1000);
-                drivetrain.interpolateToOffset(0, 0, wrappedHeading());
-                drivetrain.state = Drivetrain.State.AIMING;
-            } else {
-                controller.setLedColor(255, 0, 0, 1000);
-                drivetrain.state = Drivetrain.State.MANUAL;
-            }
-        }
+//        if (artifactDetected && headingAligned) {
+//            if (Settings.Assistance.use_deadeye) {
+//                drivetrain.state = Drivetrain.State.AIMING;
+//                double Tx = limelightManager.limelight.getLatestResult().getTx();
+//                controller.setLedColor(0, 0, 255, 1000);
+//                drivetrain.interpolateToOffset(
+//                        Tx,
+//                        Settings.Assistance.approachSpeed,
+//                        wrappedHeading());
+//                storedTx = Tx;
+//            } else {
+//                controller.setLedColor(0, 255, 0, 1000);
+//                controller.rumble(50);
+//                drivetrain.state = Drivetrain.State.MANUAL;
+//            }
+//        } else if ((drivetrain.state == Drivetrain.State.AIMING) && Settings.Assistance.use_deadeye && storedTx != 0) {
+//            controller.setLedColor(255, 0, 255, 1000);
+//            drivetrain.interpolateToOffset(
+//                    limelightManager.limelight.getLatestResult().getTx(),
+//                    Settings.Assistance.approachSpeed,
+//                    wrappedHeading());
+//        } else {
+//            storedTx = 0;
+//            if (Settings.Assistance.use_deadeye) {
+//                controller.setLedColor(0, 255, 255, 1000);
+//                drivetrain.interpolateToOffset(0, 0, wrappedHeading());
+//                drivetrain.state = Drivetrain.State.AIMING;
+//            } else {
+//                controller.setLedColor(255, 0, 0, 1000);
+//                drivetrain.state = Drivetrain.State.MANUAL;
+//            }
+//        }
     }
 
     private double wrappedHeading() {
