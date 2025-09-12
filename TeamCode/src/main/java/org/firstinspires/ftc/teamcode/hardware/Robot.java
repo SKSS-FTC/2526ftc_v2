@@ -15,7 +15,6 @@ public class Robot {
     }
 
     public void update(){
-        pipeline.update();
 
     }
 
