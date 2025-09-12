@@ -8,10 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
+import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.hardware.submechanisms.LimelightManager;
-import org.firstinspires.ftc.teamcode.hardware.submechanisms.Shoulder;
-import org.firstinspires.ftc.teamcode.hardware.submechanisms.ViperSlide;
-import org.firstinspires.ftc.teamcode.hardware.submechanisms.Wrist;
 import org.firstinspires.ftc.teamcode.software.AlignmentEngine;
 import org.firstinspires.ftc.teamcode.software.Drivetrain;
 import org.firstinspires.ftc.teamcode.software.TrajectoryEngine;
@@ -40,6 +38,7 @@ public class MainOp extends LinearOpMode {
     private AlignmentEngine alignmentEngine;
     private TrajectoryEngine trajectoryEngine;
     public MatchSettings matchSettings;
+    public Turret turret;
 
     /**
      * Main execution flow:
@@ -55,13 +54,14 @@ public class MainOp extends LinearOpMode {
 
         // Initialize robot systems
         mechanisms = new MechanismManager(hardwareMap);
-        mainController = new Controller(gamepad1);
-        subController = new Controller(gamepad2);
+        manualPinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        mainController = new Controller(gamepad1, manualPinpoint, matchSettings);
+        subController = new Controller(gamepad2, manualPinpoint, matchSettings);
         drivetrain = new Drivetrain(hardwareMap);
         limelightManager = new LimelightManager(hardwareMap.get(Limelight3A.class, "limelight"));
-        manualPinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         alignmentEngine = new AlignmentEngine(mainController, matchSettings, drivetrain, mechanisms, limelightManager, manualPinpoint);
         trajectoryEngine = new TrajectoryEngine(limelightManager, manualPinpoint, matchSettings);
+        turret = new Turret();
         // Wait for start
         waitForStart();
 
@@ -74,8 +74,7 @@ public class MainOp extends LinearOpMode {
 
             processControllerInputs();
 
-            checkAutomationConditions();
-            checkAssistanceConditions();
+            runAutomations();
 
             updateTelemetry();
 
@@ -91,124 +90,59 @@ public class MainOp extends LinearOpMode {
      * Process controller inputs
      */
     private void processControllerInputs() {
+
+        // MAIN CONTROLLER INPUTS
         // Get drivetrain controls
-        double drive = mainController.getProcessedValue(Controller.Action.MOVE_Y);
-        double strafe = mainController.getProcessedValue(Controller.Action.MOVE_X);
-        double rotate = mainController.getProcessedValue(Controller.Action.ROTATE);
+        double drive = mainController.getProcessedDrive();
+        double strafe = mainController.getProcessedStrafe();
+        double rotate = mainController.getProcessedRotation();
 
         // Apply the values to drivetrain
         drivetrain.mecanumDrive(drive, strafe, rotate);
 
-        // Vertical slide controls - incremental mode
-        if (Settings.Controls.incrementalVertical) {
-            if (mainController.getProcessedValue(Controller.Action.EXTEND_VERTICAL) > 0.0) {
-                mechanisms.outtake.verticalSlide.increment();
+        // Go to predetermined positions, overriding the mecanum drive if a button is pressed
+        Controller.Action[] gotoActions = {
+                Controller.Action.GOTO_CLOSE_SHOOT, Controller.Action.GOTO_FAR_SHOOT,
+                Controller.Action.GOTO_HUMAN_PLAYER, Controller.Action.GOTO_SECRET_TUNNEL
+        };
+        for (Controller.Action action : gotoActions) {
+            if (mainController.wasJustPressed(action)) {
+                drivetrain.goTo(Drivetrain.Position.valueOf(action.name().substring("GOTO_".length())));
+                break; // only one goto action can be triggered at a time
             }
-            if (mainController.getProcessedValue(Controller.Action.RETRACT_VERTICAL) > 0.0) {
-                mechanisms.outtake.verticalSlide.decrement();
-            }
-        } else { // Direct mode
-            if (mainController.wasJustPressed(Controller.Action.EXTEND_VERTICAL)) {
-                mechanisms.outtake.verticalSlide.extend();
-            }
-            if (mainController.wasJustPressed(Controller.Action.RETRACT_VERTICAL)) {
-                mechanisms.outtake.verticalSlide.retract();
-            }
-
         }
+
+        //if (mainController.wasJustPressed(Controller.Action.PARK_EXTEND)) {
+        // we arent implementing this until like state bro
+        //}
 
         // Intake controls using Controller's isPressed
-        if (subController.wasJustPressed(Controller.Action.CLOSE_CLAW)) {
-            mechanisms.intake.intakeClaw.close();
-            scheduleTask(() -> mechanisms.intake.wrist.setPosition(Wrist.Position.VERTICAL), 200);
-            mechanisms.outtake.outtakeClaw.open();
+        if (subController.wasJustPressed(Controller.Action.AIM)) {
+            alignmentEngine.run();
         }
 
-        if (subController.wasJustPressed(Controller.Action.OPEN_CLAW)) {
-            mechanisms.intake.intakeClaw.open();
-            if (mechanisms.intake.horizontalSlide.currentPosition.getValue() > 30 &&
-                    mechanisms.intake.intakeClaw.opened) {
-                mechanisms.intake.wrist.setPosition(Wrist.Position.READY);
-            } else {
-                mechanisms.intake.wrist.setPosition(Wrist.Position.VERTICAL);
-            }
-        }
-
-        if (subController.getProcessedValue(Controller.Action.WRIST_HORIZONTAL) > 0) {
-            mechanisms.intake.wrist.setPosition(Wrist.Position.HORIZONTAL);
-        }
-
-        // Horizontal slide controls
-        if (Settings.Controls.incrementalHorizontal) {
-            if (subController.getProcessedValue(Controller.Action.EXTEND_HORIZONTAL) > 0) {
-                mechanisms.intake.horizontalSlide.increment();
-            }
-
-            if (subController.getProcessedValue(Controller.Action.RETRACT_HORIZONTAL) > 0) {
-                mechanisms.intake.horizontalSlide.decrement();
-            }
-        } else {
-            if (subController.wasJustPressed(Controller.Action.EXTEND_HORIZONTAL)) {
-                mechanisms.intake.horizontalSlide.extend();
-            }
-
-            if (subController.wasJustPressed(Controller.Action.RETRACT_VERTICAL)) {
-                mechanisms.intake.horizontalSlide.retract();
-                if (mechanisms.intake.horizontalSlide.currentPosition == ViperSlide.HorizontalPosition.COLLAPSED) {
-                    mechanisms.outtake.outtakeClaw.open();
-                    mechanisms.intake.wrist.setPosition(Wrist.Position.VERTICAL);
-                }
-            }
-        }
-
-        // Rotator control
-        double rotatorValue = subController.getProcessedValue(Controller.Action.ROTATOR);
-        if (Math.abs(rotatorValue) > 0.05) {
-            double normalizedValue = (rotatorValue + 1) / 2; // Convert from -1..1 to 0..1
-            mechanisms.intake.rotator.setPosition(normalizedValue);
-        }
-
-        if (subController.getProcessedValue(Controller.Action.HANG_EXTEND) > 0) {
-            mechanisms.linearActuator.extend();
-        }
-
-        if (subController.getProcessedValue(Controller.Action.HANG_EXTEND) > 0) {
-            mechanisms.linearActuator.retract();
+        if (subController.wasJustPressed(Controller.Action.LAUNCH)) {
+            turret.launch();
         }
     }
 
     /**
      * Check automation conditions
      */
-    private void checkAutomationConditions() {
+    private void runAutomations() {
         // Skip if automation is disabled
         if (!Settings.Teleop.automationEnabled) {
-            return;
         }
 
-        // Automatically transfer when everything is collapsed
-        boolean horizontalCollapsed = mechanisms.intake.horizontalSlide.currentPosition
-                .getValue() <= ViperSlide.HorizontalPosition.COLLAPSED.getValue() + 10;
+        // TODO update for new automations
 
-        boolean verticalCollapsed = mechanisms.outtake.verticalSlide.verticalMotorRight
-                .getCurrentPosition() <= ViperSlide.VerticalPosition.TRANSFER.getValue() + 10;
+        // boolean shoulderInBackPosition = mechanisms.outtake.shoulder.position() == Shoulder.Position.PLACE_BACKWARD;
 
-        boolean intakeHasPixel = !mechanisms.intake.intakeClaw.opened;
-        boolean outtakeClawClosed = mechanisms.outtake.outtakeClaw.clawServo.getPosition() > 0.8;
-        boolean shoulderInBackPosition = mechanisms.outtake.shoulder.position() == Shoulder.Position.PLACE_BACKWARD;
-
-        if (horizontalCollapsed && verticalCollapsed && intakeHasPixel &&
-                outtakeClawClosed && shoulderInBackPosition) {
-            mechanisms.intake.intakeClaw.open();
-            scheduleTask(() -> mechanisms.outtake.moveShoulderToBack(), 200);
-        }
-    }
-
-    /**
-     * Check for assistance conditions
-     */
-    private void checkAssistanceConditions() {
-        alignmentEngine.check();
+//        if (horizontalCollapsed && verticalCollapsed && intakeHasPixel &&
+//                outtakeClawClosed && shoulderInBackPosition) {
+//            mechanisms.intake.intakeClaw.open();
+//            scheduleTask(() -> mechanisms.outtake.moveShoulderToBack(), 200);
+//        }
     }
 
     /**

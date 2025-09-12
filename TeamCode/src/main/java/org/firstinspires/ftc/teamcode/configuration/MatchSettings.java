@@ -68,12 +68,14 @@ public class MatchSettings {
 
     public enum AllianceColor {
         RED,
-        BLUE
+        BLUE,
+        UNKNOWN
     }
 
     public enum ArtifactColor {
         GREEN,
-        PURPLE
+        PURPLE,
+        UNKNOWN
     }
 
     public enum Motif {

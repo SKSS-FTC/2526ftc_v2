@@ -1,44 +1,25 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.hardware.submechanisms.ColorSensor;
-import org.firstinspires.ftc.teamcode.hardware.submechanisms.HorizontalSlide;
-import org.firstinspires.ftc.teamcode.hardware.submechanisms.IntakeClaw;
-import org.firstinspires.ftc.teamcode.hardware.submechanisms.Rotator;
-import org.firstinspires.ftc.teamcode.hardware.submechanisms.Wrist;
 
 public class Intake {
-    public final Rotator rotator;
-    public final Wrist wrist;
-    public final HorizontalSlide horizontalSlide;
-    public final IntakeClaw intakeClaw;
+    public final DcMotor intakeMotor;
 
     public final ColorSensor colorSensor;
 
-    public Intake(Servo clawServo, DcMotor horizontalMotor, Servo rotatorServo, Servo wristServo, Limelight3A limelight3a, RevColorSensorV3 colorSensorV3) {
-        intakeClaw = new IntakeClaw(clawServo);
-        horizontalSlide = new HorizontalSlide(horizontalMotor);
-        rotator = new Rotator(rotatorServo);
-        wrist = new Wrist(wristServo);
-        colorSensor = new ColorSensor(colorSensorV3);
+    public Intake(DcMotor intakeMotor, RevColorSensorV3 intakeColorSensor) {
+        this.intakeMotor = intakeMotor;
+        colorSensor = new ColorSensor(intakeColorSensor);
     }
 
     public void init() {
-        intakeClaw.init();
-        horizontalSlide.init();
-        rotator.init();
-        wrist.init();
         colorSensor.init();
     }
 
     public void reset() {
-        intakeClaw.reset();
-        horizontalSlide.reset();
-        rotator.reset();
-        wrist.reset();
+        colorSensor.reset();
     }
 }

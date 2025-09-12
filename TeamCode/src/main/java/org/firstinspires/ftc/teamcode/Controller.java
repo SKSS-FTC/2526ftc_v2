@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
 
 import java.util.HashMap;
@@ -9,28 +12,23 @@ import java.util.HashMap;
 public class Controller extends Gamepad {
     private final Gamepad gamepad;
     private final HashMap<Control, Double> previousControlState;
+    private final GoBildaPinpointDriver pinpoint;
 
-    // Define your Action enum
-    public enum Action {
-        MOVE_Y,
-        MOVE_X,
-        ROTATE,
-        EXTEND_VERTICAL,
-        RETRACT_VERTICAL,
-        EXTEND_HORIZONTAL,
-        RETRACT_HORIZONTAL,
-        WRIST_HORIZONTAL,
-        ROTATOR,
-        HANG_RETRACT,
-        HANG_EXTEND,
-        OPEN_CLAW,
-        CLOSE_CLAW,
-        UNSET,
+    private final MatchSettings matchSettings;
+
+    public Controller(Gamepad gamepad, GoBildaPinpointDriver pinpoint, MatchSettings matchSettings) {
+        this.gamepad = gamepad;
+        this.pinpoint = pinpoint;
+        this.matchSettings = matchSettings;
+        this.previousControlState = new HashMap<>();
     }
 
-    public Controller(Gamepad gamepad) {
-        this.gamepad = gamepad;
-        this.previousControlState = new HashMap<>();
+    public final double getProcessedRotation() {
+        double rotationValue = getProcessedValue(Action.ROTATE_AXIS) + getProcessedValue(Action.ROTATE_LEFT) - getProcessedValue(Action.ROTATE_RIGHT);
+        // clamp wont work for me on this sdk version lol
+        if (rotationValue < -1) return -1;
+        if (rotationValue > 1) return 1;
+        return rotationValue;
     }
 
     public final void saveLastState() {
@@ -67,6 +65,76 @@ public class Controller extends Gamepad {
     public final double getProcessedValue(Action action) {
         return getProcessedValue(getControlForAction(action));
     }
+
+    public final double getProcessedDrive() {
+        double headingRadians = pinpoint.getHeading(AngleUnit.RADIANS);
+
+        // Get DPad input for absolute directions
+        double dpadNorth = getProcessedValue(Action.ABS_NORTH);
+        double dpadSouth = getProcessedValue(Action.ABS_SOUTH);
+        double dpadEast = getProcessedValue(Action.ABS_EAST);
+        double dpadWest = getProcessedValue(Action.ABS_WEST);
+        matchSettings.getAllianceColor();
+
+        // Calculate the desired movement vector in field-centric coordinates
+        // Positive Y is North, Positive X is East
+        double fieldCentricY = dpadNorth - dpadSouth;
+        double fieldCentricX = dpadEast - dpadWest;
+
+
+        // Rotate the field-centric vector to robot-centric coordinates
+        // Drive is along the robot's Y-axis
+        double robotCentricDrive = fieldCentricY * Math.cos(headingRadians) + fieldCentricX * Math.sin(headingRadians);
+
+        return Math.min(Math.max(getProcessedValue(Action.MOVE_Y) + robotCentricDrive, 1), -1);
+    }
+
+    public final double getProcessedStrafe() {
+        double headingRadians = Math.toRadians(pinpoint.getHeading(AngleUnit.DEGREES));
+        double dpadEast = getProcessedValue(Action.ABS_EAST);
+        double dpadWest = getProcessedValue(Action.ABS_WEST);
+        double fieldCentricX = dpadEast - dpadWest;
+        // Strafe is along the robot's X-axis. A positive fieldCentricX (East) when robot heading is 0 (North) should result in positive strafe.
+        // A positive fieldCentricX (East) when robot heading is 90 (East) should result in negative drive, not strafe.
+        // A positive fieldCentricY (North) when robot heading is 90 (East) should result in positive strafe.
+        double dpadNorth = getProcessedValue(Action.ABS_NORTH);
+        double dpadSouth = getProcessedValue(Action.ABS_SOUTH);
+        double fieldCentricY = dpadNorth - dpadSouth;
+
+        double robotCentricStrafe = fieldCentricX * Math.cos(headingRadians) - fieldCentricY * Math.sin(headingRadians);
+
+        return getProcessedValue(Action.MOVE_X) + robotCentricStrafe;
+    }
+
+    // Define your Action enum
+    public enum Action {
+        MOVE_Y,
+        MOVE_X,
+        ROTATE_LEFT,
+        ROTATE_RIGHT,
+        ROTATE_AXIS,
+        ABS_NORTH,
+        ABS_EAST,
+        ABS_WEST,
+        ABS_SOUTH,
+        GOTO_CLOSE_SHOOT,
+        GOTO_FAR_SHOOT,
+        GOTO_HUMAN_PLAYER,
+        GOTO_SECRET_TUNNEL,
+        INTAKE,
+        RELEASE_EXTRAS,
+        RELEASE_PURPLE,
+        RELEASE_GREEN,
+        AIM,
+        LAUNCH,
+        TURRET_STEEPNESS_AXIS,
+        TURRET_ROTATION_AXIS,
+        PARK_EXTEND,
+        INCREMENT_CLASSIFIER_STATE,
+        EMPTY_CLASSIFIER_STATE,
+        UNSET,
+    }
+
 
     private double getRawValue(Control control) {
         switch (control) {

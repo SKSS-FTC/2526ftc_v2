@@ -28,15 +28,33 @@ public class Settings {
                 new EnumMap<>(Controller.Action.class); // Initialize with the Control enum class
 
         static {
-            actionControlMap.put(Controller.Action.OPEN_CLAW, Controller.Control.RIGHT_TRIGGER);
-            actionControlMap.put(Controller.Action.CLOSE_CLAW, Controller.Control.LEFT_TRIGGER);
-            actionControlMap.put(Controller.Action.EXTEND_VERTICAL, Controller.Control.DPAD_UP);
-            actionControlMap.put(Controller.Action.RETRACT_VERTICAL, Controller.Control.DPAD_DOWN);
-            actionControlMap.put(Controller.Action.EXTEND_HORIZONTAL, Controller.Control.DPAD_LEFT);
-            actionControlMap.put(Controller.Action.RETRACT_HORIZONTAL, Controller.Control.DPAD_RIGHT);
+            // Main Controller Mapping
             actionControlMap.put(Controller.Action.MOVE_Y, Controller.Control.LEFT_STICK_Y);
             actionControlMap.put(Controller.Action.MOVE_X, Controller.Control.LEFT_STICK_X);
-            actionControlMap.put(Controller.Action.ROTATE, Controller.Control.RIGHT_STICK_X);
+            actionControlMap.put(Controller.Action.ROTATE_AXIS, Controller.Control.RIGHT_STICK_X);
+            actionControlMap.put(Controller.Action.ROTATE_LEFT, Controller.Control.LEFT_BUMPER);
+            actionControlMap.put(Controller.Action.ROTATE_RIGHT, Controller.Control.RIGHT_BUMPER);
+            actionControlMap.put(Controller.Action.ABS_NORTH, Controller.Control.DPAD_UP);
+            actionControlMap.put(Controller.Action.ABS_EAST, Controller.Control.DPAD_RIGHT);
+            actionControlMap.put(Controller.Action.ABS_WEST, Controller.Control.DPAD_LEFT);
+            actionControlMap.put(Controller.Action.ABS_SOUTH, Controller.Control.DPAD_DOWN);
+            actionControlMap.put(Controller.Action.GOTO_CLOSE_SHOOT, Controller.Control.CIRCLE);
+            actionControlMap.put(Controller.Action.GOTO_FAR_SHOOT, Controller.Control.CROSS);
+            actionControlMap.put(Controller.Action.GOTO_HUMAN_PLAYER, Controller.Control.SQUARE);
+            actionControlMap.put(Controller.Action.GOTO_SECRET_TUNNEL, Controller.Control.TRIANGLE);
+            actionControlMap.put(Controller.Action.PARK_EXTEND, Controller.Control.START);
+
+            // Secondary Controller Mapping
+            actionControlMap.put(Controller.Action.AIM, Controller.Control.LEFT_TRIGGER);
+            actionControlMap.put(Controller.Action.LAUNCH, Controller.Control.RIGHT_TRIGGER);
+            actionControlMap.put(Controller.Action.TURRET_STEEPNESS_AXIS, Controller.Control.RIGHT_STICK_Y);
+            actionControlMap.put(Controller.Action.TURRET_ROTATION_AXIS, Controller.Control.RIGHT_STICK_X);
+            actionControlMap.put(Controller.Action.INTAKE, Controller.Control.SQUARE);
+            actionControlMap.put(Controller.Action.RELEASE_EXTRAS, Controller.Control.CIRCLE);
+            actionControlMap.put(Controller.Action.RELEASE_PURPLE, Controller.Control.TRIANGLE);
+            actionControlMap.put(Controller.Action.RELEASE_GREEN, Controller.Control.CROSS);
+            actionControlMap.put(Controller.Action.INCREMENT_CLASSIFIER_STATE, Controller.Control.DPAD_UP);
+            actionControlMap.put(Controller.Action.EMPTY_CLASSIFIER_STATE, Controller.Control.DPAD_DOWN);
 
             // Everything else is "UNSET"
             for (Controller.Action action : Controller.Action.values()) {
@@ -131,18 +149,7 @@ public class Settings {
             public static final String REAR_LEFT_MOTOR = "rearLeft";
             public static final String REAR_RIGHT_MOTOR = "rearRight";
 
-            // Arm components
-            public static final String SLIDE_VERTICAL_LEFT = "slideVerticalLeft";
-            public static final String SLIDE_VERTICAL_RIGHT = "slideVerticalRight";
-            public static final String SLIDE_HORIZONTAL = "slideHorizontal";
-            public static final String LINEAR_ACTUATOR = "linearActuator";
-            public static final String WRIST = "wrist";
-            public static final String ROTATOR = "rotator";
-            public static final String LEFT_SHOULDER = "shoulderLeft";
-            public static final String RIGHT_SHOULDER = "shoulderRight";
-            public static final String INTAKE_CLAW = "intakeClaw";
-            public static final String OUTTAKE_CLAW = "outtakeClaw";
-            public static final String SLIDE_VERTICAL_TOUCH_SENSOR = "verticalSlideSensor";
+            public static final String INTAKE_MOTOR = "intakeMotor";
             public static final String LIMELIGHT = "limelight";
             public static final String COLOR_SENSOR = "colorSensor";
         }

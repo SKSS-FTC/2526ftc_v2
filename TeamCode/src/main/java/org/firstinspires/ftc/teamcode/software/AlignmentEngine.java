@@ -29,7 +29,7 @@ public class AlignmentEngine {
         this.storedTx = 0;
     }
 
-    public void check() {
+    public void run() {
         LLResult llResult = limelightManager.detectGoal(matchSettings);
         boolean artifactDetected = llResult.isValid();
         // TODO everything past this is old
@@ -37,7 +37,7 @@ public class AlignmentEngine {
 
         if (artifactDetected && headingAligned) {
             if (Settings.Assistance.use_deadeye) {
-                drivetrain.state = Drivetrain.State.DEADEYE_ENABLED;
+                drivetrain.state = Drivetrain.State.AIMING;
                 double Tx = limelightManager.limelight.getLatestResult().getTx();
                 controller.setLedColor(0, 0, 255, 1000);
                 drivetrain.interpolateToOffset(
@@ -48,9 +48,9 @@ public class AlignmentEngine {
             } else {
                 controller.setLedColor(0, 255, 0, 1000);
                 controller.rumble(50);
-                drivetrain.state = Drivetrain.State.DEFAULT;
+                drivetrain.state = Drivetrain.State.MANUAL;
             }
-        } else if ((drivetrain.state == Drivetrain.State.DEADEYE_ENABLED) && Settings.Assistance.use_deadeye && storedTx != 0) {
+        } else if ((drivetrain.state == Drivetrain.State.AIMING) && Settings.Assistance.use_deadeye && storedTx != 0) {
             controller.setLedColor(255, 0, 255, 1000);
             drivetrain.interpolateToOffset(
                     limelightManager.limelight.getLatestResult().getTx(),
@@ -61,10 +61,10 @@ public class AlignmentEngine {
             if (Settings.Assistance.use_deadeye) {
                 controller.setLedColor(0, 255, 255, 1000);
                 drivetrain.interpolateToOffset(0, 0, wrappedHeading());
-                drivetrain.state = Drivetrain.State.DEADEYE_ENABLED;
+                drivetrain.state = Drivetrain.State.AIMING;
             } else {
                 controller.setLedColor(255, 0, 0, 1000);
-                drivetrain.state = Drivetrain.State.DEFAULT;
+                drivetrain.state = Drivetrain.State.MANUAL;
             }
         }
     }

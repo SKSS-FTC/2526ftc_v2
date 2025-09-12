@@ -3,48 +3,21 @@ package org.firstinspires.ftc.teamcode.hardware.submechanisms;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 
-/**
- * Incoming Yap Session:
- * Limelight returns Tx and Ty values, which return angles for where a detected object is,
- * and trig is required to get pixel or distance values.
- * IMPORTANT: Tx and Ty are zero when no desired object is detected.
- * Contact Rishu if any of this is confusing
- */
+import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
+
+// TODO tune color thresholds and confidence
 @Config
 public class ColorSensor {
     RevColorSensorV3 colorSensor;
-    ColorSensorOption desiredColors = ColorSensorOption.RED_YELLOW;
     double[] rgbValues = {0,0,0};
-    static double[] yellowMinValues = { // TODO: TUNE
-            100,
-            100,
-            0
-    };
-    static double[] yellowMaxValues = { // TODO: TUNE
-            255,
-            255,
-            100
-    };
-    static double[] redMinValues = { // TODO: TUNE
-            100,
-            0,
-            0
-    };
-    static double[] redMaxValues = { // TODO: TUNE
-            255,
-            100,
-            100
-    };
-    static double[] blueMinValues = { // TODO: TUNE
-            0,
-            0,
-            100
-    };
-    static double[] blueMaxValues = { // TODO: TUNE
-            100,
-            100,
-            255
-    };
+
+    // Target "center" colors for confidence-based matching
+    // These should be tuned to approximate measured values
+    public static double[] greenTarget = {0, 200, 0};
+    public static double[] purpleTarget = {200, 0, 200};
+
+    // Acceptable distance threshold (lower is stricter, higher is looser)
+    public static double CONFIDENCE_THRESHOLD = 100.0;
 
     public ColorSensor(RevColorSensorV3 colorSensorV3) {
         this.colorSensor = colorSensorV3;
@@ -53,69 +26,44 @@ public class ColorSensor {
     /**
      * Initializes Color Sensor and enables LED
      */
-    public void init() {
+    public final void init() {
         colorSensor.initialize();
         colorSensor.enableLed(true);
     }
 
     /**
      * Updates the data and checks if there is a desired object detected
-     * @return whether the gamepad should vibrate based on detected object
+     * @return detected artifact color
      */
-    public boolean update() {
+    public MatchSettings.ArtifactColor getArtifactColor() {
         rgbValues[0] = colorSensor.red();
         rgbValues[1] = colorSensor.green();
         rgbValues[2] = colorSensor.blue();
-        return checkForDesiredColors();
-    }
 
-    public boolean checkForDesiredColors() {
-        switch (desiredColors) {
-            case YELLOW:
-                return isYellow();
-            case RED:
-                return isRed();
-            case BLUE:
-                return isBlue();
-            case RED_YELLOW:
-                return isYellow() || isRed();
-            case BLUE_YELLOW:
-                return isYellow() || isBlue();
-            default:
-                return false;
+        double greenConfidence = computeDistance(rgbValues, greenTarget);
+        double purpleConfidence = computeDistance(rgbValues, purpleTarget);
+
+        if (greenConfidence < purpleConfidence && greenConfidence < CONFIDENCE_THRESHOLD) {
+            return MatchSettings.ArtifactColor.GREEN;
+        } else if (purpleConfidence < greenConfidence && purpleConfidence < CONFIDENCE_THRESHOLD) {
+            return MatchSettings.ArtifactColor.PURPLE;
+        } else {
+            return MatchSettings.ArtifactColor.UNKNOWN;
         }
     }
 
-    public boolean isYellow() {
-        return checkMinMaxValues(yellowMinValues, yellowMaxValues);
+    /**
+     * Euclidean distance between measured RGB and target RGB
+     */
+    private double computeDistance(double[] measured, double[] target) {
+        double dr = measured[0] - target[0];
+        double dg = measured[1] - target[1];
+        double db = measured[2] - target[2];
+        return Math.sqrt(dr * dr + dg * dg + db * db);
     }
 
-    public boolean isRed() {
-        return checkMinMaxValues(redMinValues, redMaxValues);
-    }
-
-    public boolean isBlue() {
-        return checkMinMaxValues(blueMinValues, blueMaxValues);
-    }
-
-    public boolean checkMinMaxValues(double[] minValues, double[] maxValues) {
-        return rgbValues[0] > minValues[0]
-            && rgbValues[0] < maxValues[0]
-            && rgbValues[1] > minValues[1]
-            && rgbValues[1] < maxValues[1]
-            && rgbValues[2] > minValues[2]
-            && rgbValues[2] < maxValues[2];
-    }
-
-    public void setDesiredColors(ColorSensorOption newDesiredColors) {
-        desiredColors = newDesiredColors;
-    }
-
-    public enum ColorSensorOption {
-        YELLOW,
-        RED,
-        BLUE,
-        RED_YELLOW,
-        BLUE_YELLOW
+    public void reset() {
+        colorSensor.enableLed(true);
+        rgbValues = new double[3];
     }
 }
