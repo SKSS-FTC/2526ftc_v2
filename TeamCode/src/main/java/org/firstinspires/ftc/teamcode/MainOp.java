@@ -80,6 +80,13 @@ public class MainOp extends LinearOpMode {
 
             mainController.saveLastState();
             subController.saveLastState();
+            if (matchSettings.nextArtifactNeeded() == MatchSettings.ArtifactColor.GREEN) {
+                subController.setLedColor(0, 255, 0, 100);
+            } else if (matchSettings.nextArtifactNeeded() == MatchSettings.ArtifactColor.PURPLE) {
+                subController.setLedColor(255, 0, 255, 100);
+            } else {
+                subController.setLedColor(0, 0, 0, 0);
+            }
         }
 
         // Stop all executor tasks at the end
@@ -123,6 +130,29 @@ public class MainOp extends LinearOpMode {
 
         if (subController.wasJustPressed(Controller.Action.LAUNCH)) {
             turret.launch();
+        }
+
+        if (subController.getProcessedValue(Controller.Action.INTAKE) > 0) {
+            mechanisms.intake.in();
+        } else {
+            mechanisms.intake.stop();
+        }
+
+        if (subController.getProcessedValue(Controller.Action.RELEASE_EXTRAS) > 0) {
+            mechanisms.intake.releaseExtras();
+        }
+        if (subController.getProcessedValue(Controller.Action.RELEASE_PURPLE) > 0) {
+            mechanisms.intake.releasePurple();
+        }
+        if (subController.getProcessedValue(Controller.Action.RELEASE_GREEN) > 0) {
+            mechanisms.intake.releaseGreen();
+        }
+
+        if (subController.getProcessedValue(Controller.Action.EMPTY_CLASSIFIER_STATE) > 0) {
+            matchSettings.emptyClassifier();
+        }
+        if (subController.getProcessedValue(Controller.Action.INCREMENT_CLASSIFIER_STATE) > 0) {
+            matchSettings.incrementClassifier();
         }
     }
 

@@ -155,45 +155,6 @@ public class Settings {
         }
 
         @Config
-        public static class VerticalSlide {
-            // Positions in encoder ticks
-
-            public static int TRANSFER = 0;
-            public static int HANG_RUNG_1 = 3350;
-
-            public static int HIGH_RUNG_PREP_AUTO = 1890;
-            public static int HIGH_RUNG = 2250;
-            public static int HIGH_BASKET = 3350;
-
-            // Motor power settings
-            public static double MOVEMENT_POWER = 1;
-            public static double IDLE_POWER = 0.2;
-
-            public static double INCREMENTAL_MOVEMENT_POWER = 20;
-
-            public static boolean ENABLE_LOWER_LIMIT = false;
-        }
-
-        @Config
-        public static class HorizontalSlide {
-            // Positions in encoder ticks
-            public static int COLLAPSED = 0;
-            public static int LEVEL_1 = 82;
-            public static int EXPANDED = 250;
-
-            // Motor power settings
-            public static double MOVEMENT_POWER = 0.5;
-            public static int INCREMENTAL_MOVEMENT_POWER = 15;
-        }
-
-        @Config
-        public static class LinearActuator {
-            // Positions in encoder ticks
-            public static int MAX = 1000;
-            public static int MIN = 0;
-        }
-
-        @Config
         public static class Intake {
             public static double SPEED = -1;
         }
