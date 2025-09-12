@@ -34,6 +34,8 @@ class Prototyping extends LinearOpMode {
         outtake = new Outtake(hardwareMap);
 
         waitForStart();
+        indexer.moveTo(Indexer.IndexerState.one);
+        actuator.down();
         while (opModeIsActive()) {
             gamepadEx1.readButtons();
             gamepadEx2.readButtons();
@@ -44,13 +46,36 @@ class Prototyping extends LinearOpMode {
 
     public void teleopTick(GamepadEx two, Telemetry telem)
     {
+        telem.addData("Outtake Power: ",outtake.getPower());
         if(two.wasJustPressed(GamepadKeys.Button.A))
         {
             intake.run(!intake.isRunning());
         }
         if(two.wasJustPressed(GamepadKeys.Button.B))
         {
-
+            indexer.moveTo(indexer.nextState());
+        }
+        if(two.wasJustPressed(GamepadKeys.Button.X))
+        {
+            actuator.set(!actuator.isActivated());
+        }
+        if(two.wasJustPressed(GamepadKeys.Button.Y))
+        {
+            indexer.quickSpin();
+        }
+        if(two.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)>0.01){
+            outtake.run();
+        }
+        else {
+            outtake.stop();
+        }
+        if(two.isDown(GamepadKeys.Button.DPAD_UP))
+        {
+            outtake.setPower(outtake.getPower()+0.05);
+        }
+        else if(two.isDown(GamepadKeys.Button.DPAD_DOWN))
+        {
+            outtake.setPower(outtake.getPower()-0.05);
         }
     }
 }
