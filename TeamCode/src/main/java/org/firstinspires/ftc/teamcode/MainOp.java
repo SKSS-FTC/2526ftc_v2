@@ -54,11 +54,11 @@ public class MainOp extends LinearOpMode {
 
         // Initialize robot systems
         mechanisms = new MechanismManager(hardwareMap);
-        manualPinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        manualPinpoint = hardwareMap.get(GoBildaPinpointDriver.class, Settings.Hardware.IDs.PINPOINT);
         mainController = new Controller(gamepad1, manualPinpoint, matchSettings);
         subController = new Controller(gamepad2, manualPinpoint, matchSettings);
         drivetrain = new Drivetrain(hardwareMap);
-        limelightManager = new LimelightManager(hardwareMap.get(Limelight3A.class, "limelight"));
+        limelightManager = new LimelightManager(hardwareMap.get(Limelight3A.class, Settings.Hardware.IDs.LIMELIGHT));
         alignmentEngine = new AlignmentEngine(mainController, matchSettings, drivetrain, mechanisms, limelightManager, manualPinpoint);
         trajectoryEngine = new TrajectoryEngine(limelightManager, manualPinpoint, matchSettings);
         turret = new Turret(trajectoryEngine);
