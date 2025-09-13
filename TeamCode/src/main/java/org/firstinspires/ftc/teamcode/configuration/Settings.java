@@ -73,6 +73,7 @@ public class Settings {
     public static class Deploy {
         // Core Mechanisms
         public static final boolean INTAKE = true;
+        public static final boolean SORTER = true;
         public static final boolean AUTOMATIONS = true;
     }
 
@@ -83,6 +84,15 @@ public class Settings {
         @Config
         public static class Intake {
             public static double SPEED = 0.5;
+        }
+
+        @Config
+        public static final class Sorter {
+            // Default calibrated servo positions for slots at intake
+            public static double[] SLOT_INTAKE_POSITIONS = {0.10, 0.43, 0.77}; // TODO TUNE
+
+            // Offset from intake to exit alignment
+            public static double EXIT_OFFSET = 0.25; // TODO TUNE
         }
 
         @Config
@@ -98,6 +108,7 @@ public class Settings {
             public static final String INTAKE_MOTOR = "intakeMotor";
             public static final String LIMELIGHT = "limelight";
             public static final String COLOR_SENSOR = "colorSensor";
+            public static final String SORTER_SERVO = "sorterServo";
         }
     }
 
