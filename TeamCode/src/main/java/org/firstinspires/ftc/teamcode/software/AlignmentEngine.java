@@ -1,70 +1,92 @@
 package org.firstinspires.ftc.teamcode.software;
 
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.CLOSE_LAUNCH_ZONE_FRONT_CORNER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.CLOSE_LAUNCH_ZONE_LEFT_CORNER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.CLOSE_LAUNCH_ZONE_RIGHT_CORNER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.FAR_LAUNCH_ZONE_FRONT_CORNER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.FAR_LAUNCH_ZONE_LEFT_CORNER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.FAR_LAUNCH_ZONE_RIGHT_CORNER;
+
+import com.bylazar.ftcontrol.panels.json.Point;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.Controller;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
-import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
 
 public class AlignmentEngine {
-    private final Controller controller;
     private final Drivetrain drivetrain;
-    private final MechanismManager mechanisms;
     private final GoBildaPinpointDriver pinpoint;
     private final MatchSettings matchSettings;
     private final LimelightManager limelightManager;
-    private final double storedTx;
 
-    public AlignmentEngine(Controller controller, MatchSettings matchSettings, Drivetrain drivetrain, MechanismManager mechanisms, LimelightManager limelightManager, GoBildaPinpointDriver pinpoint) {
-        this.controller = controller;
+    public AlignmentEngine(MatchSettings matchSettings, Drivetrain drivetrain, LimelightManager limelightManager, GoBildaPinpointDriver pinpoint) {
         this.drivetrain = drivetrain;
-        this.mechanisms = mechanisms;
         this.pinpoint = pinpoint;
         this.matchSettings = matchSettings;
         this.limelightManager = limelightManager;
-        this.storedTx = 0;
+    }
+
+    public static boolean isInsideTriangle(Pose2D pose, Point A, Point B, Point C) {
+        // Create new Point objects for the pose's x and y
+        Point P = new Point(pose.getX(DistanceUnit.CM), pose.getY(DistanceUnit.CM));
+
+        // Use the crossProduct method to determine if the point is within the triangle
+        double s1 = crossProduct(A, B, P);
+        double s2 = crossProduct(B, C, P);
+        double s3 = crossProduct(C, A, P);
+
+        boolean has_neg = (s1 < 0) || (s2 < 0) || (s3 < 0);
+        boolean has_pos = (s1 > 0) || (s2 > 0) || (s3 > 0);
+
+        return !(has_neg && has_pos);
+    }
+
+    public static double crossProduct(Point A, Point B, Point C) {
+        return (B.getX() - A.getX()) * (C.getY() - A.getY()) - (B.getY() - A.getY()) * (C.getX() - A.getX());
     }
 
     public void run() {
-        LLResult llResult = limelightManager.detectGoal(matchSettings);
-        boolean artifactDetected = llResult.isValid();
-        // TODO everything past this is old
-        boolean headingAligned = Math.abs(wrappedHeading()) < 10; // TODO make this a setting
+        pinpoint.getPosition();
+        if (!isInLaunchZone()) {
+            return;
+        }
 
-//        if (artifactDetected && headingAligned) {
-//            if (Settings.Assistance.use_deadeye) {
-//                drivetrain.state = Drivetrain.State.AIMING;
-//                double Tx = limelightManager.limelight.getLatestResult().getTx();
-//                controller.setLedColor(0, 0, 255, 1000);
-//                drivetrain.interpolateToOffset(
-//                        Tx,
-//                        Settings.Assistance.approachSpeed,
-//                        wrappedHeading());
-//                storedTx = Tx;
-//            } else {
-//                controller.setLedColor(0, 255, 0, 1000);
-//                controller.rumble(50);
-//                drivetrain.state = Drivetrain.State.MANUAL;
-//            }
-//        } else if ((drivetrain.state == Drivetrain.State.AIMING) && Settings.Assistance.use_deadeye && storedTx != 0) {
-//            controller.setLedColor(255, 0, 255, 1000);
-//            drivetrain.interpolateToOffset(
-//                    limelightManager.limelight.getLatestResult().getTx(),
-//                    Settings.Assistance.approachSpeed,
-//                    wrappedHeading());
-//        } else {
-//            storedTx = 0;
-//            if (Settings.Assistance.use_deadeye) {
-//                controller.setLedColor(0, 255, 255, 1000);
-//                drivetrain.interpolateToOffset(0, 0, wrappedHeading());
-//                drivetrain.state = Drivetrain.State.AIMING;
-//            } else {
-//                controller.setLedColor(255, 0, 0, 1000);
-//                drivetrain.state = Drivetrain.State.MANUAL;
-//            }
-//        }
+        // This is wrong lol. it should move to have best angle tho
+
+        LLResult llResult = limelightManager.detectGoal();
+        if (llResult == null || !llResult.isValid()) {
+            return;
+        }
+
+        double Ta = limelightManager.limelight.getLatestResult().getTa();
+
+        drivetrain.interpolateToOffset(0, 0, Ta);
+    }
+
+    public boolean isInLaunchZone() {
+        Pose2D pose = pinpoint.getPosition();
+
+        // Check if the pose is inside the FAR launch zone
+        boolean inFarZone = isInsideTriangle(
+                pose,
+                FAR_LAUNCH_ZONE_FRONT_CORNER,
+                FAR_LAUNCH_ZONE_LEFT_CORNER,
+                FAR_LAUNCH_ZONE_RIGHT_CORNER
+        );
+
+        // Check if the pose is inside the CLOSE launch zone
+        boolean inCloseZone = isInsideTriangle(
+                pose,
+                CLOSE_LAUNCH_ZONE_FRONT_CORNER,
+                CLOSE_LAUNCH_ZONE_LEFT_CORNER,
+                CLOSE_LAUNCH_ZONE_RIGHT_CORNER
+        );
+
+        // Return true if the pose is in *either* launch zone
+        return inFarZone || inCloseZone;
     }
 
     private double wrappedHeading() {

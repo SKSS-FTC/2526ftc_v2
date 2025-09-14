@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.configuration;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.ftcontrol.panels.json.Point;
 
 import org.firstinspires.ftc.teamcode.Controller;
 
@@ -98,6 +99,8 @@ public class Settings {
 
             public static double TRANSFER_SERVO_CLOSED_POSITION = 1.0; // TODO TUNE
             public static double TRANSFER_SERVO_OPEN_POSITION = 0.0; // TODO TUNE
+
+            public static double TOLERANCE = 5.0 / 360.0; // how close a slot must be to the exit in order to launch
         }
 
         @Config
@@ -118,6 +121,11 @@ public class Settings {
             public static final String LIMELIGHT = "limelight";
             public static final String COLOR_SENSOR = "colorSensor";
             public static final String SORTER_SERVO = "sorterServo";
+            public static final String TURRET_HORIZONTAL_SERVO = "turretHorizontalServo";
+            public static final String TURRET_VERTICAL_SERVO = "turretVerticalServo";
+
+            public static final String TURRET_LAUNCHER_RIGHT = "turretLauncherRight";
+            public static final String TURRET_LAUNCHER_LEFT = "turretLauncherLeft";
         }
     }
 
@@ -140,6 +148,15 @@ public class Settings {
          * Limelight horizontal window size (degrees)
          */
         public static double limelightWindowSize = 40;
+    }
+
+    @Config
+    public static class Launcher {
+        /**
+         * Launcher motor speed (0..1)
+         */
+        public static double BELT_MOTOR_SPEED = 1;
+        public static long BELT_SPINUP_TIME_MS = 500; // TODO tune
     }
 
     @Config
@@ -175,5 +192,21 @@ public class Settings {
          * Deadband: don't rotate if error below this (radians)
          */
         public static double headingDeadband = Math.toRadians(2.5);
+    }
+
+    public static class Positions {
+        public static double RED_GOAL_CENTER_X = 50; // TODO tune
+        public static double RED_GOAL_CENTER_Y = 50; // TODO tune
+
+        public static double BLUE_GOAL_CENTER_X = 50; // TODO tune
+        public static double BLUE_GOAL_CENTER_Y = 50; // TODO tune
+
+        public static Point FAR_LAUNCH_ZONE_FRONT_CORNER = new Point(0, 0); // TODO tune
+        public static Point FAR_LAUNCH_ZONE_LEFT_CORNER = new Point(0, 0); // TODO tune
+        public static Point FAR_LAUNCH_ZONE_RIGHT_CORNER = new Point(0, 0); // TODO tune
+
+        public static Point CLOSE_LAUNCH_ZONE_FRONT_CORNER = new Point(0, 0); // TODO tune
+        public static Point CLOSE_LAUNCH_ZONE_LEFT_CORNER = new Point(0, 0); // TODO tune
+        public static Point CLOSE_LAUNCH_ZONE_RIGHT_CORNER = new Point(0, 0); // TODO tune
     }
 }

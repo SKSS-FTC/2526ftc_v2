@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.software;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.LLResult;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -21,76 +22,138 @@ public class TrajectoryEngine {
     }
 
     /**
-     * Computes turret yaw (relative to robot heading) and pitch to aim at target.
+     * Normalizes an angle to be within the range [-PI, PI].
      *
-     * @param robotPose robot Pose2d (x,y,heading radians)
-     * @param cornerX   target right-angle corner x
-     * @param cornerY   target right-angle corner y
-     * @param depth     depth of target (hypotenuse length component)
-     * @return double[]{yawRadians, pitchRadians} pitch null if no solution
+     * @param angle The angle in radians.
+     * @return The normalized angle in radians.
      */
-    public static double[] aimTurret(Pose2D robotPose,
-                                     double cornerX, double cornerY,
-                                     double depth) {
-        // Compute midpoint of hypotenuse (assuming legs along +x,+y from corner)
-        double targetX = cornerX + depth / 2.0;
-        double targetY = cornerY + depth / 2.0;
+    private static double normalizeAngle(double angle) {
+        while (angle > Math.PI) angle -= 2 * Math.PI;
+        while (angle < -Math.PI) angle += 2 * Math.PI;
+        return angle;
+    }
 
-        // horizontal vector
+    /**
+     * Performs all calculations to find a valid aiming solution.
+     * This private method is the single source of truth for all aiming logic.
+     *
+     * @return An {@link AimingSolution} object containing the results.
+     */
+    private AimingSolution calculateSolution() {
+        // 1. Get all sensor data ONCE
+        Pose2D robotPose = pinpoint.getPosition();
+        LLResult limelightResult = limelightManager.detectGoal();
+
+        // 2. Robustly check for a valid target
+        if (limelightResult.getFiducialResults().isEmpty()) {
+            return new AimingSolution(); // Return invalid solution if no target is seen
+        }
+
+        // 3. Define the TARGET's fixed world coordinates from a settings file.
+        // This is a much more reliable approach than calculating from camera depth.
+        double targetX = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.RED)
+                ? Settings.Positions.RED_GOAL_CENTER_X
+                : Settings.Positions.BLUE_GOAL_CENTER_X;
+        double targetY = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.RED)
+                ? Settings.Positions.RED_GOAL_CENTER_Y
+                : Settings.Positions.BLUE_GOAL_CENTER_Y;
+
+        // 4. Calculate the vector from the robot to the target in the world frame
         double dx = targetX - robotPose.getX(DistanceUnit.CM);
         double dy = targetY - robotPose.getY(DistanceUnit.CM);
         double d = Math.hypot(dx, dy);
 
+        // 5. Calculate the required turret yaw
         double yawWorld = Math.atan2(dy, dx);
-        double yawRel = normalizeAngle(yawWorld - robotPose.getHeading(AngleUnit.RADIANS));
+        double yawRelative = normalizeAngle(yawWorld - robotPose.getHeading(AngleUnit.RADIANS));
 
-        // vertical difference
+        // 6. Calculate the required turret pitch using ballistic equations
         double h = Settings.Aiming.goalHeight - Settings.Aiming.muzzleHeight;
         double v = Settings.Aiming.muzzleSpeed;
         double g = Settings.Aiming.gravity;
 
-        double disc = v * v * v * v - g * (g * d * d + 2 * h * v * v);
-        Double pitch = null;
-        if (disc >= 0 && d > 1e-6) {
-            double sqrtDisc = Math.sqrt(disc);
-            double t1 = Math.atan((v * v + sqrtDisc) / (g * d));
-            double t2 = Math.atan((v * v - sqrtDisc) / (g * d));
-            // choose lower angle
-            pitch = Math.min(t1, t2);
+        double discriminant = (v * v * v * v) - g * (g * d * d + 2 * h * v * v);
+
+        // If the discriminant is negative, the target is out of range
+        if (discriminant < 0) {
+            return new AimingSolution(); // No ballistic solution, return invalid
         }
 
-        return new double[]{yawRel, pitch != null ? pitch : Double.NaN};
+        // We choose the lower angle for a flatter, faster trajectory
+        double sqrtDiscriminant = Math.sqrt(discriminant);
+        double pitch = Math.atan((v * v - sqrtDiscriminant) / (g * d));
+
+        // 7. Return the complete, valid solution
+        return new AimingSolution(yawRelative, pitch, d);
     }
 
-    public static boolean okayToLaunch(Pose2D robotPose,
-                                       double cornerX, double cornerY,
-                                       double depth) {
-        double[] aim = aimTurret(robotPose, cornerX, cornerY, depth);
-        double yaw = aim[0];
-        double pitch = aim[1];
-
-        if (Double.isNaN(pitch)) return false; // no ballistic solution
-
-        // check angular tolerances
-        if (Math.abs(yaw) > Settings.Aiming.maxYawError) return false;
-        if (Math.abs(pitch - aim[1]) > Settings.Aiming.maxPitchError)
-            return false; // always 0, can skip
-
-        // check if vertical impact is within goal tolerance
-        double dx = (cornerX + depth / 2.0) - robotPose.getX(DistanceUnit.CM);
-        double dy = (cornerY + depth / 2.0) - robotPose.getY(DistanceUnit.CM);
-        double d = Math.hypot(dx, dy);
-        double predictedHeight = Settings.Aiming.muzzleHeight +
-                d * Math.tan(pitch) -
-                (Settings.Aiming.gravity * d * d) /
-                        (2 * Settings.Aiming.muzzleSpeed * Settings.Aiming.muzzleSpeed * Math.cos(pitch) * Math.cos(pitch));
-
-        return !(Math.abs(predictedHeight - Settings.Aiming.goalHeight) > Settings.Aiming.goalTolerance);
+    /**
+     * Computes turret yaw (relative to robot) and pitch to aim at the target.
+     *
+     * @return A double array containing {yawRadians, pitchRadians}. Values will be NaN if no solution exists.
+     */
+    public double[] getAimingAngles() {
+        AimingSolution solution = calculateSolution();
+        return new double[]{solution.yawRadians, solution.pitchRadians};
     }
 
-    private static double normalizeAngle(double a) {
-        while (a > Math.PI) a -= 2 * Math.PI;
-        while (a < -Math.PI) a += 2 * Math.PI;
-        return a;
+    /**
+     * Determines if all conditions are met to launch the projectile.
+     * This method should be called right before launching.
+     *
+     * @return True if it's safe and logical to launch, false otherwise.
+     */
+    public boolean isOkayToLaunch() {
+        AimingSolution solution = calculateSolution();
+
+        // Check 1: A valid ballistic path must exist.
+        return solution.hasSolution;
+
+        // Check 2: The turret must be aimed correctly.
+        // You would get the turret's CURRENT angles from your hardware control loops.
+        // double currentTurretYaw = turret.getCurrentYaw();
+        // double currentTurretPitch = turret.getCurrentPitch();
+        //
+        // boolean isYawAligned = Math.abs(normalizeAngle(solution.yawRadians - currentTurretYaw)) < Settings.Aiming.maxYawError;
+        // boolean isPitchAligned = Math.abs(solution.pitchRadians - currentTurretPitch) < Settings.Aiming.maxPitchError;
+        //
+        // if (!isYawAligned || !isPitchAligned) {
+        //    return false;
+        // }
+    }
+
+    /**
+     * A simple data class to hold the results of a trajectory calculation.
+     * An "invalid" solution is one where no target was found or no ballistic path exists.
+     */
+    public class AimingSolution {
+        public final boolean hasSolution;
+        public final double yawRadians; // Turret yaw relative to the robot's heading
+        public final double pitchRadians; // Turret pitch relative to the horizontal plane
+        public final double distance; // Horizontal distance to the target
+
+        /**
+         * Constructor for a valid, successful aiming solution.
+         *
+         * @param yaw   The calculated yaw in radians.
+         * @param pitch The calculated pitch in radians.
+         * @param dist  The horizontal distance to the target in centimeters.
+         */
+        public AimingSolution(double yaw, double pitch, double dist) {
+            this.hasSolution = true;
+            this.yawRadians = yaw;
+            this.pitchRadians = pitch;
+            this.distance = dist;
+        }
+
+        /**
+         * Constructor for an invalid solution, used when no target is found or no solution exists.
+         */
+        public AimingSolution() {
+            this.hasSolution = false;
+            this.yawRadians = Double.NaN;
+            this.pitchRadians = Double.NaN;
+            this.distance = Double.NaN;
+        }
     }
 }

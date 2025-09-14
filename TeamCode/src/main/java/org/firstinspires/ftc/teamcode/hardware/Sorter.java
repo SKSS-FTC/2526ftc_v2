@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Hardware.Sorter.TOLERANCE;
+
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
@@ -21,7 +23,6 @@ import java.util.Deque;
 public class Sorter {
     private final Servo sorterServo;
     private final Servo launcherTransferServo;
-    private final Launcher launcher;
     private final ColorSensor colorSensor;
     private final double[] slotIntakePositions = new double[3]; // calibrated positions for physical slots at intake
     private final MatchSettings.ArtifactColor[] slots = new MatchSettings.ArtifactColor[3]; // physical slot storage
@@ -32,14 +33,15 @@ public class Sorter {
     private final Deque<Runnable> postSealQueue = new ArrayDeque<>();
     private long lastEjectTimeMs = 0;
     private boolean sealRequested = false;
+    private final MatchSettings matchSettings;
     private boolean sealed = true; // whether transfer servo is currently considered closed
 
     /**
      * @param sorterServo servo used to rotate the sorter. not null.
      */
-    public Sorter(Launcher launcher, Servo sorterServo, Servo launcherTransferServo, ColorSensor sorterColorSensor) {
-        this.launcher = launcher;
+    public Sorter(Servo sorterServo, Servo launcherTransferServo, ColorSensor sorterColorSensor, MatchSettings matchSettings) {
         this.sorterServo = sorterServo;
+        this.matchSettings = matchSettings;
         this.launcherTransferServo = launcherTransferServo;
         this.colorSensor = sorterColorSensor;
         for (int i = 0; i < 3; i++) {
@@ -102,6 +104,43 @@ public class Sorter {
         }
     }
 
+    /**
+     * Rotate the next Motif-matching artifact to the exit.
+     * Uses MatchSettings.nextArtifactNeeded as the target.
+     * Does nothing if no matching artifact is present.
+     */
+    public void rotateNextArtifactToExit() {
+        MatchSettings.ArtifactColor needed = matchSettings.nextArtifactNeeded();
+        if (needed == MatchSettings.ArtifactColor.UNKNOWN) return;
+
+        synchronized (lock) {
+            for (int i = 0; i < slots.length; i++) {
+                if (slots[i] == needed) {
+                    rotateSlotToExit(i);
+                    return; // rotate only the first matching slot
+                }
+            }
+        }
+    }
+
+    public boolean isNextArtifactAtExit() {
+        MatchSettings.ArtifactColor needed = matchSettings.nextArtifactNeeded();
+        if (needed == MatchSettings.ArtifactColor.UNKNOWN) return false;
+
+        synchronized (lock) {
+            for (int i = 0; i < slots.length; i++) {
+                if (slots[i] == needed) {
+                    // target servo position for this slot at exit
+                    double targetPos = wrapServo(slotIntakePositions[i] + exitOffset);
+                    double distance = circularDistance(getCurrentServoPosition(), targetPos);
+                    // 5 degrees in servo units (1 unit = 360°)
+                    return distance <= TOLERANCE;
+                }
+            }
+        }
+        return false;
+    }
+
     public void clearSlots() {
         synchronized (lock) {
             for (int i = 0; i < 3; i++) slots[i] = MatchSettings.ArtifactColor.UNKNOWN;
@@ -151,7 +190,6 @@ public class Sorter {
 
         synchronized (lock) {
             MatchSettings.ArtifactColor c = slots[slot];
-            launcher.load(c);
             slots[slot] = MatchSettings.ArtifactColor.UNKNOWN;
             lastEjectTimeMs = System.currentTimeMillis();
             // after an eject we are not sealed
