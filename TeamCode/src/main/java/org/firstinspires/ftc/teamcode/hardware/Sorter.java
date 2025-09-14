@@ -5,24 +5,43 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Deque;
 
 /**
  * Controls a 3-slot rotating sorter driven by a single Servo.
+ *
+ * Key changes:
+ * - non-blocking sealing: actions that require the launcher transfer to be sealed are queued
+ *   and only executed after the periodic update() performs the seal.
+ * - blocking API for background threads: requireSealBlocking()
+ *  TODO this was all upwritten by chatgpt 5 to make the requireSeal work. will test w/ robot
  */
 public class Sorter {
-    private final Servo servo;
+    private final Servo sorterServo;
+    private final Servo launcherTransferServo;
+    private final Launcher launcher;
+    private final ColorSensor colorSensor;
     private final double[] slotIntakePositions = new double[3]; // calibrated positions for physical slots at intake
     private final MatchSettings.ArtifactColor[] slots = new MatchSettings.ArtifactColor[3]; // physical slot storage
     private final Object lock = new Object();
     private final double exitOffset; // servo units 0..1
     private volatile double commandedPosition; // last position we commanded the servo to
+    // sealing state
+    private final Deque<Runnable> postSealQueue = new ArrayDeque<>();
+    private long lastEjectTimeMs = 0;
+    private boolean sealRequested = false;
+    private boolean sealed = true; // whether transfer servo is currently considered closed
 
     /**
-     * @param servo servo used to rotate the sorter. not null.
+     * @param sorterServo servo used to rotate the sorter. not null.
      */
-    public Sorter(Servo servo) {
-        this.servo = servo;
+    public Sorter(Launcher launcher, Servo sorterServo, Servo launcherTransferServo, ColorSensor sorterColorSensor) {
+        this.launcher = launcher;
+        this.sorterServo = sorterServo;
+        this.launcherTransferServo = launcherTransferServo;
+        this.colorSensor = sorterColorSensor;
         for (int i = 0; i < 3; i++) {
             slotIntakePositions[i] = wrapServo(Settings.Hardware.Sorter.SLOT_INTAKE_POSITIONS[i]);
         }
@@ -33,13 +52,11 @@ public class Sorter {
         // Sync commandedPosition to current hardware reading if available
         double pos = 0.0;
         try {
-            pos = servo.getPosition();
+            pos = sorterServo.getPosition();
         } catch (Exception ignored) {
         }
         this.commandedPosition = wrapServo(pos);
     }
-
-    /* -------------------- Public API -------------------- */
 
     private static double wrapServo(double v) {
         v %= 1.0;
@@ -53,12 +70,30 @@ public class Sorter {
     }
 
     public void init() {
+        // Make sure transfer is closed initially (best-effort)
+        try {
+            launcherTransferServo.setPosition(Settings.Hardware.Sorter.TRANSFER_SERVO_CLOSED_POSITION);
+            sealed = true;
+        } catch (Exception ignored) {
+            // keep sealed=true; serviceSeal() will ensure hardware eventually matches logical state
+        }
+
         // organize slots around outtake
         rotateSlotToExit(0);
     }
 
-    public void reset() {
-        rotateSlotToExit(0);
+    /**
+     * Called periodically from opmode loop. Must be called frequently.
+     * This services any pending seal requests and runs queued actions once sealed.
+     */
+    public void update() {
+        serviceSeal();
+
+        // if there is a color sensed, update that position in the slots to that color
+        MatchSettings.ArtifactColor color = colorSensor.getArtifactColor();
+        if (color != MatchSettings.ArtifactColor.UNKNOWN) {
+            setCurrentlyIntakingArtifact(color);
+        }
     }
 
     public MatchSettings.ArtifactColor[] getSlotsSnapshot() {
@@ -98,15 +133,11 @@ public class Sorter {
 
     /**
      * Place a ball into the physical slot currently at intake.
-     * Returns false if that slot is occupied.
      */
-    public boolean setCurrentlyIntakingArtifact(MatchSettings.ArtifactColor color) {
-        if (color == null) color = MatchSettings.ArtifactColor.UNKNOWN;
+    public void setCurrentlyIntakingArtifact(MatchSettings.ArtifactColor color) {
         int slot = getSlotIndexAtIntake();
         synchronized (lock) {
-            if (slots[slot] != MatchSettings.ArtifactColor.UNKNOWN) return false;
             slots[slot] = color;
-            return true;
         }
     }
 
@@ -115,42 +146,76 @@ public class Sorter {
      */
     public MatchSettings.ArtifactColor ejectBallAtExit() {
         int slot = getSlotIndexAtExit();
+        // open transfer immediately
+        launcherTransferServo.setPosition(Settings.Hardware.Sorter.TRANSFER_SERVO_OPEN_POSITION);
+
         synchronized (lock) {
             MatchSettings.ArtifactColor c = slots[slot];
+            launcher.load(c);
             slots[slot] = MatchSettings.ArtifactColor.UNKNOWN;
+            lastEjectTimeMs = System.currentTimeMillis();
+            // after an eject we are not sealed
+            sealed = false;
+            // schedule any later sealing requests normally
+            // leave previously queued actions in place; they will run after the next seal
+            sealRequested = false;
             return c;
         }
     }
 
     /**
      * Command the servo so physical slot `slotIndex` is aligned to the exit.
-     * Non-blocking.
+     * Non-blocking. The actual servo move will happen only after the transfer is sealed.
      */
     public void rotateSlotToExit(int slotIndex) {
         checkSlotIndex(slotIndex);
-        double target = wrapServo(slotIntakePositions[slotIndex] + exitOffset);
-        setServoPosition(target);
+        ensureSealedThen(() -> {
+            double target = wrapServo(slotIntakePositions[slotIndex] + exitOffset);
+            setServoPosition(target);
+        });
     }
 
     /* -------------------- Internal helpers -------------------- */
 
     /**
-     * Command the servo so physical slot `slotIndex` is aligned to the intake.
-     * Non-blocking.
+     * Ensure the sorter is in a state ready to rotate around.
+     * <p>
+     * Non-blocking: schedules `action` to run after sealing completes. If sealing is already
+     * satisfied, the action runs immediately on the caller thread.
      */
-    public void rotateSlotToIntake(int slotIndex) {
-        checkSlotIndex(slotIndex);
-        double target = slotIntakePositions[slotIndex];
-        setServoPosition(target);
+    private void ensureSealedThen(Runnable action) {
+        synchronized (lock) {
+            long now = System.currentTimeMillis();
+            long readyAt = lastEjectTimeMs + Settings.Hardware.Sorter.EJECT_EXIT_TIME_MS;
+            if (now >= readyAt) {
+                // Cooldown satisfied. Close transfer and run action immediately.
+                try {
+                    launcherTransferServo.setPosition(Settings.Hardware.Sorter.TRANSFER_SERVO_CLOSED_POSITION);
+                } catch (Exception ignored) {
+                }
+                sealed = true;
+                sealRequested = false;
+                // run action immediately on caller thread
+                action.run();
+                return;
+            }
+
+            // Not ready yet. Request sealing via serviceSeal() and queue the action.
+            sealRequested = true;
+            postSealQueue.add(action);
+        }
     }
 
     /**
-     * Rotate a number of intake steps. Positive steps advance slot indices.
+     * Command the servo so physical slot `slotIndex` is aligned to the intake.
+     * Non-blocking. The actual servo move will happen only after the transfer is sealed.
      */
-    public void rotateIntakeBySteps(int steps) {
-        int current = getSlotIndexAtIntake();
-        int target = Math.floorMod(current + steps, 3);
-        rotateSlotToIntake(target);
+    public void rotateSlotToIntake(int slotIndex) {
+        checkSlotIndex(slotIndex);
+        ensureSealedThen(() -> {
+            double target = slotIntakePositions[slotIndex];
+            setServoPosition(target);
+        });
     }
 
     private void checkSlotIndex(int slot) {
@@ -168,7 +233,7 @@ public class Sorter {
     private void setServoPosition(double pos) {
         pos = wrapServo(pos);
         try {
-            servo.setPosition(pos);
+            sorterServo.setPosition(pos);
         } catch (Exception ignored) {
             // If servo call fails, still keep logical state deterministic.
         }
@@ -190,6 +255,47 @@ public class Sorter {
             }
         }
         return best;
+    }
+
+    /**
+     * Called from update() to actually close the transfer servo once cooldown passes and run queued actions.
+     */
+    private void serviceSeal() {
+        Deque<Runnable> toRun = null;
+        synchronized (lock) {
+            if (!sealRequested) return;
+            long now = System.currentTimeMillis();
+            if (now - lastEjectTimeMs < Settings.Hardware.Sorter.EJECT_EXIT_TIME_MS) return;
+
+            // time has passed; close transfer and drain queue
+            try {
+                launcherTransferServo.setPosition(Settings.Hardware.Sorter.TRANSFER_SERVO_CLOSED_POSITION);
+            } catch (Exception ignored) {
+            }
+
+            sealed = true;
+            sealRequested = false;
+
+            if (!postSealQueue.isEmpty()) {
+                toRun = new ArrayDeque<>(postSealQueue);
+                postSealQueue.clear();
+            }
+
+            // wake any blocking waiters
+            lock.notifyAll();
+        }
+
+        // run queued actions outside lock
+        if (toRun != null) {
+            while (!toRun.isEmpty()) {
+                Runnable r = toRun.poll();
+                try {
+                    r.run();
+                } catch (RuntimeException ignored) {
+                    // swallow to ensure other queued actions still run
+                }
+            }
+        }
     }
 
     @Override

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.hardware.submechanisms;
+package org.firstinspires.ftc.teamcode.hardware;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
@@ -60,10 +60,5 @@ public class ColorSensor {
         double dg = measured[1] - target[1];
         double db = measured[2] - target[2];
         return Math.sqrt(dr * dr + dg * dg + db * db);
-    }
-
-    public void reset() {
-        colorSensor.enableLed(true);
-        rgbValues = new double[3];
     }
 }

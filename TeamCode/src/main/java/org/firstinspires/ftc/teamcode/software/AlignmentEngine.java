@@ -7,7 +7,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Controller;
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
-import org.firstinspires.ftc.teamcode.hardware.submechanisms.LimelightManager;
 
 public class AlignmentEngine {
     private final Controller controller;

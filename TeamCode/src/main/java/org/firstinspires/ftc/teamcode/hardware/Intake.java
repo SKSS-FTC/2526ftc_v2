@@ -1,23 +1,24 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
-import org.firstinspires.ftc.teamcode.hardware.submechanisms.ColorSensor;
 
 public class Intake {
     public final DcMotor intakeMotor;
 
     public final ColorSensor colorSensor;
+    public final Servo[] servoArray;
 
 
     public MatchSettings.ArtifactColor expectation;
 
-    public Intake(DcMotor intakeMotor, RevColorSensorV3 intakeColorSensor) {
+    public Intake(DcMotor intakeMotor, Servo[] tubeServoArray, ColorSensor intakeColorSensor) {
         this.intakeMotor = intakeMotor;
-        colorSensor = new ColorSensor(intakeColorSensor);
+        this.servoArray = tubeServoArray;
+        this.colorSensor = intakeColorSensor;
         this.expectation = MatchSettings.ArtifactColor.UNKNOWN;
     }
 
@@ -50,9 +51,5 @@ public class Intake {
 
     public void setNextExpectedBall(MatchSettings.ArtifactColor expectation) {
         this.expectation = expectation;
-    }
-
-    public void reset() {
-        colorSensor.reset();
     }
 }

@@ -7,11 +7,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
+import org.firstinspires.ftc.teamcode.hardware.Launcher;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
-import org.firstinspires.ftc.teamcode.hardware.Turret;
-import org.firstinspires.ftc.teamcode.hardware.submechanisms.LimelightManager;
 import org.firstinspires.ftc.teamcode.software.AlignmentEngine;
 import org.firstinspires.ftc.teamcode.software.Drivetrain;
+import org.firstinspires.ftc.teamcode.software.LimelightManager;
 import org.firstinspires.ftc.teamcode.software.TrajectoryEngine;
 
 import java.util.concurrent.Executors;
@@ -38,7 +38,7 @@ public class MainOp extends LinearOpMode {
     private AlignmentEngine alignmentEngine;
     private TrajectoryEngine trajectoryEngine;
     public MatchSettings matchSettings;
-    public Turret turret;
+    public Launcher turret;
 
     /**
      * Main execution flow:
@@ -53,7 +53,7 @@ public class MainOp extends LinearOpMode {
         matchSettings = new MatchSettings(blackboard);
 
         // Initialize robot systems
-        mechanisms = new MechanismManager(hardwareMap);
+        mechanisms = new MechanismManager(hardwareMap, matchSettings);
         manualPinpoint = hardwareMap.get(GoBildaPinpointDriver.class, Settings.Hardware.IDs.PINPOINT);
         mainController = new Controller(gamepad1, manualPinpoint, matchSettings);
         subController = new Controller(gamepad2, manualPinpoint, matchSettings);
@@ -61,7 +61,7 @@ public class MainOp extends LinearOpMode {
         limelightManager = new LimelightManager(hardwareMap.get(Limelight3A.class, Settings.Hardware.IDs.LIMELIGHT));
         alignmentEngine = new AlignmentEngine(mainController, matchSettings, drivetrain, mechanisms, limelightManager, manualPinpoint);
         trajectoryEngine = new TrajectoryEngine(limelightManager, manualPinpoint, matchSettings);
-        turret = new Turret(trajectoryEngine);
+        turret = new Launcher(trajectoryEngine);
         // Wait for start
         waitForStart();
 
@@ -72,9 +72,9 @@ public class MainOp extends LinearOpMode {
         while (opModeIsActive()) {
             manualPinpoint.update();
 
-            processControllerInputs();
+            mechanisms.update();
 
-            runAutomations();
+            processControllerInputs();
 
             updateTelemetry();
 
@@ -138,15 +138,17 @@ public class MainOp extends LinearOpMode {
             mechanisms.intake.stop();
         }
 
+        /*
         if (subController.getProcessedValue(Controller.Action.RELEASE_EXTRAS) > 0) {
-            mechanisms.intake.releaseExtras();
+            mechanisms.sorter.loadExtra();
         }
         if (subController.getProcessedValue(Controller.Action.RELEASE_PURPLE) > 0) {
-            mechanisms.intake.releasePurple();
+            mechanisms.sorter.loadPurple();
         }
         if (subController.getProcessedValue(Controller.Action.RELEASE_GREEN) > 0) {
-            mechanisms.intake.releaseGreen();
+            mechanisms.sorter.loadGreen();
         }
+         */
 
         if (subController.getProcessedValue(Controller.Action.EMPTY_CLASSIFIER_STATE) > 0) {
             matchSettings.emptyClassifier();
@@ -154,25 +156,6 @@ public class MainOp extends LinearOpMode {
         if (subController.getProcessedValue(Controller.Action.INCREMENT_CLASSIFIER_STATE) > 0) {
             matchSettings.incrementClassifier();
         }
-    }
-
-    /**
-     * Check automation conditions
-     */
-    private void runAutomations() {
-        // Skip if automation is disabled
-        if (!Settings.Deploy.AUTOMATIONS) {
-        }
-
-        // TODO update for new automations
-
-        // boolean shoulderInBackPosition = mechanisms.outtake.shoulder.position() == Shoulder.Position.PLACE_BACKWARD;
-
-//        if (horizontalCollapsed && verticalCollapsed && intakeHasPixel &&
-//                outtakeClawClosed && shoulderInBackPosition) {
-//            mechanisms.intake.intakeClaw.open();
-//            scheduleTask(() -> mechanisms.outtake.moveShoulderToBack(), 200);
-//        }
     }
 
     /**
