@@ -1,18 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
-import org.firstinspires.ftc.teamcode.configuration.Settings;
-import org.firstinspires.ftc.teamcode.hardware.Launcher;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
-import org.firstinspires.ftc.teamcode.software.AlignmentEngine;
 import org.firstinspires.ftc.teamcode.software.Drivetrain;
-import org.firstinspires.ftc.teamcode.software.LimelightManager;
-import org.firstinspires.ftc.teamcode.software.TrajectoryEngine;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,17 +21,11 @@ import java.util.concurrent.TimeUnit;
 public class MainOp extends LinearOpMode {
 
     private MechanismManager mechanisms;
-    private LimelightManager limelightManager;
     private Controller mainController;
     private Controller subController;
-    private Drivetrain drivetrain;
-    private GoBildaPinpointDriver manualPinpoint;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    private AlignmentEngine alignmentEngine;
-    private TrajectoryEngine trajectoryEngine;
     public MatchSettings matchSettings;
-    public Launcher turret;
 
     /**
      * Main execution flow:
@@ -54,14 +41,8 @@ public class MainOp extends LinearOpMode {
 
         // Initialize robot systems
         mechanisms = new MechanismManager(hardwareMap, matchSettings);
-        manualPinpoint = hardwareMap.get(GoBildaPinpointDriver.class, Settings.Hardware.IDs.PINPOINT);
-        mainController = new Controller(gamepad1, manualPinpoint, matchSettings);
-        subController = new Controller(gamepad2, manualPinpoint, matchSettings);
-        drivetrain = new Drivetrain(hardwareMap);
-        limelightManager = new LimelightManager(hardwareMap.get(Limelight3A.class, Settings.Hardware.IDs.LIMELIGHT));
-        alignmentEngine = new AlignmentEngine(mainController, matchSettings, drivetrain, mechanisms, limelightManager, manualPinpoint);
-        trajectoryEngine = new TrajectoryEngine(limelightManager, manualPinpoint, matchSettings);
-        turret = new Launcher(trajectoryEngine);
+        mainController = new Controller(gamepad1, mechanisms.pinpoint, matchSettings);
+        subController = new Controller(gamepad2, mechanisms.pinpoint, matchSettings);
         // Wait for start
         waitForStart();
 
@@ -70,8 +51,6 @@ public class MainOp extends LinearOpMode {
 
         // Main loop
         while (opModeIsActive()) {
-            manualPinpoint.update();
-
             mechanisms.update();
 
             processControllerInputs();
@@ -105,7 +84,7 @@ public class MainOp extends LinearOpMode {
         double rotate = mainController.getProcessedRotation();
 
         // Apply the values to drivetrain
-        drivetrain.mecanumDrive(drive, strafe, rotate);
+        mechanisms.drivetrain.mecanumDrive(drive, strafe, rotate);
 
         // Go to predetermined positions, overriding the mecanum drive if a button is pressed
         Controller.Action[] gotoActions = {
@@ -114,7 +93,7 @@ public class MainOp extends LinearOpMode {
         };
         for (Controller.Action action : gotoActions) {
             if (mainController.wasJustPressed(action)) {
-                drivetrain.goTo(Drivetrain.Position.valueOf(action.name().substring("GOTO_".length())));
+                mechanisms.drivetrain.goTo(Drivetrain.Position.valueOf(action.name().substring("GOTO_".length())));
                 break; // only one goto action can be triggered at a time
             }
         }
@@ -124,12 +103,15 @@ public class MainOp extends LinearOpMode {
         //}
 
         // Intake controls using Controller's isPressed
-        if (subController.wasJustPressed(Controller.Action.AIM)) {
-            alignmentEngine.run();
+        if (subController.getProcessedValue(Controller.Action.AIM) > 0.2) {
+            mechanisms.alignmentEngine.run();
+            mechanisms.launcher.ready();
+        } else {
+            mechanisms.launcher.stop();
         }
 
         if (subController.wasJustPressed(Controller.Action.LAUNCH)) {
-            turret.launch();
+            mechanisms.launcher.launch();
         }
 
         if (subController.getProcessedValue(Controller.Action.INTAKE) > 0) {

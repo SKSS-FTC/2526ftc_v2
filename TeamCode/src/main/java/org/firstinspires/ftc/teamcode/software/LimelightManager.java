@@ -15,11 +15,13 @@ import org.firstinspires.ftc.teamcode.configuration.Settings;
  */
 public class LimelightManager {
     public Limelight3A limelight;
+    public MatchSettings matchSettings;
     LLResult currentResult;
     Pipeline currentPipeline = Pipeline.OBELISK; // to detect the obelisk april tag
 
-    public LimelightManager(Limelight3A limelight) {
+    public LimelightManager(Limelight3A limelight, MatchSettings matchSettings) {
         this.limelight = limelight;
+        this.matchSettings = matchSettings;
     }
 
     /**
@@ -74,7 +76,7 @@ public class LimelightManager {
         }
     }
 
-    public LLResult detectGoal(MatchSettings matchSettings) {
+    public LLResult detectGoal() {
         setCurrentPipeline(getPipelineFromAlliance(matchSettings.getAllianceColor()));
         return limelight.getLatestResult();
     }
