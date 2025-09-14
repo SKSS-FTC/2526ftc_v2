@@ -28,7 +28,7 @@ public class Pipeline {
         return color;
     }
 
-    public void updateColor (){
+    public void getColor (){
         cacheColor = getNewColor();
     }
 
