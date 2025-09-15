@@ -41,7 +41,12 @@ captures/
 
 # IntelliJ
 *.iml
-.idea/
+# Ignore all of .idea
+.idea/**
+
+# But keep code styles
+!.idea/codeStyles/
+!.idea/codeStyles/**
 
 # For Mac users
 .DS_Store
