@@ -44,6 +44,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.teamcode.auto.roadrunner.messages.DriveCommandMessage;
@@ -111,7 +112,7 @@ public final class TankDrive {
 
     public final List<DcMotorEx> leftMotors, rightMotors;
 
-    public final LazyImu lazyImu;
+    public final ConcreteLazyImu lazyImu;
 
     public final VoltageSensor voltageSensor;
 
@@ -249,7 +250,7 @@ public final class TankDrive {
 
         // TODO: make sure your config has an IMU with this name (can be BNO or BHI)
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
-        lazyImu = new LazyImu(hardwareMap, "imu", new RevHubOrientationOnRobot(
+        lazyImu = new ConcreteLazyImu(hardwareMap, "imu", new RevHubOrientationOnRobot(
                 PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));
 
         voltageSensor = hardwareMap.voltageSensor.iterator().next();
