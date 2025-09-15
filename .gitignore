@@ -49,8 +49,8 @@ captures/
 !.idea/codeStyles/**
 !.idea/scopes/
 !.idea/scopes/**
-!/idea/inspectionProfiles/
-!/idea/inspectionProfiles/**
+!.idea/inspectionProfiles/
+!.idea/inspectionProfiles/**
 
 # For Mac users
 .DS_Store
