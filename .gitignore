@@ -44,9 +44,13 @@ captures/
 # Ignore all of .idea
 .idea/**
 
-# But keep code styles
+# But keep what we need
 !.idea/codeStyles/
 !.idea/codeStyles/**
+!.idea/scopes/
+!.idea/scopes/**
+!/idea/inspectionProfiles/
+!/idea/inspectionProfiles/**
 
 # For Mac users
 .DS_Store
