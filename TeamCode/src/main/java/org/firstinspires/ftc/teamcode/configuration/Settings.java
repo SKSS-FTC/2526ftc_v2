@@ -15,15 +15,11 @@ import java.util.EnumMap;
  */
 @Config
 public class Settings {
-	/* The configuration for the Controllers. **/
 	@Config
 	public static class Controls {
-		/**
-		 * @noinspection PublicStaticCollectionField (i dont car)
-		 */
 		// Using EnumMap for better performance and type safety with Enum keys
 		// The keys are the physical controller inputs, the values are the game actions.
-		public static EnumMap<Controller.Action, Controller.Control> actionControlMap =
+		public static final EnumMap<Controller.Action, Controller.Control> actionControlMap =
 				new EnumMap<>(Controller.Action.class); // Initialize with the Control enum class
 		
 		static {
@@ -66,7 +62,7 @@ public class Settings {
 	@Config
 	public static class Teleop {
 		// Multiplier applied to strafe movements to compensate for mechanical differences
-		public static double strafe_power_coefficient = 1.2;
+		public static final double strafe_power_coefficient = 1.2;
 	}
 	
 	// Deploy flags control what parts of the robot are on
@@ -86,23 +82,23 @@ public class Settings {
 	public static class Hardware {
 		@Config
 		public static class Intake {
-			public static double SPEED = 0.5;
+			public static final double SPEED = 0.5;
 		}
 		
 		@Config
 		public static final class Sorter {
 			// Default calibrated servo positions for slots at intake
-			public static double[] SLOT_INTAKE_POSITIONS = {0.10, 0.43, 0.77}; // TODO TUNE
+			public static final double[] SLOT_INTAKE_POSITIONS = {0.10, 0.43, 0.77}; // TODO TUNE
 			
 			// Offset from intake to exit alignment
-			public static double EXIT_OFFSET = 0.25; // TODO TUNE
+			public static final double EXIT_OFFSET = 0.25; // TODO TUNE
 			
-			public static long EJECT_EXIT_TIME_MS = 200; // ms needed from servo receiving open to the ball fully leaving the sorter
+			public static final long EJECT_EXIT_TIME_MS = 200; // ms needed from servo receiving open to the ball fully leaving the sorter
 			
-			public static double TRANSFER_SERVO_CLOSED_POSITION = 1.0; // TODO TUNE
-			public static double TRANSFER_SERVO_OPEN_POSITION = 0.0; // TODO TUNE
+			public static final double TRANSFER_SERVO_CLOSED_POSITION = 1.0; // TODO TUNE
+			public static final double TRANSFER_SERVO_OPEN_POSITION = 0.0; // TODO TUNE
 			
-			public static double TOLERANCE = 5.0 / 360.0; // how close a slot must be to the exit in order to launch
+			public static final double TOLERANCE = 5.0 / 360.0; // how close a slot must be to the exit in order to launch
 		}
 		
 		@Config
@@ -133,12 +129,11 @@ public class Settings {
 	
 	@Config
 	public static class Aiming {
+		public static final double gravity = 9.81;
 		// todo tune
 		public static double muzzleSpeed;
 		public static double muzzleHeight;
 		public static double goalHeight;
-		public static double gravity = 9.81;
-		
 		public static double maxYawError = 1;      // rad
 		public static double maxPitchError = 1;    // rad
 		public static double goalTolerance;    // cm (vertical tolerance window)
@@ -149,7 +144,7 @@ public class Settings {
 		/**
 		 * Limelight horizontal window size (degrees)
 		 */
-		public static double limelightWindowSize = 40;
+		public static final double limelightWindowSize = 40;
 	}
 	
 	@Config
@@ -162,8 +157,8 @@ public class Settings {
 		/**
 		 * Launcher motor speed (0..1)
 		 */
-		public static double BELT_MOTOR_SPEED = 1;
-		public static long BELT_SPINUP_TIME_MS = 500; // TODO tune
+		public static final double BELT_MOTOR_SPEED = 1;
+		public static final long BELT_SPINUP_TIME_MS = 500; // TODO tune
 	}
 	
 	@Config
@@ -172,48 +167,48 @@ public class Settings {
 		/**
 		 * Max drive/strafe speed when far from target (0..1)
 		 */
-		public static double maxTranslationalSpeed = 0.5;
+		public static final double maxTranslationalSpeed = 0.5;
 		
 		/**
 		 * Distance (inches) outside of which translational speed hits max
 		 */
-		public static double fullSpeedDistance = 30.0;
+		public static final double fullSpeedDistance = 30.0;
 		
 		/**
 		 * Distance (inches) inside which translational speed tapers to near zero
 		 */
-		public static double stopDistance = 1.0;
+		public static final double stopDistance = 1.0;
 		
 		// Rotational control
 		/**
 		 * Max rotation speed (0..1)
 		 */
-		public static double maxRotationSpeed = 0.5;
+		public static final double maxRotationSpeed = 0.5;
 		
 		/**
 		 * Heading error (radians) at which rotation is full speed
 		 */
-		public static double fullSpeedHeadingError = Math.toRadians(90);
+		public static final double fullSpeedHeadingError = Math.toRadians(90);
 		
 		/**
 		 * Deadband: don't rotate if error below this (radians)
 		 */
-		public static double headingDeadband = Math.toRadians(2.5);
+		public static final double headingDeadband = Math.toRadians(2.5);
 	}
 	
 	public static class Positions {
-		public static double RED_GOAL_CENTER_X = 50; // TODO tune
-		public static double RED_GOAL_CENTER_Y = 50; // TODO tune
+		public static final double RED_GOAL_CENTER_X = 50; // TODO tune
+		public static final double RED_GOAL_CENTER_Y = 50; // TODO tune
 		
-		public static double BLUE_GOAL_CENTER_X = 50; // TODO tune
-		public static double BLUE_GOAL_CENTER_Y = 50; // TODO tune
+		public static final double BLUE_GOAL_CENTER_X = 50; // TODO tune
+		public static final double BLUE_GOAL_CENTER_Y = 50; // TODO tune
 		
-		public static Point FAR_LAUNCH_ZONE_FRONT_CORNER = new Point(0, 0); // TODO tune
-		public static Point FAR_LAUNCH_ZONE_LEFT_CORNER = new Point(0, 0); // TODO tune
-		public static Point FAR_LAUNCH_ZONE_RIGHT_CORNER = new Point(0, 0); // TODO tune
+		public static final Point FAR_LAUNCH_ZONE_FRONT_CORNER = new Point(0, 0); // TODO tune
+		public static final Point FAR_LAUNCH_ZONE_LEFT_CORNER = new Point(0, 0); // TODO tune
+		public static final Point FAR_LAUNCH_ZONE_RIGHT_CORNER = new Point(0, 0); // TODO tune
 		
-		public static Point CLOSE_LAUNCH_ZONE_FRONT_CORNER = new Point(0, 0); // TODO tune
-		public static Point CLOSE_LAUNCH_ZONE_LEFT_CORNER = new Point(0, 0); // TODO tune
-		public static Point CLOSE_LAUNCH_ZONE_RIGHT_CORNER = new Point(0, 0); // TODO tune
+		public static final Point CLOSE_LAUNCH_ZONE_FRONT_CORNER = new Point(0, 0); // TODO tune
+		public static final Point CLOSE_LAUNCH_ZONE_LEFT_CORNER = new Point(0, 0); // TODO tune
+		public static final Point CLOSE_LAUNCH_ZONE_RIGHT_CORNER = new Point(0, 0); // TODO tune
 	}
 }

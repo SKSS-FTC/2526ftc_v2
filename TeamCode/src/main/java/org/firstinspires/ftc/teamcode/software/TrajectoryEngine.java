@@ -28,9 +28,7 @@ public class TrajectoryEngine {
 	 * @return The normalized angle in radians.
 	 */
 	private static double normalizeAngle(double angle) {
-		while (angle > Math.PI) angle -= 2 * Math.PI;
-		while (angle < -Math.PI) angle += 2 * Math.PI;
-		return angle;
+		return angle - 2 * Math.PI * Math.floor((angle + Math.PI) / (2 * Math.PI));
 	}
 	
 	/**
@@ -126,7 +124,7 @@ public class TrajectoryEngine {
 	 * A simple data class to hold the results of a trajectory calculation.
 	 * An "invalid" solution is one where no target was found or no ballistic path exists.
 	 */
-	public class AimingSolution {
+	public static class AimingSolution {
 		public final boolean hasSolution;
 		public final double yawRadians; // Launcher yaw relative to the robot's heading
 		public final double pitchRadians; // Launcher pitch relative to the horizontal plane

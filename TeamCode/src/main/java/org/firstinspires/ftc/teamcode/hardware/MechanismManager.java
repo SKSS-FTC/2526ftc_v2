@@ -15,16 +15,14 @@ import org.firstinspires.ftc.teamcode.software.LimelightManager;
 import org.firstinspires.ftc.teamcode.software.TrajectoryEngine;
 
 public class MechanismManager {
-	public Intake intake;
-	public Sorter sorter;
-	
+	public final Intake intake;
+	public final Sorter sorter;
+	public final Launcher launcher;
+	public final LimelightManager limelightManager;
+	public final AlignmentEngine alignmentEngine;
+	public final TrajectoryEngine trajectoryEngine;
+	public final Drivetrain drivetrain;
 	public GoBildaPinpointDriver pinpoint;
-	public Launcher launcher;
-	public LimelightManager limelightManager;
-	
-	public AlignmentEngine alignmentEngine;
-	public TrajectoryEngine trajectoryEngine;
-	public Drivetrain drivetrain;
 	
 	public MechanismManager(HardwareMap hardwareMap, MatchSettings matchSettings) {
 		drivetrain = new Drivetrain(hardwareMap);

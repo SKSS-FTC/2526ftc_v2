@@ -183,7 +183,7 @@ public class Sorter {
 	/**
 	 * Remove and return the artifact at the exit. Becomes UNKNOWN after removal.
 	 */
-	public MatchSettings.ArtifactColor ejectBallAtExit() {
+	public void ejectBallAtExit() {
 		int slot = getSlotIndexAtExit();
 		// open transfer immediately
 		launcherTransferServo.setPosition(Settings.Hardware.Sorter.TRANSFER_SERVO_OPEN_POSITION);
@@ -197,7 +197,6 @@ public class Sorter {
 			// schedule any later sealing requests normally
 			// leave previously queued actions in place; they will run after the next seal
 			sealRequested = false;
-			return c;
 		}
 	}
 	
@@ -297,6 +296,8 @@ public class Sorter {
 	
 	/**
 	 * Called from update() to actually close the transfer servo once cooldown passes and run queued actions.
+	 *
+	 * @noinspection MethodWithMoreThanThreeNegations sorry
 	 */
 	private void serviceSeal() {
 		Deque<Runnable> toRun = null;
@@ -334,15 +335,5 @@ public class Sorter {
 				}
 			}
 		}
-	}
-	
-	@Override
-	public String toString() {
-		return "Sorter{" +
-				"servoPos=" + getCurrentServoPosition() +
-				", intakeIndex=" + getSlotIndexAtIntake() +
-				", exitIndex=" + getSlotIndexAtExit() +
-				", slots=" + Arrays.toString(getSlotsSnapshot()) +
-				'}';
 	}
 }

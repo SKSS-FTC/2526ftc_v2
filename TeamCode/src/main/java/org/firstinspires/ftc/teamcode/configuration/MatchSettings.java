@@ -5,13 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @noinspection unchecked, we know what the blackboard is storing
+ */
 public class MatchSettings {
 	private static final String CLASSIFIER_STATE_KEY = "classifierState";
 	private static final String MOTIF_KEY = "motif";
 	private static final String ALLIANCE_COLOR_KEY = "allianceColor";
-	private final HashMap blackboard;
+	private final HashMap<String, Object> blackboard;
 	
-	public MatchSettings(HashMap blackboard) {
+	public MatchSettings(HashMap<String, Object> blackboard) {
 		this.blackboard = blackboard;
 	}
 	
@@ -62,7 +65,11 @@ public class MatchSettings {
 	
 	public Motif getMotif() {
 		String motif = (String) blackboard.get(MOTIF_KEY);
-		return Motif.valueOf(motif.toUpperCase());
+		if (motif != null) {
+			return Motif.valueOf(motif.toUpperCase());
+		} else {
+			return Motif.UNKNOWN;
+		}
 	}
 	
 	public void setMotif(Motif motif) {
@@ -72,7 +79,6 @@ public class MatchSettings {
 	}
 	
 	// Get current state
-	@SuppressWarnings("unchecked")
 	public List<ArtifactColor> getClassifierState() {
 		return (List<ArtifactColor>) blackboard.getOrDefault(CLASSIFIER_STATE_KEY, new ArrayList<ArtifactColor>());
 	}

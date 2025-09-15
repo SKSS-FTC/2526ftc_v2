@@ -16,7 +16,7 @@ public class Drivetrain {
 	public final DcMotor rearLeftMotor;
 	public final DcMotor rearRightMotor;
 	public final Map<String, DcMotor> motors = new HashMap<>();
-	public State state = State.MANUAL;
+	public final State state = State.MANUAL;
 	
 	public Drivetrain(HardwareMap hardwareMap) {
 		frontLeftMotor = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.FRONT_LEFT_MOTOR);
@@ -94,6 +94,9 @@ public class Drivetrain {
 		mecanumDrive(drivePower, strafePower, rotation, false);
 	}
 	
+	/**
+	 * @noinspection EmptyMethod for now
+	 */
 	public void goTo(Position position) {
 		// TODO automatic positions
 	}

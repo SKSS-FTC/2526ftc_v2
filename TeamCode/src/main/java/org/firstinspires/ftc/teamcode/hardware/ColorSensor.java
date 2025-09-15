@@ -10,12 +10,12 @@ import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 public class ColorSensor {
 	// Target "center" colors for confidence-based matching
 	// These should be tuned to approximate measured values
-	public static double[] greenTarget = {0, 200, 0};
-	public static double[] purpleTarget = {200, 0, 200};
+	public static final double[] greenTarget = {0, 200, 0};
+	public static final double[] purpleTarget = {200, 0, 200};
 	// Acceptable distance threshold (lower is stricter, higher is looser)
-	public static double CONFIDENCE_THRESHOLD = 100.0;
-	RevColorSensorV3 colorSensor;
-	double[] rgbValues = {0, 0, 0};
+	public static final double CONFIDENCE_THRESHOLD = 100.0;
+	final RevColorSensorV3 colorSensor;
+	final double[] rgbValues = {0, 0, 0};
 	
 	public ColorSensor(RevColorSensorV3 colorSensorV3) {
 		this.colorSensor = colorSensorV3;

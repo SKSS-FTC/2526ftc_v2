@@ -14,8 +14,8 @@ import org.firstinspires.ftc.teamcode.configuration.Settings;
  * IMPORTANT: Tx and Ty are zero when no desired object is detected.
  */
 public class LimelightManager {
-	public Limelight3A limelight;
-	public MatchSettings matchSettings;
+	public final Limelight3A limelight;
+	public final MatchSettings matchSettings;
 	LLResult currentResult;
 	Pipeline currentPipeline = Pipeline.OBELISK; // to detect the obelisk april tag
 	

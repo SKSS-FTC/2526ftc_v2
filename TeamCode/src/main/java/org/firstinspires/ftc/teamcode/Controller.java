@@ -9,6 +9,9 @@ import org.firstinspires.ftc.teamcode.configuration.Settings;
 
 import java.util.HashMap;
 
+/**
+ * @noinspection CyclicClassDependency
+ */
 public class Controller extends Gamepad {
 	private final Gamepad gamepad;
 	private final HashMap<Control, Double> previousControlState;
@@ -53,12 +56,11 @@ public class Controller extends Gamepad {
 		// add value modifiers here
 		double val = getRawValue(control);
 		
-		switch (control) {
-			case LEFT_STICK_X:
-				val = -val;
-				break;
-			// add more here
+		if (control == Control.LEFT_STICK_X) {
+			val = -val;
 		}
+		// add more here
+		
 		return val;
 	}
 	
