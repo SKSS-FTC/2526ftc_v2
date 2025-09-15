@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.configuration.Settings;
 import java.util.HashMap;
 
 /**
- * @noinspection CyclicClassDependency
+ * @noinspection CyclicClassDependency, DataFlowIssue
  */
 public class Controller extends Gamepad {
 	private final Gamepad gamepad;
@@ -24,6 +24,8 @@ public class Controller extends Gamepad {
 		this.pinpoint = pinpoint;
 		this.matchSettings = matchSettings;
 		this.previousControlState = new HashMap<>();
+		// Populate the initial state in the constructor
+		saveLastState();
 	}
 	
 	public final double getProcessedRotation() {
@@ -108,6 +110,9 @@ public class Controller extends Gamepad {
 		return getProcessedValue(Action.MOVE_X) + robotCentricStrafe;
 	}
 	
+	/**
+	 * @noinspection OverlyComplexMethod, OverlyLongMethod - Never edit this
+	 */
 	private double getRawValue(Control control) {
 		switch (control) {
 			case LEFT_TRIGGER:

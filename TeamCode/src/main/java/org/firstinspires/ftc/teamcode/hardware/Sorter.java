@@ -18,7 +18,7 @@ import java.util.Deque;
  * - non-blocking sealing: actions that require the launcher transfer to be sealed are queued
  * and only executed after the periodic update() performs the seal.
  * - blocking API for background threads: requireSealBlocking()
- *  TODO this was all upwritten by chatgpt 5 to make the requireSeal work. will test w/ robot
+ *  TODO this was all up-written by chatgpt 5 to make the requireSeal work. will test w/ robot
  */
 public class Sorter {
 	private final Servo sorterServo;
@@ -49,14 +49,10 @@ public class Sorter {
 		}
 		this.exitOffset = wrapServo(Settings.Hardware.Sorter.EXIT_OFFSET);
 		
-		for (int i = 0; i < 3; i++) slots[i] = MatchSettings.ArtifactColor.UNKNOWN;
+		Arrays.fill(slots, MatchSettings.ArtifactColor.UNKNOWN);
 		
 		// Sync commandedPosition to current hardware reading if available
-		double pos = 0.0;
-		try {
-			pos = sorterServo.getPosition();
-		} catch (Exception ignored) {
-		}
+		double pos = sorterServo.getPosition();
 		this.commandedPosition = wrapServo(pos);
 	}
 	
@@ -85,7 +81,7 @@ public class Sorter {
 	}
 	
 	/**
-	 * Called periodically from opmode loop. Must be called frequently.
+	 * Called periodically from op-mode loop. Must be called frequently.
 	 * This services any pending seal requests and runs queued actions once sealed.
 	 */
 	public void update() {
@@ -329,7 +325,9 @@ public class Sorter {
 			while (!toRun.isEmpty()) {
 				Runnable r = toRun.poll();
 				try {
-					r.run();
+					if (r != null) {
+						r.run();
+					}
 				} catch (RuntimeException ignored) {
 					// swallow to ensure other queued actions still run
 				}
