@@ -63,11 +63,11 @@ public class TrajectoryEngine {
         double dy = targetY - robotPose.getY(DistanceUnit.CM);
         double d = Math.hypot(dx, dy);
 
-        // 5. Calculate the required turret yaw
+        // 5. Calculate the required launcher yaw
         double yawWorld = Math.atan2(dy, dx);
         double yawRelative = normalizeAngle(yawWorld - robotPose.getHeading(AngleUnit.RADIANS));
 
-        // 6. Calculate the required turret pitch using ballistic equations
+        // 6. Calculate the required launcher pitch using ballistic equations
         double h = Settings.Aiming.goalHeight - Settings.Aiming.muzzleHeight;
         double v = Settings.Aiming.muzzleSpeed;
         double g = Settings.Aiming.gravity;
@@ -88,7 +88,7 @@ public class TrajectoryEngine {
     }
 
     /**
-     * Computes turret yaw (relative to robot) and pitch to aim at the target.
+     * Computes launcher yaw (relative to robot) and pitch to aim at the target.
      *
      * @return A double array containing {yawRadians, pitchRadians}. Values will be NaN if no solution exists.
      */
@@ -109,13 +109,13 @@ public class TrajectoryEngine {
         // Check 1: A valid ballistic path must exist.
         return solution.hasSolution;
 
-        // Check 2: The turret must be aimed correctly.
-        // You would get the turret's CURRENT angles from your hardware control loops.
-        // double currentTurretYaw = turret.getCurrentYaw();
-        // double currentTurretPitch = turret.getCurrentPitch();
+        // Check 2: The launcher must be aimed correctly.
+        // You would get the launcher's CURRENT angles from your hardware control loops.
+        // double currentLauncherYaw = launcher.getCurrentYaw();
+        // double currentLauncherPitch = launcher.getCurrentPitch();
         //
-        // boolean isYawAligned = Math.abs(normalizeAngle(solution.yawRadians - currentTurretYaw)) < Settings.Aiming.maxYawError;
-        // boolean isPitchAligned = Math.abs(solution.pitchRadians - currentTurretPitch) < Settings.Aiming.maxPitchError;
+        // boolean isYawAligned = Math.abs(normalizeAngle(solution.yawRadians - currentLauncherYaw)) < Settings.Aiming.maxYawError;
+        // boolean isPitchAligned = Math.abs(solution.pitchRadians - currentLauncherPitch) < Settings.Aiming.maxPitchError;
         //
         // if (!isYawAligned || !isPitchAligned) {
         //    return false;
@@ -128,8 +128,8 @@ public class TrajectoryEngine {
      */
     public class AimingSolution {
         public final boolean hasSolution;
-        public final double yawRadians; // Turret yaw relative to the robot's heading
-        public final double pitchRadians; // Turret pitch relative to the horizontal plane
+        public final double yawRadians; // Launcher yaw relative to the robot's heading
+        public final double pitchRadians; // Launcher pitch relative to the horizontal plane
         public final double distance; // Horizontal distance to the target
 
         /**

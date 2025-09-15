@@ -46,8 +46,8 @@ public class Settings {
             // Secondary Controller Mapping
             actionControlMap.put(Controller.Action.AIM, Controller.Control.LEFT_TRIGGER);
             actionControlMap.put(Controller.Action.LAUNCH, Controller.Control.RIGHT_TRIGGER);
-            actionControlMap.put(Controller.Action.TURRET_STEEPNESS_AXIS, Controller.Control.RIGHT_STICK_Y);
-            actionControlMap.put(Controller.Action.TURRET_ROTATION_AXIS, Controller.Control.RIGHT_STICK_X);
+            actionControlMap.put(Controller.Action.LAUNCHER_STEEPNESS_AXIS, Controller.Control.RIGHT_STICK_Y);
+            actionControlMap.put(Controller.Action.LAUNCHER_ROTATION_AXIS, Controller.Control.RIGHT_STICK_X);
             actionControlMap.put(Controller.Action.INTAKE, Controller.Control.SQUARE);
             actionControlMap.put(Controller.Action.RELEASE_EXTRAS, Controller.Control.CIRCLE);
             actionControlMap.put(Controller.Action.RELEASE_PURPLE, Controller.Control.TRIANGLE);
@@ -115,17 +115,17 @@ public class Settings {
 
             public static final String INTAKE_MOTOR = "intakeMotor";
             public static final String[] INTAKE_SERVO_ARRAY = {"intakeServoLowerLeft", "intakeServoLowerRight", "intakeServoUpperLeft", "intakeServoUpperRight"};
-            public static final String TURRET_TRANSFER_SERVO = "turretTransferServo";
+            public static final String LAUNCHER_TRANSFER_SERVO = "launcherTransferServo";
             public static final String SORTER_COLOR_SENSOR = "sorterColorSensor";
 
             public static final String LIMELIGHT = "limelight";
             public static final String COLOR_SENSOR = "colorSensor";
             public static final String SORTER_SERVO = "sorterServo";
-            public static final String TURRET_HORIZONTAL_SERVO = "turretHorizontalServo";
-            public static final String TURRET_VERTICAL_SERVO = "turretVerticalServo";
+            public static final String LAUNCHER_HORIZONTAL_SERVO = "launcherHorizontalServo";
+            public static final String LAUNCHER_VERTICAL_SERVO = "launcherVerticalServo";
 
-            public static final String TURRET_LAUNCHER_RIGHT = "turretLauncherRight";
-            public static final String TURRET_LAUNCHER_LEFT = "turretLauncherLeft";
+            public static final String LAUNCHER_LAUNCHER_RIGHT = "launcherLauncherRight";
+            public static final String LAUNCHER_LAUNCHER_LEFT = "launcherLauncherLeft";
         }
     }
 
@@ -157,6 +157,12 @@ public class Settings {
          */
         public static double BELT_MOTOR_SPEED = 1;
         public static long BELT_SPINUP_TIME_MS = 500; // TODO tune
+
+        public static final double BELT_SYNC_KP = 0.05; // how fast the belts move to match each other
+        public static final double MIN_PITCH = 0; // degrees from horizontal when vert servo is fully down
+        public static final double MAX_PITCH = 30; // degrees above horiz when vert servo is maxed
+        public static final double MIN_YAW = -20; // degrees left when horiz servo is min
+        public static final double MAX_YAW = 20; // degrees right when horiz servo is maxed
     }
 
     @Config

@@ -44,28 +44,26 @@ public class MechanismManager {
         alignmentEngine = new AlignmentEngine(matchSettings, drivetrain, limelightManager, pinpoint);
 
         Servo sorterServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.SORTER_SERVO);
-        Servo turretTransferServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.TURRET_TRANSFER_SERVO);
+        Servo launcherTransferServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.LAUNCHER_TRANSFER_SERVO);
         ColorSensor sorterColorSensor = new ColorSensor(hardwareMap.get(RevColorSensorV3.class, Settings.Hardware.IDs.SORTER_COLOR_SENSOR));
-        sorter = new Sorter(sorterServo, turretTransferServo, sorterColorSensor, matchSettings);
+        sorter = new Sorter(sorterServo, launcherTransferServo, sorterColorSensor, matchSettings);
 
-        DcMotor turretLauncherRight = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.TURRET_LAUNCHER_RIGHT);
-        DcMotor turretLauncherLeft = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.TURRET_LAUNCHER_LEFT);
-        Servo horizontalServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.TURRET_HORIZONTAL_SERVO);
-        Servo verticalServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.TURRET_VERTICAL_SERVO);
-        launcher = new Launcher(sorter, turretLauncherRight, turretLauncherLeft, horizontalServo, verticalServo, trajectoryEngine);
+        DcMotor launcherLauncherRight = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.LAUNCHER_LAUNCHER_RIGHT);
+        DcMotor launcherLauncherLeft = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.LAUNCHER_LAUNCHER_LEFT);
+        Servo horizontalServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.LAUNCHER_HORIZONTAL_SERVO);
+        Servo verticalServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.LAUNCHER_VERTICAL_SERVO);
+        launcher = new Launcher(sorter, launcherLauncherRight, launcherLauncherLeft, horizontalServo, verticalServo, trajectoryEngine);
     }
 
     public void init() {
-        if (Settings.Deploy.INTAKE) {
-            intake.init();
-            sorter.init();
-        }
+        intake.init();
+        sorter.init();
+        launcher.init();
     }
 
     public void update() {
-        if (Settings.Deploy.INTAKE) {
-            intake.update();
-            sorter.update();
-        }
+        intake.update();
+        sorter.update();
+        launcher.update();
     }
 }
