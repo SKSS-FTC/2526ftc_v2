@@ -151,9 +151,9 @@ public class Settings {
 	public static class Launcher {
 		public static final double BELT_SYNC_KP = 0.05; // how fast the belts move to match each other
 		public static final double MIN_PITCH = 0; // degrees from horizontal when vert servo is fully down
-		public static final double MAX_PITCH = 30; // degrees above horiz when vert servo is maxed
-		public static final double MIN_YAW = -20; // degrees left when horiz servo is min
-		public static final double MAX_YAW = 20; // degrees right when horiz servo is maxed
+		public static final double MAX_PITCH = 30; // degrees above horizontal when vert servo is maxed
+		public static final double MIN_YAW = -20; // degrees left when horizontal servo is min
+		public static final double MAX_YAW = 20; // degrees right when horizontal servo is maxed
 		/**
 		 * Launcher motor speed (0..1)
 		 */
