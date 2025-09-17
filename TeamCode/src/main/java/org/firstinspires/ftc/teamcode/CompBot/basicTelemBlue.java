@@ -9,14 +9,17 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.FORWARD;
 import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver;
+import org.firstinspires.ftc.teamcode.Swerve.wpilib.MathUtil;
+import org.firstinspires.ftc.teamcode.Swerve.wpilib.util.Units;
 
+@Disabled
 @TeleOp(name = "basic telemetry for blue robot", group = "CompBot")
 public class basicTelemBlue extends LinearOpMode {
   /*
@@ -24,18 +27,10 @@ public class basicTelemBlue extends LinearOpMode {
   date last updated and tested:
   */
 
-  DcMotor FLMotor, BLMotor, BRMotor, FRMotor, pivot, slide;
+  DcMotor FLMotor, BLMotor, BRMotor, FRMotor, pivot, slide, slide2;
   Servo FLServo, BLServo, BRServo, FRServo, intakeL, wrist;
 
   GoBildaPinpointDriver odo;
-
-  ElapsedTime turnTime = new ElapsedTime();
-
-  // In case we need to add it later, but servos only have 180° so have to be perfectly placed
-  double FLServoOffSet = .00;
-  double FRServoOffSet = .00;
-  double BLServoOffSet = .00;
-  double BRServoOffSet = .00;
 
   double limitSlide;
   double limitPivot;
@@ -44,7 +39,7 @@ public class basicTelemBlue extends LinearOpMode {
 
   double pubLength = 0;
 
-  double encoderCountsPerInch = 100;
+  double encoderCountsPerInch = 85; // needs adjusting
 
   double encoderCountsPerDegree = 30; // needs adjusting
 
@@ -72,10 +67,9 @@ public class basicTelemBlue extends LinearOpMode {
     FRServo.setPosition(0.50);
     BRServo.setPosition(0.50);
 
-    wrist.setPosition(0.7);
+    wrist.setPosition(0.35);
 
     while (opModeIsActive()) {
-
       // game pad 1
       double forBack = -gamepad1.left_stick_y;
       double rotate = gamepad1.right_stick_x;
@@ -95,12 +89,10 @@ public class basicTelemBlue extends LinearOpMode {
       }
 
       // game pad 2
-      // sets arm
       slideLimit();
       setSlide(-gamepad2.right_stick_y);
       setPivot(gamepad2.left_stick_y);
 
-      // claw intake/outtake
       if (gamepad2.right_trigger != 0) {
         intakeL.setPosition(1);
       } else if (gamepad2.left_trigger != 0) {
@@ -109,11 +101,10 @@ public class basicTelemBlue extends LinearOpMode {
         intakeL.setPosition(0.5);
       }
 
-      // wrist rotation
       if (gamepad2.b) {
         double x;
-        if (wrist.getPosition() >= .1) x = 0;
-        else x = .7;
+        if (wrist.getPosition() >= .5) x = .35;
+        else x = 1;
         wrist.setPosition(x);
       }
 
@@ -125,12 +116,12 @@ public class basicTelemBlue extends LinearOpMode {
   }
 
   public void topBucketPreset() {
-    // setPivot();
+    setPivot(90 - 5 * encoderCountsPerDegree);
     // setSlide();
   }
 
   public void toTopSpecimenRung() {
-    // setPivot();
+    setPivot(90 - 5 * encoderCountsPerDegree);
     // setSlide();
   }
 
@@ -142,9 +133,7 @@ public class basicTelemBlue extends LinearOpMode {
   public void initRobot() {
 
     // Maps the motor objects to the physical ports
-    FLMotor =
-        hardwareMap.get(
-            DcMotor.class, "FLMotor"); // TODO: Run testMotor to figure out which motor is where
+    FLMotor = hardwareMap.get(DcMotor.class, "FLMotor");
     BLMotor = hardwareMap.get(DcMotor.class, "BLMotor");
     FRMotor = hardwareMap.get(DcMotor.class, "FRMotor");
     BRMotor = hardwareMap.get(DcMotor.class, "BRMotor");
@@ -197,23 +186,29 @@ public class basicTelemBlue extends LinearOpMode {
     // Init slaw, claw, and pivot
     pivot = hardwareMap.dcMotor.get("pivot");
     slide = hardwareMap.dcMotor.get("slide");
+    slide2 = hardwareMap.dcMotor.get("slide 2");
 
     pivot.setMode(STOP_AND_RESET_ENCODER);
     slide.setMode(STOP_AND_RESET_ENCODER);
+    slide2.setMode(STOP_AND_RESET_ENCODER);
 
     pivot.setMode(RUN_USING_ENCODER);
     slide.setMode(RUN_USING_ENCODER);
+    slide2.setMode(RUN_USING_ENCODER);
 
     pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    slide2.setZeroPowerBehavior(BRAKE);
 
     pivot.setDirection(FORWARD);
     slide.setDirection(FORWARD);
+    slide2.setDirection(FORWARD);
 
     pivot.setPower(0);
     slide.setPower(0);
+    slide2.setPower(0);
 
-    limitSlide = 4750;
+    limitSlide = 4500;
     limitPivot = 2750;
 
     limitSwitch = hardwareMap.get(DigitalChannel.class, "limit switch");
@@ -230,13 +225,26 @@ public class basicTelemBlue extends LinearOpMode {
   public void setSlide(double x) {
     if (slide.getCurrentPosition() >= limitSlide && x > 0) {
       x = 0;
-    } else if (slide.getCurrentPosition() <= -limitSlide && x < 0) {
+    } else if (slide.getCurrentPosition() <= 0 && x < 0) {
       x = 0;
     }
+
+    if (x == 0)
+      x =
+          MathUtil.interpolate(
+                  .00125,
+                  .005,
+                  MathUtil.inverseInterpolate(0, limitSlide, slide.getCurrentPosition()))
+              * Math.sin(
+                  Units.degreesToRadians(
+                      90 - (pivot.getCurrentPosition() * encoderCountsPerDegree)));
+
     if (x > 0 && slide.getCurrentPosition() > pubLength) {
       x = 0;
     }
+
     slide.setPower(x);
+    slide2.setPower(x);
   }
 
   public void slideLimit() {
@@ -244,6 +252,7 @@ public class basicTelemBlue extends LinearOpMode {
         Math.cos(Math.toRadians(pivot.getCurrentPosition() / encoderCountsPerDegree))
             * (46 * encoderCountsPerInch);
     if (pubLength <= 2950) pubLength = 2950;
+    if (pivot.getCurrentPosition() / encoderCountsPerDegree <= 7.5) pubLength = limitSlide;
   }
 
   public void setPivot(double x) {
@@ -256,6 +265,7 @@ public class basicTelemBlue extends LinearOpMode {
 
     if (x > 1) x = .5;
     if (x < -1) x = -.5;
+
     if (slide.getCurrentPosition() > pubLength && x > 1) slide.setPower(-x * 2);
     pivot.setPower(x);
 
