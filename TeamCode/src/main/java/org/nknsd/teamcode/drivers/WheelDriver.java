@@ -5,10 +5,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.nknsd.teamcode.components.handlers.WheelHandler;
-import org.nknsd.teamcode.components.utility.GamePadHandler;
-import org.nknsd.teamcode.controlSchemes.abstracts.WheelControlScheme;
 import org.nknsd.teamcode.frameworks.NKNComponent;
+import org.nknsd.teamcode.components.utility.GamePadHandler;
+import org.nknsd.teamcode.components.handlers.WheelHandler;
+import org.nknsd.teamcode.controlSchemes.abstracts.WheelControlScheme;
 
 // Adds events to gamepad to control the wheels
 public class WheelDriver implements NKNComponent {
@@ -83,7 +83,7 @@ public class WheelDriver implements NKNComponent {
 
     @Override
     public void loop(ElapsedTime runtime, Telemetry telemetry) {
-        wheelHandler.relativeVectorToMotion(forwardStick.getValue(gamepad) * moveSpeedMultiplier, strafeStick.getValue(gamepad) * moveSpeedMultiplier, turnStick.getValue(gamepad) * moveSpeedMultiplier);
+        wheelHandler.relativeVectorToMotion(strafeStick.getValue(gamepad) * moveSpeedMultiplier, forwardStick.getValue(gamepad) * moveSpeedMultiplier, turnStick.getValue(gamepad) * moveSpeedMultiplier);
 //        double y = 0; double x = 0;
 //        if (GamePadHandler.GamepadButtons.DPAD_UP.detect(gamepad)) {
 //            y = 0.4;
