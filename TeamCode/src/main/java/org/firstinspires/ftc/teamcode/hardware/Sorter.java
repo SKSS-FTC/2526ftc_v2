@@ -8,52 +8,53 @@ import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.List;
 
 /**
- * Controls a 3-slot rotating sorter driven by a single Servo.
+ * Controls a 3-slot rotating sorter using the Command Pattern.
  * <p>
- * Key changes:
- * - non-blocking sealing: actions that require the launcher transfer to be sealed are queued
- * and only executed after the periodic update() performs the seal.
- * - blocking API for background threads: requireSealBlocking()
- *  TODO this was all up-written by chatgpt 5 to make the requireSeal work. will test w/ robot
+ * This design delegates all complex actions to dedicated "Command" objects.
+ * The Sorter's main loop simply executes the current command, making the system
+ * highly scalable, readable, and robust against interruptions.
  */
 public class Sorter {
-	private final Servo sorterServo;
-	private final Servo launcherTransferServo;
-	private final ColorSensor colorSensor;
-	private final double[] slotIntakePositions = new double[3]; // calibrated positions for physical slots at intake
-	private final MatchSettings.ArtifactColor[] slots = new MatchSettings.ArtifactColor[3]; // physical slot storage
-	private final Object lock = new Object();
-	private final double exitOffset; // servo units 0..1
-	// sealing state
-	private final Deque<Runnable> postSealQueue = new ArrayDeque<>();
-	private final MatchSettings matchSettings;
-	private volatile double commandedPosition; // last position we commanded the servo to
-	private long lastEjectTimeMs = 0;
-	private boolean sealRequested = false;
-	private boolean sealed = true; // whether transfer servo is currently considered closed
+	// Hardware & Config (public for Command access)
+	public final Servo sorterServo;
+	public final Servo exitSealServo;
+	public final Servo intakeSealServo;
+	public final ColorSensor colorSensor;
+	public final MatchSettings matchSettings;
+	public final double[] slotIntakePositions = new double[3];
+	public final double exitOffset;
+	public final double intakeOffset;
 	
-	/**
-	 * @param sorterServo servo used to rotate the sorter. not null.
-	 */
-	public Sorter(Servo sorterServo, Servo launcherTransferServo, ColorSensor sorterColorSensor, MatchSettings matchSettings) {
+	// State Variables
+	final MatchSettings.ArtifactColor[] slots = new MatchSettings.ArtifactColor[3];
+	final Object lock = new Object();
+	public long lastActionTimeMs = 0; // Public for Command access
+	private volatile double commandedPosition;
+	// --- Command Pattern Implementation ---
+	private Command currentCommand = new Command.IdleCommand();
+	
+	public Sorter(Servo sorterServo, Servo exitSealServo, Servo intakeSealServo, ColorSensor sorterColorSensor, MatchSettings matchSettings) {
 		this.sorterServo = sorterServo;
-		this.matchSettings = matchSettings;
-		this.launcherTransferServo = launcherTransferServo;
+		this.exitSealServo = exitSealServo;
+		this.intakeSealServo = intakeSealServo;
 		this.colorSensor = sorterColorSensor;
+		this.matchSettings = matchSettings;
+		
 		for (int i = 0; i < 3; i++) {
 			slotIntakePositions[i] = wrapServo(Settings.Hardware.Sorter.SLOT_INTAKE_POSITIONS[i]);
 		}
 		this.exitOffset = wrapServo(Settings.Hardware.Sorter.EXIT_OFFSET);
+		this.intakeOffset = wrapServo(this.exitOffset + 0.5); // Intake is 180 degrees from exit
 		
 		Arrays.fill(slots, MatchSettings.ArtifactColor.UNKNOWN);
-		
-		// Sync commandedPosition to current hardware reading if available
-		double pos = sorterServo.getPosition();
-		this.commandedPosition = wrapServo(pos);
+		this.commandedPosition = wrapServo(sorterServo.getPosition());
 	}
 	
 	private static double wrapServo(double v) {
@@ -68,216 +69,222 @@ public class Sorter {
 	}
 	
 	public void init() {
-		// Make sure transfer is closed initially (best-effort)
-		try {
-			launcherTransferServo.setPosition(Settings.Hardware.Sorter.TRANSFER_SERVO_CLOSED_POSITION);
-			sealed = true;
-		} catch (Exception ignored) {
-			// keep sealed=true; serviceSeal() will ensure hardware eventually matches logical state
-		}
-		
-		// organize slots around outtake
+		closeBothSeals();
 		rotateSlotToExit(0);
 	}
 	
 	/**
-	 * Called periodically from op-mode loop. Must be called frequently.
-	 * This services any pending seal requests and runs queued actions once sealed.
+	 * Called periodically. This is the heart of the command executor.
 	 */
 	public void update() {
-		serviceSeal();
+		// Execute the current command.
+		if (currentCommand != null) {
+			currentCommand.execute();
+			// If the command is finished, revert to the idle state.
+			if (currentCommand.isFinished()) {
+				currentCommand = new Command.IdleCommand();
+			}
+		}
 		
-		// if there is a color sensed, update that position in the slots to that color
+		// Handle color sensor reading separately, as it's always active.
 		MatchSettings.ArtifactColor color = colorSensor.getArtifactColor();
 		if (color != MatchSettings.ArtifactColor.UNKNOWN) {
-			setCurrentlyIntakingArtifact(color);
+			slots[getSlotIndexAtSensor()] = color;
 		}
 	}
 	
-	public MatchSettings.ArtifactColor[] getSlotsSnapshot() {
-		synchronized (lock) {
-			return Arrays.copyOf(slots, slots.length);
-		}
+	// Add this method to your Sorter class
+	public void eject() {
+		submitCommand(new Command.EjectCommand(this));
 	}
 	
 	/**
-	 * Rotate the next Motif-matching artifact to the exit.
-	 * Uses MatchSettings.nextArtifactNeeded as the target.
-	 * Does nothing if no matching artifact is present.
+	 * Submits a new command to the sorter, allowing for intelligent interruption.
 	 */
-	public void rotateNextArtifactToExit() {
-		MatchSettings.ArtifactColor needed = matchSettings.nextArtifactNeeded();
-		if (needed == MatchSettings.ArtifactColor.UNKNOWN) return;
-		
+	private void submitCommand(Command newCommand) {
 		synchronized (lock) {
-			for (int i = 0; i < slots.length; i++) {
-				if (slots[i] == needed) {
-					rotateSlotToExit(i);
-					return; // rotate only the first matching slot
-				}
+			// Give the current command a chance to handle the new one (e.g., retargeting).
+			// If it can't, the new command simply replaces the old one.
+			if (currentCommand == null || !currentCommand.handleNewCommand(newCommand)) {
+				currentCommand = newCommand;
+				currentCommand.init(); // Initialize the new command
 			}
 		}
+	}
+	
+	private void rotateSlotToExit(int slotIndex) {
+		double targetPos = getExitPositionForSlot(slotIndex);
+		submitCommand(new Command.RotateCommand(this, targetPos));
+	}
+	
+	private void rotateSlotToIntake(int slotIndex) {
+		double targetPos = getIntakePositionForSlot(slotIndex);
+		submitCommand(new Command.RotateCommand(this, targetPos));
+	}
+	
+	/**
+	 * Submits a command to run the full intake sequence: find an empty slot,
+	 * rotate to it, open the seal, and wait for a new artifact.
+	 *
+	 * @return Returns true if an intake command was started, false if the sorter is full.
+	 */
+	public boolean prepareForIntake() {
+		// First, check if there's an empty slot without locking, for a quick exit.
+		boolean hasEmptySlot = false;
+		// This read is not synchronized, but it's only for a preliminary check.
+		// The command itself will perform a safe, synchronized check.
+		for (MatchSettings.ArtifactColor slot : slots) {
+			if (slot == MatchSettings.ArtifactColor.UNKNOWN) {
+				hasEmptySlot = true;
+				break;
+			}
+		}
+		
+		if (hasEmptySlot) {
+			submitCommand(new Command.IntakeCommand(this));
+			return true;
+		}
+		return false; // Sorter is full
+	}
+	
+	public void rapidFireSequence() {
+		List<Integer> targets = findOptimalShotOrder(matchSettings.nextThreeArtifactsNeeded());
+		if (!targets.isEmpty()) {
+			submitCommand(new Command.RapidFireCommand(this, new ArrayDeque<>(targets)));
+		}
+	}
+	
+	// --- Hardware and State Helpers ---
+	
+	public double getCurrentServoPosition() {
+		return commandedPosition;
+	}
+	
+	void setServoPosition(double pos) {
+		commandedPosition = wrapServo(pos);
+		sorterServo.setPosition(commandedPosition);
+	}
+	
+	void openIntakeSeal() {
+		intakeSealServo.setPosition(Settings.Hardware.Sorter.INTAKE_SERVO_OPEN_POSITION);
+	}
+	
+	// Add this public method to your Sorter class
+	public void rotateNextArtifactToExit() {
+		MatchSettings.ArtifactColor needed = matchSettings.nextArtifactNeeded();
+		if (needed == MatchSettings.ArtifactColor.UNKNOWN) {
+			return; // Nothing to do
+		}
+		
+		// Find the first slot containing the needed artifact
+		for (int i = 0; i < slots.length; i++) {
+			if (slots[i] == needed) {
+				// Found it. Create and submit a command to rotate this slot to the exit.
+				double targetPos = getExitPositionForSlot(i);
+				submitCommand(new Command.RotateCommand(this, targetPos));
+				return; // We only need to move the first one we find
+			}
+		}
+		// If we get here, no matching artifact was found in the sorter.
 	}
 	
 	public boolean isNextArtifactAtExit() {
 		MatchSettings.ArtifactColor needed = matchSettings.nextArtifactNeeded();
-		if (needed == MatchSettings.ArtifactColor.UNKNOWN) return false;
+		if (needed == MatchSettings.ArtifactColor.UNKNOWN) {
+			return false;
+		}
 		
-		synchronized (lock) {
-			for (int i = 0; i < slots.length; i++) {
-				if (slots[i] == needed) {
-					// target servo position for this slot at exit
-					double targetPos = wrapServo(slotIntakePositions[i] + exitOffset);
-					double distance = circularDistance(getCurrentServoPosition(), targetPos);
-					// 5 degrees in servo units (1 unit = 360°)
-					return distance <= TOLERANCE;
-				}
-			}
+		// 1. Is the sorter currently idle?
+		boolean isIdle = (currentCommand instanceof Command.IdleCommand || currentCommand.isFinished());
+		if (!isIdle) {
+			return false;
 		}
-		return false;
-	}
-	
-	public void clearSlots() {
-		synchronized (lock) {
-			for (int i = 0; i < 3; i++) slots[i] = MatchSettings.ArtifactColor.UNKNOWN;
-		}
-	}
-	
-	/**
-	 * Return physical slot index currently aligned to intake (0..2).
-	 */
-	public int getSlotIndexAtIntake() {
-		return nearestSlotIndexTo(getCurrentServoPosition());
-	}
-	
-	/**
-	 * Return physical slot index currently aligned to exit (0..2).
-	 */
-	public int getSlotIndexAtExit() {
-		double servoPos = getCurrentServoPosition();
-		// The slot at exit is the slot whose intake-calibrated position aligns with servoPos - exitOffset.
-		return nearestSlotIndexTo(wrapServo(servoPos - exitOffset));
-	}
-	
-	public MatchSettings.ArtifactColor getArtifactAtSlot(int slotIndex) {
-		checkSlotIndex(slotIndex);
-		synchronized (lock) {
-			return slots[slotIndex];
-		}
-	}
-	
-	/**
-	 * Place a ball into the physical slot currently at intake.
-	 */
-	public void setCurrentlyIntakingArtifact(MatchSettings.ArtifactColor color) {
-		int slot = getSlotIndexAtIntake();
-		synchronized (lock) {
-			slots[slot] = color;
-		}
-	}
-	
-	/**
-	 * Remove and return the artifact at the exit. Becomes UNKNOWN after removal.
-	 */
-	public void ejectBallAtExit() {
-		int slot = getSlotIndexAtExit();
-		// open transfer immediately
-		launcherTransferServo.setPosition(Settings.Hardware.Sorter.TRANSFER_SERVO_OPEN_POSITION);
 		
-		synchronized (lock) {
-			MatchSettings.ArtifactColor c = slots[slot];
+		// 2. Is there a slot aligned at the exit?
+		Integer slotAtExit = getSlotIndexAtExit(); // This now checks for alignment
+		if (slotAtExit == null) {
+			return false; // No slot is aligned within tolerance.
+		}
+		
+		// 3. Does the aligned slot contain the correct artifact?
+		return slots[slotAtExit] == needed;
+	}
+	
+	void ejectBallAtExit() {
+		Integer slot = getSlotIndexAtExit(); // Return type is now Integer
+		
+		// Only proceed if a slot is actually aligned at the exit
+		if (slot != null) {
+			exitSealServo.setPosition(Settings.Hardware.Sorter.EXIT_SERVO_OPEN_POSITION);
 			slots[slot] = MatchSettings.ArtifactColor.UNKNOWN;
-			lastEjectTimeMs = System.currentTimeMillis();
-			// after an eject we are not sealed
-			sealed = false;
-			// schedule any later sealing requests normally
-			// leave previously queued actions in place; they will run after the next seal
-			sealRequested = false;
+			lastActionTimeMs = System.currentTimeMillis();
 		}
 	}
 	
-	/**
-	 * Command the servo so physical slot `slotIndex` is aligned to the exit.
-	 * Non-blocking. The actual servo move will happen only after the transfer is sealed.
-	 */
-	public void rotateSlotToExit(int slotIndex) {
-		checkSlotIndex(slotIndex);
-		ensureSealedThen(() -> {
-			double target = wrapServo(slotIntakePositions[slotIndex] + exitOffset);
-			setServoPosition(target);
-		});
+	void closeBothSeals() {
+		exitSealServo.setPosition(Settings.Hardware.Sorter.EXIT_SERVO_CLOSED_POSITION);
+		intakeSealServo.setPosition(Settings.Hardware.Sorter.INTAKE_SERVO_CLOSED_POSITION);
 	}
 	
-	/* -------------------- Internal helpers -------------------- */
+	public boolean isAtTarget(double targetPosition) {
+		return circularDistance(commandedPosition, targetPosition) <= TOLERANCE;
+	}
+	
+	public double getExitPositionForSlot(int slotIndex) {
+		return wrapServo(slotIntakePositions[slotIndex] + exitOffset);
+	}
+	
+	public double getIntakePositionForSlot(int slotIndex) {
+		return wrapServo(slotIntakePositions[slotIndex] + intakeOffset);
+	}
+	
+	public int getSlotIndexAtSensor() {
+		return nearestSlotIndexTo(commandedPosition);
+	}
 	
 	/**
-	 * Ensure the sorter is in a state ready to rotate around.
-	 * <p>
-	 * Non-blocking: schedules `action` to run after sealing completes. If sealing is already
-	 * satisfied, the action runs immediately on the caller thread.
+	 * Finds the index of the slot currently aligned at the exit position.
+	 *
+	 * @return The index (0-2) of the aligned slot, or null if no slot is
+	 * within tolerance of the exit position.
 	 */
-	private void ensureSealedThen(Runnable action) {
-		synchronized (lock) {
-			long now = System.currentTimeMillis();
-			long readyAt = lastEjectTimeMs + Settings.Hardware.Sorter.EJECT_EXIT_TIME_MS;
-			if (now >= readyAt) {
-				// Cooldown satisfied. Close transfer and run action immediately.
-				try {
-					launcherTransferServo.setPosition(Settings.Hardware.Sorter.TRANSFER_SERVO_CLOSED_POSITION);
-				} catch (Exception ignored) {
+	public Integer getSlotIndexAtExit() {
+		// Step 1: Find the index of the slot that is physically nearest to the exit.
+		int nearestIndex = nearestSlotIndexTo(wrapServo(commandedPosition - exitOffset));
+		
+		// Step 2: Determine the exact target position for that slot to be at the exit.
+		double targetPositionForSlot = getExitPositionForSlot(nearestIndex);
+		
+		// Step 3: Check if the sorter is actually at that target position.
+		boolean isAligned = isAtTarget(targetPositionForSlot);
+		
+		// Step 4: Only return the index if it's truly aligned, otherwise return null.
+		return isAligned ? nearestIndex : null;
+	}
+	
+	// --- Unchanged Helper Methods ---
+	private List<Integer> findOptimalShotOrder(List<MatchSettings.ArtifactColor> needed) {
+		MatchSettings.ArtifactColor[] currentSlots = Arrays.copyOf(slots, slots.length);
+		List<Integer> availableSlotsForNeededArtifacts = new ArrayList<>();
+		for (MatchSettings.ArtifactColor neededColor : needed) {
+			for (int i = 0; i < currentSlots.length; i++) {
+				if (currentSlots[i] == neededColor) {
+					availableSlotsForNeededArtifacts.add(i);
+					currentSlots[i] = null;
+					break;
 				}
-				sealed = true;
-				sealRequested = false;
-				// run action immediately on caller thread
-				action.run();
-				return;
 			}
-			
-			// Not ready yet. Request sealing via serviceSeal() and queue the action.
-			sealRequested = true;
-			postSealQueue.add(action);
 		}
-	}
-	
-	/**
-	 * Command the servo so physical slot `slotIndex` is aligned to the intake.
-	 * Non-blocking. The actual servo move will happen only after the transfer is sealed.
-	 */
-	public void rotateSlotToIntake(int slotIndex) {
-		checkSlotIndex(slotIndex);
-		ensureSealedThen(() -> {
-			double target = slotIntakePositions[slotIndex];
-			setServoPosition(target);
+		if (availableSlotsForNeededArtifacts.isEmpty()) return new ArrayList<>();
+		availableSlotsForNeededArtifacts.sort((slotA, slotB) -> {
+			double distA = circularDistance(commandedPosition, getExitPositionForSlot(slotA));
+			double distB = circularDistance(commandedPosition, getExitPositionForSlot(slotB));
+			return Double.compare(distA, distB);
 		});
+		return availableSlotsForNeededArtifacts;
 	}
 	
-	private void checkSlotIndex(int slot) {
-		if (slot < 0 || slot >= 3) throw new IllegalArgumentException("slot index must be 0..2");
-	}
-	
-	/**
-	 * Return the current servo position used for logical calculations.
-	 * Uses last commandedPosition for determinism. Change to servo.getPosition() if you prefer hardware read.
-	 */
-	private double getCurrentServoPosition() {
-		return commandedPosition;
-	}
-	
-	private void setServoPosition(double pos) {
-		pos = wrapServo(pos);
-		try {
-			sorterServo.setPosition(pos);
-		} catch (Exception ignored) {
-			// If servo call fails, still keep logical state deterministic.
-		}
-		commandedPosition = pos;
-	}
-	
-	/**
-	 * Find the physical slot whose intake-calibration position is nearest the given servo position.
-	 */
 	private int nearestSlotIndexTo(double servoPos) {
-		servoPos = wrapServo(servoPos);
 		int best = 0;
 		double bestDist = Double.POSITIVE_INFINITY;
 		for (int i = 0; i < 3; i++) {
@@ -289,49 +296,356 @@ public class Sorter {
 		}
 		return best;
 	}
+}
+
+
+/**
+ * Defines the interface for a command that the Sorter can execute.
+ * Each command is a self-contained state machine for a specific task.
+ */
+abstract class Command {
+	protected Sorter sorter; // Reference to the sorter hardware
+	
+	public Command(Sorter sorter) {
+		this.sorter = sorter;
+	}
+	
+	public Command() {
+	}
 	
 	/**
-	 * Called from update() to actually close the transfer servo once cooldown passes and run queued actions.
-	 *
-	 * @noinspection MethodWithMoreThanThreeNegations sorry
+	 * Called once when the command is first started.
 	 */
-	private void serviceSeal() {
-		Deque<Runnable> toRun = null;
-		synchronized (lock) {
-			if (!sealRequested) return;
-			long now = System.currentTimeMillis();
-			if (now - lastEjectTimeMs < Settings.Hardware.Sorter.EJECT_EXIT_TIME_MS) return;
-			
-			// time has passed; close transfer and drain queue
-			try {
-				launcherTransferServo.setPosition(Settings.Hardware.Sorter.TRANSFER_SERVO_CLOSED_POSITION);
-			} catch (Exception ignored) {
-			}
-			
-			sealed = true;
-			sealRequested = false;
-			
-			if (!postSealQueue.isEmpty()) {
-				toRun = new ArrayDeque<>(postSealQueue);
-				postSealQueue.clear();
-			}
-			
-			// wake any blocking waiters
-			lock.notifyAll();
+	public void init() {
+	}
+	
+	/**
+	 * Called on every loop of the Sorter's update method.
+	 */
+	public abstract void execute();
+	
+	/**
+	 * Returns true when the command has finished its task.
+	 */
+	public abstract boolean isFinished();
+	
+	/**
+	 * Allows a command to intelligently handle a new incoming command.
+	 *
+	 * @return true if the new command was handled (e.g., retargeted), false otherwise.
+	 */
+	public boolean handleNewCommand(Command newCommand) {
+		return false;
+	}
+	
+	
+	// --- Concrete Command Implementations ---
+	
+	// Add this method inside the abstract Command class
+	public Command then(Command nextCommand) {
+		// Note: We're passing 'this.sorter' so the new command group has the sorter reference.
+		return new SequentialCommand(this.sorter, this, nextCommand);
+	}
+	
+	/**
+	 * A default command that does nothing.
+	 */
+	public static class IdleCommand extends Command {
+		@Override
+		public void execute() {
 		}
 		
-		// run queued actions outside lock
-		if (toRun != null) {
-			while (!toRun.isEmpty()) {
-				Runnable r = toRun.poll();
-				try {
-					if (r != null) {
-						r.run();
+		@Override
+		public boolean isFinished() {
+			return false;
+		} // Never finishes
+	}
+	
+	/**
+	 * A command to rotate the sorter to a target position.
+	 */
+	public static class RotateCommand extends Command {
+		private final Runnable onCompleteAction;
+		private State state = State.SEALING;
+		private double targetPosition;
+		
+		public RotateCommand(Sorter sorter, double targetPosition, Runnable onCompleteAction) {
+			super(sorter);
+			this.targetPosition = targetPosition;
+			this.onCompleteAction = onCompleteAction;
+		}
+		
+		public RotateCommand(Sorter sorter, double targetPosition) {
+			this(sorter, targetPosition, null);
+		}
+		
+		@Override
+		public void init() {
+			this.state = State.SEALING;
+		}
+		
+		@Override
+		public void execute() {
+			switch (state) {
+				case SEALING:
+					sorter.closeBothSeals();
+					// Wait for eject cooldown before moving.
+					if (System.currentTimeMillis() - sorter.lastActionTimeMs > Settings.Hardware.Sorter.EJECT_EXIT_TIME_MS) {
+						state = State.ROTATING;
 					}
-				} catch (RuntimeException ignored) {
-					// swallow to ensure other queued actions still run
+					break;
+				case ROTATING:
+					sorter.setServoPosition(targetPosition);
+					if (sorter.isAtTarget(targetPosition)) {
+						if (onCompleteAction != null) {
+							onCompleteAction.run();
+						}
+						state = State.FINISHED;
+					}
+					break;
+				case FINISHED:
+					// Do nothing
+					break;
+			}
+		}
+		
+		@Override
+		public boolean isFinished() {
+			return state == State.FINISHED;
+		}
+		
+		@Override
+		public boolean handleNewCommand(Command newCommand) {
+			// If the new command is also a rotation, we can just update our target!
+			if (newCommand instanceof RotateCommand) {
+				RotateCommand newRotateCmd = (RotateCommand) newCommand;
+				this.targetPosition = newRotateCmd.targetPosition;
+				// If we were already rotating, continue. If sealing, the new target will be used
+				// when we transition to the ROTATING state. This is intelligent retargeting.
+				return true;
+			}
+			return false;
+		}
+		
+		private enum State {SEALING, ROTATING, FINISHED}
+	}
+	
+	// Add this class alongside the other command implementations
+	
+	/**
+	 * A command to execute the rapid-fire sequence.
+	 */
+	public static class RapidFireCommand extends Command {
+		
+		private final Deque<Integer> targetQueue;
+		private State state = State.SEALING;
+		
+		public RapidFireCommand(Sorter sorter, Deque<Integer> targetQueue) {
+			super(sorter);
+			this.targetQueue = targetQueue;
+		}
+		
+		@Override
+		public void execute() {
+			switch (state) {
+				case SEALING:
+					sorter.closeBothSeals();
+					if (System.currentTimeMillis() - sorter.lastActionTimeMs > Settings.Hardware.Sorter.EJECT_EXIT_TIME_MS) {
+						state = State.ROTATING;
+					}
+					break;
+				case ROTATING:
+					if (targetQueue.isEmpty()) {
+						state = State.FINISHED;
+						break;
+					}
+					double targetPos = sorter.getExitPositionForSlot(targetQueue.peek());
+					sorter.setServoPosition(targetPos);
+					if (sorter.isAtTarget(targetPos)) {
+						state = State.FIRING;
+					}
+					break;
+				case FIRING:
+					// Wait for rapid-fire cooldown
+					if (System.currentTimeMillis() - sorter.lastActionTimeMs > Settings.Hardware.Sorter.RAPID_FIRE_COOLDOWN_MS) {
+						sorter.ejectBallAtExit(); // This also updates lastActionTimeMs
+						targetQueue.poll(); // Fired, so remove from queue.
+						state = State.ROTATING; // Go back to rotating for the next target
+					}
+					break;
+				case FINISHED:
+					break;
+			}
+		}
+		
+		// Add this class alongside the other command implementations
+		
+		@Override
+		public boolean isFinished() {
+			return state == State.FINISHED;
+		}
+		
+		private enum State {SEALING, ROTATING, FIRING, FINISHED}
+	}
+	
+	public static class EjectCommand extends Command {
+		private State state = State.READY_TO_FIRE;
+		
+		public EjectCommand(Sorter sorter) {
+			super(sorter);
+		}
+		
+		@Override
+		public void execute() {
+			switch (state) {
+				case READY_TO_FIRE:
+					// Only fire if the correct artifact is at the exit AND cooldown has passed.
+					if (sorter.isNextArtifactAtExit() &&
+							(System.currentTimeMillis() - sorter.lastActionTimeMs > Settings.Hardware.Sorter.RAPID_FIRE_COOLDOWN_MS)) {
+						sorter.ejectBallAtExit(); // Perform the action
+					}
+					// This command is "fire-and-forget". It finishes on the first cycle
+					// whether it fired or not, preventing it from blocking other commands.
+					state = State.FINISHED;
+					break;
+				case FINISHED:
+					// Do nothing
+					break;
+			}
+		}
+		
+		@Override
+		public boolean isFinished() {
+			return state == State.FINISHED;
+		}
+		
+		private enum State {READY_TO_FIRE, FINISHED}
+	}
+	
+	/**
+	 * A command to find an empty slot, rotate it to the intake,
+	 * open the seal, and wait to sense a new artifact.
+	 */
+	public static class IntakeCommand extends Command {
+		private State state = State.START;
+		private int targetSlot = -1;
+		
+		public IntakeCommand(Sorter sorter) {
+			super(sorter);
+		}
+		
+		@Override
+		public void init() {
+			// Reset the state machine every time the command starts
+			this.state = State.START;
+			this.targetSlot = -1;
+		}
+		
+		@Override
+		public void execute() {
+			synchronized (sorter.lock) { // Synchronize to safely access slots array
+				switch (state) {
+					case START:
+						// Step 1: Find the first available empty slot
+						for (int i = 0; i < 3; i++) {
+							if (sorter.slots[i] == MatchSettings.ArtifactColor.UNKNOWN) {
+								targetSlot = i;
+								break;
+							}
+						}
+						// If we found a slot, proceed to rotate. Otherwise, we're done.
+						if (targetSlot != -1) {
+							state = State.SEALING;
+						} else {
+							state = State.FINISHED; // No empty slots
+						}
+						break;
+					
+					case SEALING:
+						// Step 2: Ensure seals are closed and wait for any eject cooldown
+						sorter.closeBothSeals();
+						if (System.currentTimeMillis() - sorter.lastActionTimeMs > Settings.Hardware.Sorter.EJECT_EXIT_TIME_MS) {
+							state = State.ROTATING;
+						}
+						break;
+					
+					case ROTATING:
+						// Step 3: Rotate the target slot to the intake position
+						double intakePos = sorter.getIntakePositionForSlot(targetSlot);
+						sorter.setServoPosition(intakePos);
+						if (sorter.isAtTarget(intakePos)) {
+							state = State.INTAKING;
+						}
+						break;
+					
+					case INTAKING:
+						// Step 4: Open the seal and wait for a color to be detected
+						sorter.openIntakeSeal();
+						MatchSettings.ArtifactColor detectedColor = sorter.colorSensor.getArtifactColor();
+						if (detectedColor != MatchSettings.ArtifactColor.UNKNOWN) {
+							sorter.slots[targetSlot] = detectedColor; // Safely update the slot
+							state = State.FINISHING;
+						}
+						// Note: You could add a timeout here to prevent getting stuck
+						break;
+					
+					case FINISHING:
+						// Step 5: Close the seal and finish the command
+						sorter.closeBothSeals();
+						state = State.FINISHED;
+						break;
+					
+					case FINISHED:
+						// Do nothing
+						break;
 				}
 			}
+		}
+		
+		@Override
+		public boolean isFinished() {
+			return state == State.FINISHED;
+		}
+		
+		private enum State {START, SEALING, ROTATING, INTAKING, FINISHING, FINISHED}
+	}
+	
+	/**
+	 * A command that runs a series of other commands in sequence.
+	 */
+	public static class SequentialCommand extends Command {
+		private final Deque<Command> commandQueue = new ArrayDeque<>();
+		private Command currentCommand;
+		
+		public SequentialCommand(Sorter sorter, Command... commands) {
+			super(sorter);
+			Collections.addAll(this.commandQueue, commands);
+		}
+		
+		@Override
+		public void execute() {
+			// If there is no current command, get the next one from the queue
+			if (currentCommand == null) {
+				currentCommand = commandQueue.poll();
+				if (currentCommand != null) {
+					currentCommand.init(); // Initialize the new command
+				}
+			}
+			
+			// If we have a command to run, execute it
+			if (currentCommand != null) {
+				currentCommand.execute();
+				// If it just finished, clear it so we can get the next one
+				if (currentCommand.isFinished()) {
+					currentCommand = null;
+				}
+			}
+		}
+		
+		@Override
+		public boolean isFinished() {
+			// The sequence is finished when the queue is empty and no command is running
+			return commandQueue.isEmpty() && currentCommand == null;
 		}
 	}
 }

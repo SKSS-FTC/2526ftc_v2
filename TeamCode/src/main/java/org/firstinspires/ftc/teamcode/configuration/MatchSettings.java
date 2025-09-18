@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.configuration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -118,6 +119,34 @@ public class MatchSettings {
 		
 		int index = state.size() % motifColors.length;
 		return motifColors[index];
+	}
+	
+	public List<ArtifactColor> nextThreeArtifactsNeeded() {
+		Motif motif = getMotif();
+		// Return an empty list if the motif is not defined.
+		if (motif == null || motif == Motif.UNKNOWN) {
+			return Collections.emptyList();
+		}
+		
+		List<ArtifactColor> state = getClassifierState();
+		ArtifactColor[] motifColors = motifToArtifactColors(motif);
+		
+		// Return an empty list if the motif has no corresponding color sequence.
+		if (motifColors == null || motifColors.length == 0) {
+			return Collections.emptyList();
+		}
+		
+		List<ArtifactColor> nextThree = new ArrayList<>();
+		int currentSize = state.size();
+		
+		// Loop three times to get the next three colors.
+		for (int i = 0; i < 3; i++) {
+			// Use the modulo operator to loop back to the beginning of the motif sequence.
+			int index = (currentSize + i) % motifColors.length;
+			nextThree.add(motifColors[index]);
+		}
+		
+		return nextThree;
 	}
 	
 	public enum AllianceColor {

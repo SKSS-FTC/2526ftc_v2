@@ -44,7 +44,8 @@ public class MechanismManager {
 		Servo sorterServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.SORTER_SERVO);
 		Servo launcherTransferServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.LAUNCHER_TRANSFER_SERVO);
 		ColorSensor sorterColorSensor = new ColorSensor(hardwareMap.get(RevColorSensorV3.class, Settings.Hardware.IDs.SORTER_COLOR_SENSOR));
-		sorter = new Sorter(sorterServo, launcherTransferServo, sorterColorSensor, matchSettings);
+		Servo intakeTransferServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.INTAKE_TRANSFER_SERVO);
+		sorter = new Sorter(sorterServo, launcherTransferServo, intakeTransferServo, sorterColorSensor, matchSettings);
 		
 		DcMotor launcherLauncherRight = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.LAUNCHER_LAUNCHER_RIGHT);
 		DcMotor launcherLauncherLeft = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.LAUNCHER_LAUNCHER_LEFT);

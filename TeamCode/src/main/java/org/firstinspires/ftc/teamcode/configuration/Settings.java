@@ -93,11 +93,14 @@ public class Settings {
 			// Offset from intake to exit alignment
 			public static final double EXIT_OFFSET = 0.25; // TODO TUNE
 			
+			public static final double RAPID_FIRE_COOLDOWN_MS = 200;
+			
 			public static final long EJECT_EXIT_TIME_MS = 200; // ms needed from servo receiving open to the ball fully leaving the sorter
 			
-			public static final double TRANSFER_SERVO_CLOSED_POSITION = 1.0; // TODO TUNE
-			public static final double TRANSFER_SERVO_OPEN_POSITION = 0.0; // TODO TUNE
-			
+			public static final double EXIT_SERVO_CLOSED_POSITION = 1.0; // TODO TUNE
+			public static final double EXIT_SERVO_OPEN_POSITION = 0.0; // TODO TUNE
+			public static final double INTAKE_SERVO_CLOSED_POSITION = 1.0; // TODO TUNE
+			public static final double INTAKE_SERVO_OPEN_POSITION = 0.0; // TODO TUNE
 			public static final double TOLERANCE = 5.0 / 360.0; // how close a slot must be to the exit in order to launch
 		}
 		
@@ -114,8 +117,8 @@ public class Settings {
 			public static final String INTAKE_MOTOR = "intakeMotor";
 			public static final String[] INTAKE_SERVO_ARRAY = {"intakeServoLowerLeft", "intakeServoLowerRight", "intakeServoUpperLeft", "intakeServoUpperRight"};
 			public static final String LAUNCHER_TRANSFER_SERVO = "launcherTransferServo";
+			public static final String INTAKE_TRANSFER_SERVO = "intakeTransferServo";
 			public static final String SORTER_COLOR_SENSOR = "sorterColorSensor";
-			
 			public static final String LIMELIGHT = "limelight";
 			public static final String COLOR_SENSOR = "colorSensor";
 			public static final String SORTER_SERVO = "sorterServo";

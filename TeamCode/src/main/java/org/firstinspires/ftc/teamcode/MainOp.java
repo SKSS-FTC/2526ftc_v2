@@ -114,6 +114,7 @@ public class MainOp extends LinearOpMode {
 		}
 		
 		if (subController.getProcessedValue(Controller.Action.INTAKE) > 0) {
+			mechanisms.sorter.prepareForIntake();
 			mechanisms.intake.in();
 		} else {
 			mechanisms.intake.stop();

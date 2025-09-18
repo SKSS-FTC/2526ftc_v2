@@ -49,7 +49,7 @@ public class Launcher {
 	
 	public void launch() {
 		if (okayToLaunch()) {
-			sorter.ejectBallAtExit();
+			sorter.eject();
 		}
 	}
 	

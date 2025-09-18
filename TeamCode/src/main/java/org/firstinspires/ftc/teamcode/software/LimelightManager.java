@@ -17,7 +17,7 @@ public class LimelightManager {
 	public final Limelight3A limelight;
 	public final MatchSettings matchSettings;
 	LLResult currentResult;
-	Pipeline currentPipeline = Pipeline.OBELISK; // to detect the obelisk april tag
+	Pipeline currentPipeline = Pipeline.APRILTAG; // to detect the obelisk april tag
 	
 	public LimelightManager(Limelight3A limelight, MatchSettings matchSettings) {
 		this.limelight = limelight;
@@ -53,16 +53,8 @@ public class LimelightManager {
 		}
 	}
 	
-	public final Pipeline getPipelineFromAlliance(MatchSettings.AllianceColor color) {
-		if (color == MatchSettings.AllianceColor.RED) {
-			return Pipeline.RED_GOAL;
-		} else {
-			return Pipeline.BLUE_GOAL;
-		}
-	}
-	
 	public MatchSettings.Motif detectMotif() {
-		setCurrentPipeline(Pipeline.OBELISK);
+		setCurrentPipeline(Pipeline.APRILTAG);
 		// TODO match fiducial IDs
 		switch (limelight.getLatestResult().getFiducialResults().get(0).getFiducialId()) {
 			case 21:
@@ -77,7 +69,7 @@ public class LimelightManager {
 	}
 	
 	public LLResult detectGoal() {
-		setCurrentPipeline(getPipelineFromAlliance(matchSettings.getAllianceColor()));
+		setCurrentPipeline(Pipeline.APRILTAG);
 		return limelight.getLatestResult();
 	}
 	
@@ -93,11 +85,9 @@ public class LimelightManager {
 	}
 	
 	public enum Pipeline {
-		OBELISK, // pipe 2
+		APRILTAG, // pipe 2
 		GREEN, // pipe 3
 		PURPLE, // pipe 4
-		RED_GOAL, // pipe 5
-		BLUE_GOAL, // pipe 6
 		UNKNOWN
 	}
 }
