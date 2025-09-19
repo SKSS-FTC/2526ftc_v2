@@ -44,9 +44,9 @@ public class Prototyping extends LinearOpMode {
         }
     }
 
-    public void teleopTick(GamepadEx two, Telemetry telem)
+    public void teleopTick(GamepadEx two, Telemetry telemetry)
     {
-        telem.addData("Outtake Power: ",outtake.getPower());
+        telemetry.addData("Outtake Power: ",outtake.getPower());
         if(two.wasJustPressed(GamepadKeys.Button.A))
         {
             //intake.run(!intake.isRunning());
