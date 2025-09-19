@@ -6,10 +6,10 @@ package org.firstinspires.ftc.teamcode.Auto;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver;
-import org.firstinspires.ftc.teamcode.Swerve.wpilib.geometry.Rotation2d;
 import org.firstinspires.ftc.teamcode.Utils;
 
 
@@ -17,7 +17,7 @@ public class AutoSwerve {
 
   public AnalogInput servoInputFL, servoInputFR, servoInputBR, servoInputBL;
   public Servo servoFL, servoFR, servoBR, servoBL;
-  DcMotor motorFL, motorFR, motorBR, motorBL;
+  public DcMotorEx motorFL, motorFR, motorBR, motorBL;
   LinearOpMode opMode;
   static double countsPerRevolution = 537.7;
   static double gearRatio = 1.1;
@@ -38,7 +38,7 @@ public class AutoSwerve {
     maxSteerSpeedRadPerSec = (2 * Math.PI) / (maxSpeedSecondsPer60Degrees * 6);
   }
 
-  GoBildaPinpointDriver odo;
+  public GoBildaPinpointDriver odo;
 
   public AutoSwerve(LinearOpMode opMode, GoBildaPinpointDriver odo) {
     this.opMode = opMode;
@@ -46,25 +46,29 @@ public class AutoSwerve {
     //FL
     servoInputFL = opMode.hardwareMap.analogInput.get("FLEncoder");
     servoFL = opMode.hardwareMap.servo.get("FLServo");
-    motorFL = opMode.hardwareMap.dcMotor.get("FLMotor");
+    servoFL.setDirection(Servo.Direction.REVERSE);
+    motorFL = (DcMotorEx) opMode.hardwareMap.dcMotor.get("FLMotor");
     motorFL.setDirection(DcMotorSimple.Direction.REVERSE);
 
     //FR
     servoInputFR = opMode.hardwareMap.analogInput.get("FREncoder");
     servoFR = opMode.hardwareMap.servo.get("FRServo");
-    motorFR = opMode.hardwareMap.dcMotor.get("FRMotor");
+    servoFR.setDirection(Servo.Direction.REVERSE);
+    motorFR = (DcMotorEx) opMode.hardwareMap.dcMotor.get("FRMotor");
     motorFR.setDirection(DcMotorSimple.Direction.REVERSE);
 
     //BR
     servoInputBR = opMode.hardwareMap.analogInput.get("BREncoder");
     servoBR = opMode.hardwareMap.servo.get("BRServo");
-    motorBR = opMode.hardwareMap.dcMotor.get("BRMotor");
+    servoBR.setDirection(Servo.Direction.REVERSE);
+    motorBR = (DcMotorEx) opMode.hardwareMap.dcMotor.get("BRMotor");
     motorBR.setDirection(DcMotorSimple.Direction.FORWARD);
 
     //BL
     servoInputBL = opMode.hardwareMap.analogInput.get("BLEncoder");
     servoBL = opMode.hardwareMap.servo.get("BLServo");
-    motorBL = opMode.hardwareMap.dcMotor.get("BLMotor");
+    servoBL.setDirection(Servo.Direction.REVERSE);
+    motorBL = (DcMotorEx) opMode.hardwareMap.dcMotor.get("BLMotor");
     motorBL.setDirection(DcMotorSimple.Direction.FORWARD);
 
     double currentTime = Utils.getTimeSeconds();
@@ -74,45 +78,62 @@ public class AutoSwerve {
 
 //  public AtomicInteger wheel_active_count;
 
-  public double set_wheels(double fr, double bl, double br, double fl) {
-    double delta_sum = 0.0;
-    if(fr>1)
-      fr -= 1;
-    if(bl>1)
-      bl -= 1;
-    if(br>1)
-      br -= 1;
-    if(fl>1)
-      fl -= 1;
-    for (int i = 0; i < 4; i++) {
-      if (i == 1) {
-        delta_sum += Math.abs(set_Servo_Angle(servoInputFR, servoFR, fr));
-      } else if (i == 2) {
-        delta_sum += Math.abs(set_Servo_Angle(servoInputBL, servoBL, bl));
-      } else if (i == 3) {
-        delta_sum += Math.abs(set_Servo_Angle(servoInputBR, servoBR, br));
-      }
-      else {
-        delta_sum += Math.abs(set_Servo_Angle(servoInputFL, servoFL, fl));
-      }
+  private double correct_with_heading(double input, double heading) {
+    // Here all wheel directions need to be between 0.25 and 0.75 to stay far away from
+    // the 180 degrees area. Modulus can be used instead of the larger if-statement blocks
+    // and a check should be conducted to see if the application of the heading results
+    // in the wheels steering into that lower half of the joystick region.
+
+    double corrected_angle = input + 0.5 - heading;  // TODO: needs fixing
+
+    if (corrected_angle > 0.75) {
+      corrected_angle = 1.0 - corrected_angle + 0.25;
     }
+
+    if (corrected_angle < 0.25) {
+      corrected_angle += 0.25;
+    }
+
+    return corrected_angle;
+  }
+
+  public double set_wheels(double fr, double bl, double br, double fl, double heading) {
+    double delta_sum = 0.0;
+
+    fr = correct_with_heading(fr - .5, heading);
+    bl = correct_with_heading(bl - .25, heading);
+    br = correct_with_heading(br - .25, heading);
+    fl = correct_with_heading(fl, heading);
+    opMode.telemetry.addData("fr angle: ", fr);
+    opMode.telemetry.addData("br angle: ", br);
+    opMode.telemetry.addData("bl angle: ", bl);
+    opMode.telemetry.addData("fl angle: ", fl);
+
+    delta_sum += Math.abs(set_Servo_Angle(servoInputFR, servoFR, fr));
+
+    delta_sum += Math.abs(set_Servo_Angle(servoInputBL, servoBL, bl));
+
+    delta_sum += Math.abs(set_Servo_Angle(servoInputBR, servoBR, br));
+
+    delta_sum += Math.abs(set_Servo_Angle(servoInputFL, servoFL, fl));
 
     return delta_sum;
   }
 
-  public void steer_wheels_to_central_pivot_position(double fr,double bl,double br,double fl) {
+  public void steer_wheels_to_central_pivot_position(double fr, double bl, double br, double fl) {
     set_wheels(
         1.000 - fr,  // Front Right
-        1.250 - bl,  // Back Left
+        0.750 - bl,  // Back Left
         0.750 - br,  // Back Right
-        1.000 - fl  // Front Left
+        1.000 - fl,  // Front Left
+        0
     );
   }
 
   // distance to drive by encoder
-  // turns on motor for a drive distance
-  // dist in meters
-  //TODO: revise to use new code
+// turns on motor for a drive distance
+// dist in meters
+//TODO: revise to use new code
   public void driveDist(double dist, double mSpd) {
     if (mSpd < .3) mSpd = 0.3;
     if (mSpd > 1.0) mSpd = 1.0;
@@ -125,8 +146,8 @@ public class AutoSwerve {
     motorBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     motorBR.setTargetPosition(motorBR.getCurrentPosition() + (int) (dist * encCt));
     motorBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    setMotors(mSpd);
-    setMotors(0);
+    setMotors(mSpd, 0);
+    setMotors(0, 0);
   }
 
   public void stopServo() {
@@ -136,22 +157,28 @@ public class AutoSwerve {
     servoBR.setPosition(.5);
   }
 
-  //odo.getPosX is forward on robot
-  public void setMotors(double pwr) {
-    motorBL.setPower(pwr);
-    motorBR.setPower(pwr);
-    motorFL.setPower(pwr);
-    motorFR.setPower(pwr);
+  //odo.getPosX is forward on robot                                             // why is this here?
+  public void setMotors(double pwr, double z) {
+    //because br can't rotate to the right position to go straight
+    if (z == 1)
+      motorBR.setPower(pwr);
+    else
+      motorBR.setPower(pwr);
+      motorBL.setPower(pwr);
+      motorFL.setPower(pwr);
+      motorFR.setPower(pwr);
   }
 
   public double set_Servo_Angle(AnalogInput analogInput, Servo servo, double desired_normalized_angle) {
     double normalized_voltage = analogInput.getVoltage() / max_voltage;
     double delta_to_reference = desired_normalized_angle - normalized_voltage;
     double servo_speed = 0.09;
-    if(delta_to_reference > 0.05)
+    if (delta_to_reference > 0.09)
       servo_speed = delta_to_reference;
-    if(servo_speed > .25)
+    if (delta_to_reference > .18)
       servo_speed = .25;
+    if (delta_to_reference > .25)
+      servo_speed = .3;
 
     double tolerance = 0.01;
 
@@ -166,7 +193,7 @@ public class AutoSwerve {
     return Math.abs(delta_to_reference);
   }
 
-  public void odoDrive(double x, double  y, double h, double mSpd) {
+  public void odoDrive(double x, double y, double h, double mSpd) {
     if (mSpd > 1.0) {
       mSpd = 1.0;
     }
@@ -179,42 +206,42 @@ public class AutoSwerve {
     double sY = getY();
     double sH = h;//direction of travel in degrees
     while (opMode.opModeIsActive() && thereYet) {
-      setMotors(mSpd);
+      setMotors(mSpd, 0);
       //CtrlWheels(); // may use this in long runs
       odo.update();
       double sHc = sH - getDeg() / 360; // normalize degree
       if (sHc > .5) {
         // FR BL BR FL
-        set_wheels(sHc, .5, .5, sHc);
+        set_wheels(sHc, .5, .5, sHc, odo.getHeading().getDegrees() / 360);
       }
       if ((getX() - sX) < .2 || (getY() - sY) < .2) {
-        setMotors(.4);
+        setMotors(.4, 0);
       }
       if ((getX() - sX < .01 && (getY() - sY) < .01)) {
-        setMotors(0.0);
+        setMotors(0.0, 0);
         thereYet = false;
       }
     }// end while traveling
   }
 
-    public double getX(){
-      odo.update();
-      return odo.getPosX();
-    }
+  public double getX() {
+    odo.update();
+    return odo.getPosX();
+  }
 
-    public double getY(){
-      odo.update();
-      return odo.getPosY();
-    }
+  public double getY() {
+    odo.update();
+    return odo.getPosY();
+  }
 
-    public double getDeg(){
-      odo.update();
-      return odo.getHeading().getDegrees();
-    }
+  public double getDeg() {
+    odo.update();
+    return odo.getHeading().getDegrees();
+  }
 
   // align wheels has a angle always set where alignWheels is
-  // constantly checking for the turn error and eventually compensating
-  //TODO: decide on whether to delete this because of new code added above
+// constantly checking for the turn error and eventually compensating
+//TODO: decide on whether to delete this because of new code added above
   public void alignWheels(double wang) {
     if (wang > 359.0) wang = 359.0;
     if (wang < 0.0) wang = 0.0;

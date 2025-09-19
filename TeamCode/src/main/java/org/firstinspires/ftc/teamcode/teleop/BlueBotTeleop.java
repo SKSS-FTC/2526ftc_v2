@@ -3,186 +3,134 @@
 
 package org.firstinspires.ftc.teamcode.teleop;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.teamcode.Mekanism.Mekanism;
-import org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver;
-import org.firstinspires.ftc.teamcode.Swerve.Swerve;
-import org.firstinspires.ftc.teamcode.Swerve.wpilib.geometry.Rotation2d;
-import org.firstinspires.ftc.teamcode.Utils;
-import org.firstinspires.ftc.teamcode.Auto.AutoSwerve;
-
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.EncoderDirection.FORWARD;
 import static org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+import org.firstinspires.ftc.teamcode.Mekanism.Mekanism;
+import org.firstinspires.ftc.teamcode.ODO.GoBildaPinpointDriver;
+import org.firstinspires.ftc.teamcode.Swerve.TheBestSwerve;
+import org.firstinspires.ftc.teamcode.Swerve.wpilib.geometry.Rotation2d;
+
+@Config
 @TeleOp(name = "Blue Bot Teleop")
 public class BlueBotTeleop extends LinearOpMode {
 
-  double slideSpeed = 100;
+  FtcDashboard dash = FtcDashboard.getInstance();
+
+  double slideSpeed = 80;
   GoBildaPinpointDriver odometry;
 
-  AutoSwerve driveBase;
-  boolean d_pad = false;
-  boolean lastPressed = false;
+  boolean
+      is2A = false,
+      is2B = false,
+      is2X = false,
+      is2Y = false,
+      game2A = false,
+      game2B = false,
+      game2X = false,
+      game2Y = false;
 
-  public double frOffset = -0.125;
-  public double brOffset = -0.125;
-  public double blOffset = -0.25;
-  public double flOffset = -0.25;
-  public double frRotationOffset = -0.125;
-  public double brRotationOffset = -0.125;
-  public double blRotationOffset = -0.25;
-  public double flRotationOffset = -0.25;
   public final double change_In_Offset = .025;
 
   @Override
   public void runOpMode() throws InterruptedException {
 
-    // Does this move the robot? because if so we need it to move after the waitForStart()
-    // or add the movement to the Autonomous
-    Mekanism mek = new Mekanism(this);
-    Swerve swerve = new Swerve(this, odometry);
+    //if you want outputs on driver station comment out the line below
+    telemetry = dash.getTelemetry();
 
-    double slideSpeed = 100;
-    boolean bPressed = false;
+    // Does this move the robot? not anymore but you need to init the wrist or press b to get it to go to the right position
+    Mekanism mek = new Mekanism(this);
+
     Init();
     waitForStart();
-    mek.homeArm();
-    double lastTime = Utils.getTimeSeconds();
+    mek.arm.homeArm();
+    mek.grabber.initWrist();
+    odometry.resetHeading();
+    odometry.resetPosAndIMU();
+
+    mek.arm.setRunMode(DcMotor.RunMode.RUN_USING_ENCODER, DcMotor.RunMode.RUN_USING_ENCODER);
+
     while (opModeIsActive()) {
 
-      // 1. Calculates deltaTime
-      double currentTime = Utils.getTimeSeconds();
-      double dt = currentTime - lastTime;
+      double left_joy_x = gamepad1.left_stick_x;
+      double left_joy_y = gamepad1.left_stick_y;
 
-      // 2.0.1 offsets for swerve (done by holding button and then tapping up or down on the d-pad    TODO: add in adjustable rotation offsets
-      d_pad = gamepad1.dpad_down || gamepad1.dpad_up || gamepad1.dpad_left || gamepad1.dpad_right;
-      if (gamepad1.a && !lastPressed) {
-        if (d_pad) {
-          if (gamepad1.dpad_up)
-            blOffset += change_In_Offset;
-          else
-            blOffset -= change_In_Offset;
-          lastPressed = true;
-        }
-      } else if (gamepad1.b && !lastPressed) {
-        if (d_pad) {
-          if (gamepad1.dpad_up)
-            brOffset += change_In_Offset;
-          else
-            brOffset -= change_In_Offset;
-          lastPressed = true;
-        }
-      } else if (gamepad1.x && !lastPressed) {
-        if (d_pad) {
-          if (gamepad1.dpad_up)
-            flOffset += change_In_Offset;
-          else
-            flOffset -= change_In_Offset;
-          lastPressed = true;
-        }
-      } else if (gamepad1.y && !lastPressed) {
-        if (d_pad) {
-          if (gamepad1.dpad_up)
-            frOffset += change_In_Offset;
-          else
-            frOffset -= change_In_Offset;
-          lastPressed = true;
-        }
-      } else
-        lastPressed = false;
+      /**
+       * To this point, the code supports strafe. Steering can be determined by taking into
+       * consideration the drive speed and the value of the right joystick x-axis.
+       * Multiplying by -1 is because smaller numbers of steering_angle are on the right
+       * side whereas -1 is on the left side of the x-axis joystick.
+       */
+      double right_joy_x = gamepad1.right_stick_x * -1.0;
 
-      // 2. takes inputs and makes them work for swerve auto
-      double strafe_joystick = gamepad1.left_stick_x;
-      double drive_joystick = -gamepad1.left_stick_y;
-      double rotate_joystick = gamepad1.right_stick_x;
-      Double vector_angle = Math.atan2(drive_joystick, strafe_joystick) * (180.0 / Math.PI);
-      double vector_length = Math.sqrt(Math.pow(strafe_joystick, 2.0) + Math.pow(drive_joystick, 2.0));
-      vector_angle = (vector_angle + 90.0) % 360.0;
-      // Normalize so the angle works with AutoSwerve
-      vector_angle /= 360.0;
-      if (vector_angle < 0) {
-        vector_angle = Math.abs(1.0 + vector_angle);
-      }
-      vector_angle += 0.125;
+      amazingSwerve.swerveTheThing(left_joy_x, left_joy_y, right_joy_x);
 
-      // 2.5 puts values through swerve auto
-      if (vector_angle == null || vector_angle == 0.0)
-        vector_angle = 0.0;
-      if (vector_angle > 1)
-        vector_angle -= 1;
-      if (vector_angle < 0)
-        vector_angle += 1;
-
-      if (vector_angle > .75 && vector_angle < 1.0) {
-        vector_angle -= .5;
-        vector_length *= -1;
-      }
-      if (vector_angle > 0 && vector_angle < 0.25) {
-        vector_angle += .5;
-        vector_length *= -1;
+      //just in case auto get's screwed up
+      if (gamepad1.b && gamepad1.a) {
+        amazingSwerve.odometry.resetHeading(new Rotation2d());
+        sleep(250);
       }
 
-      if (strafe_joystick != 0. || drive_joystick != 0.) {
-        driveBase.set_wheels(
-            vector_angle + frOffset, // Front Right
-            vector_angle + blOffset, // Back Left
-            vector_angle + brOffset, // Back Right
-            vector_angle + flOffset // Front Left
-        );
-        driveBase.setMotors(vector_length * 0.5);
-      } else if(rotate_joystick!=0) {
-        driveBase.steer_wheels_to_central_pivot_position(frRotationOffset, blRotationOffset, brRotationOffset, flRotationOffset);
-        driveBase.setMotors(rotate_joystick * 0.5);
-      }
-      else {
-        driveBase.stopServo();
-        driveBase.setMotors(0);
-      }
+      /*
+        Everything before this is for Driving.
+        Everything below is for Mekanism
+       */
 
-      if (gamepad2.a) {
-        mek.autoClip();
-        telemetry.addLine("Auto clip");
+      double
+          g2_lx = gamepad2.left_stick_x,
+          g2_ly = -gamepad2.left_stick_y,
+          g2_rx = gamepad2.right_stick_x,
+          g2_ry = -gamepad2.right_stick_y,
+          g2_lt = gamepad2.left_trigger,
+          g2_rt = gamepad2.right_trigger;
+
+      telemetry.addLine("G2 LY: " + g2_ly);
+      telemetry.addLine("G2 RY: " + g2_ry);
+      if (gamepad2.right_bumper) {
+        mek.arm.hang();
+        mek.grabber.setGrabber(0, 0);
+        sleep(5000);
       } else {
-
-        // 3. Sets the target position of the slide, limits set in Mekansim class
-        mek.slideTarget += -gamepad2.left_stick_y * slideSpeed;
-        if (mek.slideTarget < 0) mek.slideTarget = 0;
-        if (mek.slideTarget > mek.limitSlide) mek.slideTarget = mek.limitSlide;
-        telemetry.addData("Slide target position: ", mek.slideTarget);
-
-        // 3.5 Moves the slide all the way down if right bumper is pressed
-        if (gamepad2.right_bumper) {
-          mek.setSlide(0);
-          mek.slideTarget = 0;
-          sleep(1000);
-        }
-
-        // 4. Set the pivot power
-        mek.setPivot(-gamepad2.right_stick_y, gamepad2.right_bumper);
-
-        // 5. Intake/Outtake control
-        mek.runIntake(gamepad2.left_trigger > .5, gamepad2.right_trigger > .5);
-        if (gamepad2.b && !bPressed) {
-          mek.toggleWrist();
-        }
-        bPressed = gamepad2.b;
-
-        // 6. clamp/unclamp
-        if (gamepad2.x) {
-          mek.clamp();
-        } else if (gamepad2.y) {
-          mek.unclamp();
-        }
+        mek.arm.setSlide(g2_ly);
+        mek.arm.setPivot(g2_ry);
       }
+      telemetry.addLine("Slide current pos: " + mek.arm.slide.getPower());
+      telemetry.addLine("Slider current pos: " + mek.arm.slide.getCurrentPosition() + "Slide goal pos: " + mek.arm.slide.getTargetPosition());
 
-      // 7. Updates the target position of the slide
-      mek.setSlide((int) mek.slideTarget);
+      // This block handles making the gamepad.b toggle the wrist position
+      if (gamepad2.b && !is2B) {
+        game2B = !game2B;
+        is2B = true;
+      } else if (!gamepad2.b) is2B = false;
+      if (game2B)
+        mek.grabber.setWrist(1.0);
+      else mek.grabber.setWrist(-1.0);
 
-      telemetry.addLine("odo: " + odometry.getHeading());
-      telemetry.update();
-      lastTime = currentTime;
+      // Grabber power
+      double grabberSpeed = g2_rt - g2_lt;
+      mek.grabber.setGrabber(grabberSpeed, grabberSpeed);
+      if (gamepad2.a && gamepad2.b) {
+        mek.arm.slide.setMode(STOP_AND_RESET_ENCODER);
+        mek.arm.slide2.setMode(STOP_AND_RESET_ENCODER);
+        mek.arm.slide.setMode(RUN_USING_ENCODER);
+        mek.arm.slide2.setMode(RUN_USING_ENCODER);
+      }
+      mek.update();
+      telemetry.addLine("Grabber speed: " + grabberSpeed);
+      telemetry.addLine("intake 1 power: " + mek.grabber.intake1.getPosition());
+      telemetry.addLine("intake 2 power: " + mek.grabber.intake2.getPosition());
+
+      telemetry.addLine("Imu angle: " + odometry.getHeading().getDegrees());
+      telemetry.addLine("X Pos: " + odometry.getPosX());
+      telemetry.addLine("Y Pos: " + odometry.getPosY());
       telemetry.update();
     }
   }
@@ -191,10 +139,9 @@ public class BlueBotTeleop extends LinearOpMode {
     odometry = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
     odometry.recalibrateIMU();
     odometry.resetPosAndIMU();
-    odometry.setOffsets(110, 30);
+    odometry.setOffsets(160, 32.5);
     odometry.setEncoderResolution(goBILDA_4_BAR_POD);
     odometry.setEncoderDirections(FORWARD, FORWARD);
     odometry.resetHeading(Rotation2d.fromDegrees(120));
-    driveBase = new AutoSwerve(this, odometry);
   }
 }
