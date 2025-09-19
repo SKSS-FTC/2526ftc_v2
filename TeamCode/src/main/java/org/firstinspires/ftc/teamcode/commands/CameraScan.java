@@ -4,19 +4,18 @@ import org.firstinspires.ftc.teamcode.scheduler.Command;
 import org.firstinspires.ftc.teamcode.subsystems.Pipeline;
 
 public class CameraScan implements Command {
-    private Pipeline cam;
-    public CameraScan (Pipeline cam){
-        this.cam = cam;
+    private final Pipeline pipeline;
+    public CameraScan (Pipeline pipeline){
+        this.pipeline = pipeline;
     }
 
     @Override
     public void start() {
-        cam.start();
+        pipeline.start();
     }
 
     @Override
     public void update() {
-        cam.update();
     }
 
     @Override
@@ -26,6 +25,6 @@ public class CameraScan implements Command {
 
     @Override
     public void end() {
-        cam.stop();
+        pipeline.stop();
     }
 }

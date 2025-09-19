@@ -4,6 +4,8 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.teamcode.subsystems.CameraLocalization;
 import org.firstinspires.ftc.teamcode.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.subsystems.IMU;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
@@ -14,6 +16,7 @@ public class Robot {
     public final MecanumDrive mecanumDrive;
     public final IMU imu;
     public final Drive input;
+    public final CameraLocalization cameraLocalization;
 
     public Robot(HardwareMap hmap, Gamepad gamepad1){
         pipeline = new Pipeline(
@@ -31,13 +34,20 @@ public class Robot {
           hmap.get(com.qualcomm.robotcore.hardware.IMU.class, "IMU")
         );
 
+        cameraLocalization = new CameraLocalization(
+                hmap.get(Limelight3A.class, "Limelight_2"),
+                imu
+        );
+
         input = new Drive(gamepad1);
 
 
     }
 
     public void update(){
-
+        cameraLocalization.update();
+        pipeline.update();
+        imu.update();
     }
 
 }

@@ -6,6 +6,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 public class Pipeline {
     private final Limelight3A limelight;
     private int cacheColor = 0;
+    private boolean running;
 
     public Pipeline(Limelight3A limelight) {
         this.limelight = limelight;
@@ -14,6 +15,8 @@ public class Pipeline {
     }
 
     public void update() {
+        if (!running) return;
+
         LLResult result = limelight.getLatestResult();
         if (result != null) {
             double[] pythonOutputs = result.getPythonOutput();
@@ -37,6 +40,13 @@ public class Pipeline {
     public boolean isPurple() { return cacheColor == 2; }
     public boolean hasDetection() { return cacheColor != 0; }
 
-    public void start() { limelight.start(); }
-    public void stop() { limelight.stop(); }
+    public void start() {
+        limelight.start();
+        running = true;
+    }
+
+    public void stop() {
+        limelight.stop();
+        running = false;
+    }
 }

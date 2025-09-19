@@ -4,10 +4,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class MecanumDrive {
-    private DcMotorEx lf;
-    private DcMotorEx lb;
-    private DcMotorEx rf;
-    private DcMotorEx rb;
+    private final DcMotorEx lf;
+    private final DcMotorEx lb;
+    private final DcMotorEx rf;
+    private final DcMotorEx rb;
 
     public MecanumDrive(DcMotorEx lf, DcMotorEx lb, DcMotorEx rf, DcMotorEx rb){
         this.lb = lb;
@@ -26,7 +26,7 @@ public class MecanumDrive {
             double last_front_right = 0;
             double last_back_left = 0;
             double last_back_right = 0;
-            double threshold = 0.01;
+            double threshold = 0.02;
 
             double x_field = x * cos - y * sin;
             double y_field = x * sin + y * cos;

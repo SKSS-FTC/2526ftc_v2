@@ -9,8 +9,7 @@ public class IMU {
         this.imu = imu;
     }
 
-    private void updateCachedHeading() {
-
+    public void update() {
         double rawHeading = Math.toRadians(imu.getRobotYawPitchRollAngles().getYaw());
 
         if (Double.isNaN(lastRawHeading) || Math.abs(rawHeading - lastRawHeading) > EPSILON) {
@@ -18,8 +17,7 @@ public class IMU {
         }
     }
 
-    public double getLastRawHeading(){ return lastRawHeading;}
-
+    public double getYaw(){ return lastRawHeading;}
     public void resetCache() {
         lastRawHeading = Double.NaN;
     }
