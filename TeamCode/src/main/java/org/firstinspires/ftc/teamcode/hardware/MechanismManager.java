@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.software.TrajectoryEngine;
 
 public class MechanismManager {
 	public final Intake intake;
-	public final Sorter sorter;
+	public final Spindex spindex;
 	public final Launcher launcher;
 	public final LimelightManager limelightManager;
 	public final AlignmentEngine alignmentEngine;
@@ -41,28 +41,28 @@ public class MechanismManager {
 		trajectoryEngine = new TrajectoryEngine(limelightManager, pinpoint, matchSettings);
 		alignmentEngine = new AlignmentEngine(matchSettings, drivetrain, limelightManager, pinpoint);
 		
-		Servo sorterServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.SORTER_SERVO);
+		Servo spindexServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.SPINDEX_SERVO);
 		Servo launcherTransferServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.LAUNCHER_TRANSFER_SERVO);
-		ColorSensor sorterColorSensor = new ColorSensor(hardwareMap.get(RevColorSensorV3.class, Settings.Hardware.IDs.SORTER_COLOR_SENSOR));
+		ColorSensor spindexColorSensor = new ColorSensor(hardwareMap.get(RevColorSensorV3.class, Settings.Hardware.IDs.SPINDEX_COLOR_SENSOR));
 		Servo intakeTransferServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.INTAKE_TRANSFER_SERVO);
-		sorter = new Sorter(sorterServo, launcherTransferServo, intakeTransferServo, sorterColorSensor, matchSettings);
+		spindex = new Spindex(spindexServo, launcherTransferServo, intakeTransferServo, spindexColorSensor, matchSettings);
 		
 		DcMotor launcherLauncherRight = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.LAUNCHER_LAUNCHER_RIGHT);
 		DcMotor launcherLauncherLeft = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.LAUNCHER_LAUNCHER_LEFT);
 		Servo horizontalServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.LAUNCHER_HORIZONTAL_SERVO);
 		Servo verticalServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.LAUNCHER_VERTICAL_SERVO);
-		launcher = new Launcher(sorter, launcherLauncherRight, launcherLauncherLeft, horizontalServo, verticalServo, trajectoryEngine);
+		launcher = new Launcher(spindex, launcherLauncherRight, launcherLauncherLeft, horizontalServo, verticalServo, trajectoryEngine);
 	}
 	
 	public void init() {
 		intake.init();
-		sorter.init();
+		spindex.init();
 		launcher.init();
 	}
 	
 	public void update() {
 		intake.update();
-		sorter.update();
+		spindex.update();
 		launcher.update();
 	}
 }

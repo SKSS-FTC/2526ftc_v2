@@ -70,7 +70,7 @@ public class Settings {
 	public static class Deploy {
 		// Core Mechanisms
 		public static final boolean INTAKE = true;
-		public static final boolean SORTER = true;
+		public static final boolean SPINDEX = true;
 		public static final boolean AUTOMATIONS = true;
 	}
 	
@@ -86,7 +86,7 @@ public class Settings {
 		}
 		
 		@Config
-		public static final class Sorter {
+		public static final class Spindex {
 			// Default calibrated servo positions for slots at intake
 			public static final double[] SLOT_INTAKE_POSITIONS = {0.10, 0.43, 0.77}; // TODO TUNE
 			
@@ -95,7 +95,7 @@ public class Settings {
 			
 			public static final double RAPID_FIRE_COOLDOWN_MS = 200;
 			
-			public static final long EJECT_EXIT_TIME_MS = 200; // ms needed from servo receiving open to the ball fully leaving the sorter
+			public static final long EJECT_EXIT_TIME_MS = 200; // ms needed from servo receiving open to the ball fully leaving the spindex
 			
 			public static final double EXIT_SERVO_CLOSED_POSITION = 1.0; // TODO TUNE
 			public static final double EXIT_SERVO_OPEN_POSITION = 0.0; // TODO TUNE
@@ -118,10 +118,10 @@ public class Settings {
 			public static final String[] INTAKE_SERVO_ARRAY = {"intakeServoLowerLeft", "intakeServoLowerRight", "intakeServoUpperLeft", "intakeServoUpperRight"};
 			public static final String LAUNCHER_TRANSFER_SERVO = "launcherTransferServo";
 			public static final String INTAKE_TRANSFER_SERVO = "intakeTransferServo";
-			public static final String SORTER_COLOR_SENSOR = "sorterColorSensor";
+			public static final String SPINDEX_COLOR_SENSOR = "spindexColorSensor";
 			public static final String LIMELIGHT = "limelight";
 			public static final String COLOR_SENSOR = "colorSensor";
-			public static final String SORTER_SERVO = "sorterServo";
+			public static final String SPINDEX_SERVO = "spindexServo";
 			public static final String LAUNCHER_HORIZONTAL_SERVO = "launcherHorizontalServo";
 			public static final String LAUNCHER_VERTICAL_SERVO = "launcherVerticalServo";
 			

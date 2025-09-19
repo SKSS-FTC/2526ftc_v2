@@ -11,20 +11,20 @@ public class Launcher {
 	
 	private final Servo horizontalServo;
 	private final Servo verticalServo;
-	private final Sorter sorter;
+	private final Spindex spindex;
 	private final SyncBelt belt;
 	
 	// Cached commanded orientation (radians or degrees depending on Settings)
 	private double commandedYaw;
 	private double commandedPitch;
 	
-	public Launcher(Sorter sorter,
+	public Launcher(Spindex spindex,
 	                DcMotor beltRight,
 	                DcMotor beltLeft,
 	                Servo horizontalServo,
 	                Servo verticalServo,
 	                TrajectoryEngine trajectoryEngine) {
-		this.sorter = sorter;
+		this.spindex = spindex;
 		this.trajectoryEngine = trajectoryEngine;
 		this.horizontalServo = horizontalServo;
 		this.verticalServo = verticalServo;
@@ -49,13 +49,13 @@ public class Launcher {
 	
 	public void launch() {
 		if (okayToLaunch()) {
-			sorter.eject();
+			spindex.eject();
 		}
 	}
 	
 	public void ready() {
 		belt.spinUp();
-		sorter.rotateNextArtifactToExit();
+		spindex.rotateNextArtifactToExit();
 	}
 	
 	public void stop() {
@@ -65,7 +65,7 @@ public class Launcher {
 	public boolean okayToLaunch() {
 		return trajectoryEngine.isOkayToLaunch() &&
 				belt.atSpeed() &&
-				sorter.isNextArtifactAtExit();
+				spindex.isNextArtifactAtExit();
 	}
 	
 	// ---- Orientation handling ----

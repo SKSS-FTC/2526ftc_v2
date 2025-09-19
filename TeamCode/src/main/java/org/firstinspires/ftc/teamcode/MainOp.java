@@ -114,7 +114,7 @@ public class MainOp extends LinearOpMode {
 		}
 		
 		if (subController.getProcessedValue(Controller.Action.INTAKE) > 0) {
-			mechanisms.sorter.prepareForIntake();
+			mechanisms.spindex.prepareForIntake();
 			mechanisms.intake.in();
 		} else {
 			mechanisms.intake.stop();
@@ -122,13 +122,13 @@ public class MainOp extends LinearOpMode {
 
         /*
         if (subController.getProcessedValue(Controller.Action.RELEASE_EXTRAS) > 0) {
-            mechanisms.sorter.loadExtra();
+            mechanisms.spindex.loadExtra();
         }
         if (subController.getProcessedValue(Controller.Action.RELEASE_PURPLE) > 0) {
-            mechanisms.sorter.loadPurple();
+            mechanisms.spindex.loadPurple();
         }
         if (subController.getProcessedValue(Controller.Action.RELEASE_GREEN) > 0) {
-            mechanisms.sorter.loadGreen();
+            mechanisms.spindex.loadGreen();
         }
          */
 		

@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
-import static org.firstinspires.ftc.teamcode.configuration.Settings.Hardware.Sorter.TOLERANCE;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Hardware.Spindex.TOLERANCE;
 
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -15,15 +15,15 @@ import java.util.Deque;
 import java.util.List;
 
 /**
- * Controls a 3-slot rotating sorter using the Command Pattern.
+ * Controls a 3-slot rotating spindex using the Command Pattern.
  * <p>
  * This design delegates all complex actions to dedicated "Command" objects.
- * The Sorter's main loop simply executes the current command, making the system
+ * The Spindex's main loop simply executes the current command, making the system
  * highly scalable, readable, and robust against interruptions.
  */
-public class Sorter {
+public class Spindex {
 	// Hardware & Config (public for Command access)
-	public final Servo sorterServo;
+	public final Servo spindexServo;
 	public final Servo exitSealServo;
 	public final Servo intakeSealServo;
 	public final ColorSensor colorSensor;
@@ -40,21 +40,21 @@ public class Sorter {
 	// --- Command Pattern Implementation ---
 	private Command currentCommand = new Command.IdleCommand();
 	
-	public Sorter(Servo sorterServo, Servo exitSealServo, Servo intakeSealServo, ColorSensor sorterColorSensor, MatchSettings matchSettings) {
-		this.sorterServo = sorterServo;
+	public Spindex(Servo spindexServo, Servo exitSealServo, Servo intakeSealServo, ColorSensor spindexColorSensor, MatchSettings matchSettings) {
+		this.spindexServo = spindexServo;
 		this.exitSealServo = exitSealServo;
 		this.intakeSealServo = intakeSealServo;
-		this.colorSensor = sorterColorSensor;
+		this.colorSensor = spindexColorSensor;
 		this.matchSettings = matchSettings;
 		
 		for (int i = 0; i < 3; i++) {
-			slotIntakePositions[i] = wrapServo(Settings.Hardware.Sorter.SLOT_INTAKE_POSITIONS[i]);
+			slotIntakePositions[i] = wrapServo(Settings.Hardware.Spindex.SLOT_INTAKE_POSITIONS[i]);
 		}
-		this.exitOffset = wrapServo(Settings.Hardware.Sorter.EXIT_OFFSET);
+		this.exitOffset = wrapServo(Settings.Hardware.Spindex.EXIT_OFFSET);
 		this.intakeOffset = wrapServo(this.exitOffset + 0.5); // Intake is 180 degrees from exit
 		
 		Arrays.fill(slots, MatchSettings.ArtifactColor.UNKNOWN);
-		this.commandedPosition = wrapServo(sorterServo.getPosition());
+		this.commandedPosition = wrapServo(spindexServo.getPosition());
 	}
 	
 	private static double wrapServo(double v) {
@@ -93,13 +93,13 @@ public class Sorter {
 		}
 	}
 	
-	// Add this method to your Sorter class
+	// Add this method to your Spindex class
 	public void eject() {
 		submitCommand(new Command.EjectCommand(this));
 	}
 	
 	/**
-	 * Submits a new command to the sorter, allowing for intelligent interruption.
+	 * Submits a new command to the spindex, allowing for intelligent interruption.
 	 */
 	private void submitCommand(Command newCommand) {
 		synchronized (lock) {
@@ -126,7 +126,7 @@ public class Sorter {
 	 * Submits a command to run the full intake sequence: find an empty slot,
 	 * rotate to it, open the seal, and wait for a new artifact.
 	 *
-	 * @return Returns true if an intake command was started, false if the sorter is full.
+	 * @return Returns true if an intake command was started, false if the spindex is full.
 	 */
 	public boolean prepareForIntake() {
 		// First, check if there's an empty slot without locking, for a quick exit.
@@ -144,7 +144,7 @@ public class Sorter {
 			submitCommand(new Command.IntakeCommand(this));
 			return true;
 		}
-		return false; // Sorter is full
+		return false; // Spindex is full
 	}
 	
 	public void rapidFireSequence() {
@@ -162,14 +162,14 @@ public class Sorter {
 	
 	void setServoPosition(double pos) {
 		commandedPosition = wrapServo(pos);
-		sorterServo.setPosition(commandedPosition);
+		spindexServo.setPosition(commandedPosition);
 	}
 	
 	void openIntakeSeal() {
-		intakeSealServo.setPosition(Settings.Hardware.Sorter.INTAKE_SERVO_OPEN_POSITION);
+		intakeSealServo.setPosition(Settings.Hardware.Spindex.INTAKE_SERVO_OPEN_POSITION);
 	}
 	
-	// Add this public method to your Sorter class
+	// Add this public method to your Spindex class
 	public void rotateNextArtifactToExit() {
 		MatchSettings.ArtifactColor needed = matchSettings.nextArtifactNeeded();
 		if (needed == MatchSettings.ArtifactColor.UNKNOWN) {
@@ -185,7 +185,7 @@ public class Sorter {
 				return; // We only need to move the first one we find
 			}
 		}
-		// If we get here, no matching artifact was found in the sorter.
+		// If we get here, no matching artifact was found in the spindex.
 	}
 	
 	public boolean isNextArtifactAtExit() {
@@ -194,7 +194,7 @@ public class Sorter {
 			return false;
 		}
 		
-		// 1. Is the sorter currently idle?
+		// 1. Is the spindex currently idle?
 		boolean isIdle = (currentCommand instanceof Command.IdleCommand || currentCommand.isFinished());
 		if (!isIdle) {
 			return false;
@@ -215,15 +215,15 @@ public class Sorter {
 		
 		// Only proceed if a slot is actually aligned at the exit
 		if (slot != null) {
-			exitSealServo.setPosition(Settings.Hardware.Sorter.EXIT_SERVO_OPEN_POSITION);
+			exitSealServo.setPosition(Settings.Hardware.Spindex.EXIT_SERVO_OPEN_POSITION);
 			slots[slot] = MatchSettings.ArtifactColor.UNKNOWN;
 			lastActionTimeMs = System.currentTimeMillis();
 		}
 	}
 	
 	void closeBothSeals() {
-		exitSealServo.setPosition(Settings.Hardware.Sorter.EXIT_SERVO_CLOSED_POSITION);
-		intakeSealServo.setPosition(Settings.Hardware.Sorter.INTAKE_SERVO_CLOSED_POSITION);
+		exitSealServo.setPosition(Settings.Hardware.Spindex.EXIT_SERVO_CLOSED_POSITION);
+		intakeSealServo.setPosition(Settings.Hardware.Spindex.INTAKE_SERVO_CLOSED_POSITION);
 	}
 	
 	public boolean isAtTarget(double targetPosition) {
@@ -255,7 +255,7 @@ public class Sorter {
 		// Step 2: Determine the exact target position for that slot to be at the exit.
 		double targetPositionForSlot = getExitPositionForSlot(nearestIndex);
 		
-		// Step 3: Check if the sorter is actually at that target position.
+		// Step 3: Check if the spindex is actually at that target position.
 		boolean isAligned = isAtTarget(targetPositionForSlot);
 		
 		// Step 4: Only return the index if it's truly aligned, otherwise return null.
@@ -300,14 +300,14 @@ public class Sorter {
 
 
 /**
- * Defines the interface for a command that the Sorter can execute.
+ * Defines the interface for a command that the Spindex can execute.
  * Each command is a self-contained state machine for a specific task.
  */
 abstract class Command {
-	protected Sorter sorter; // Reference to the sorter hardware
+	protected Spindex spindex; // Reference to the spindex hardware
 	
-	public Command(Sorter sorter) {
-		this.sorter = sorter;
+	public Command(Spindex spindex) {
+		this.spindex = spindex;
 	}
 	
 	public Command() {
@@ -320,7 +320,7 @@ abstract class Command {
 	}
 	
 	/**
-	 * Called on every loop of the Sorter's update method.
+	 * Called on every loop of the Spindex's update method.
 	 */
 	public abstract void execute();
 	
@@ -343,8 +343,8 @@ abstract class Command {
 	
 	// Add this method inside the abstract Command class
 	public Command then(Command nextCommand) {
-		// Note: We're passing 'this.sorter' so the new command group has the sorter reference.
-		return new SequentialCommand(this.sorter, this, nextCommand);
+		// Note: We're passing 'this.spindex' so the new command group has the spindex reference.
+		return new SequentialCommand(this.spindex, this, nextCommand);
 	}
 	
 	/**
@@ -362,21 +362,21 @@ abstract class Command {
 	}
 	
 	/**
-	 * A command to rotate the sorter to a target position.
+	 * A command to rotate the spindex to a target position.
 	 */
 	public static class RotateCommand extends Command {
 		private final Runnable onCompleteAction;
 		private State state = State.SEALING;
 		private double targetPosition;
 		
-		public RotateCommand(Sorter sorter, double targetPosition, Runnable onCompleteAction) {
-			super(sorter);
+		public RotateCommand(Spindex spindex, double targetPosition, Runnable onCompleteAction) {
+			super(spindex);
 			this.targetPosition = targetPosition;
 			this.onCompleteAction = onCompleteAction;
 		}
 		
-		public RotateCommand(Sorter sorter, double targetPosition) {
-			this(sorter, targetPosition, null);
+		public RotateCommand(Spindex spindex, double targetPosition) {
+			this(spindex, targetPosition, null);
 		}
 		
 		@Override
@@ -388,15 +388,15 @@ abstract class Command {
 		public void execute() {
 			switch (state) {
 				case SEALING:
-					sorter.closeBothSeals();
+					spindex.closeBothSeals();
 					// Wait for eject cooldown before moving.
-					if (System.currentTimeMillis() - sorter.lastActionTimeMs > Settings.Hardware.Sorter.EJECT_EXIT_TIME_MS) {
+					if (System.currentTimeMillis() - spindex.lastActionTimeMs > Settings.Hardware.Spindex.EJECT_EXIT_TIME_MS) {
 						state = State.ROTATING;
 					}
 					break;
 				case ROTATING:
-					sorter.setServoPosition(targetPosition);
-					if (sorter.isAtTarget(targetPosition)) {
+					spindex.setServoPosition(targetPosition);
+					if (spindex.isAtTarget(targetPosition)) {
 						if (onCompleteAction != null) {
 							onCompleteAction.run();
 						}
@@ -440,8 +440,8 @@ abstract class Command {
 		private final Deque<Integer> targetQueue;
 		private State state = State.SEALING;
 		
-		public RapidFireCommand(Sorter sorter, Deque<Integer> targetQueue) {
-			super(sorter);
+		public RapidFireCommand(Spindex spindex, Deque<Integer> targetQueue) {
+			super(spindex);
 			this.targetQueue = targetQueue;
 		}
 		
@@ -449,8 +449,8 @@ abstract class Command {
 		public void execute() {
 			switch (state) {
 				case SEALING:
-					sorter.closeBothSeals();
-					if (System.currentTimeMillis() - sorter.lastActionTimeMs > Settings.Hardware.Sorter.EJECT_EXIT_TIME_MS) {
+					spindex.closeBothSeals();
+					if (System.currentTimeMillis() - spindex.lastActionTimeMs > Settings.Hardware.Spindex.EJECT_EXIT_TIME_MS) {
 						state = State.ROTATING;
 					}
 					break;
@@ -459,16 +459,16 @@ abstract class Command {
 						state = State.FINISHED;
 						break;
 					}
-					double targetPos = sorter.getExitPositionForSlot(targetQueue.peek());
-					sorter.setServoPosition(targetPos);
-					if (sorter.isAtTarget(targetPos)) {
+					double targetPos = spindex.getExitPositionForSlot(targetQueue.peek());
+					spindex.setServoPosition(targetPos);
+					if (spindex.isAtTarget(targetPos)) {
 						state = State.FIRING;
 					}
 					break;
 				case FIRING:
 					// Wait for rapid-fire cooldown
-					if (System.currentTimeMillis() - sorter.lastActionTimeMs > Settings.Hardware.Sorter.RAPID_FIRE_COOLDOWN_MS) {
-						sorter.ejectBallAtExit(); // This also updates lastActionTimeMs
+					if (System.currentTimeMillis() - spindex.lastActionTimeMs > Settings.Hardware.Spindex.RAPID_FIRE_COOLDOWN_MS) {
+						spindex.ejectBallAtExit(); // This also updates lastActionTimeMs
 						targetQueue.poll(); // Fired, so remove from queue.
 						state = State.ROTATING; // Go back to rotating for the next target
 					}
@@ -491,8 +491,8 @@ abstract class Command {
 	public static class EjectCommand extends Command {
 		private State state = State.READY_TO_FIRE;
 		
-		public EjectCommand(Sorter sorter) {
-			super(sorter);
+		public EjectCommand(Spindex spindex) {
+			super(spindex);
 		}
 		
 		@Override
@@ -500,9 +500,9 @@ abstract class Command {
 			switch (state) {
 				case READY_TO_FIRE:
 					// Only fire if the correct artifact is at the exit AND cooldown has passed.
-					if (sorter.isNextArtifactAtExit() &&
-							(System.currentTimeMillis() - sorter.lastActionTimeMs > Settings.Hardware.Sorter.RAPID_FIRE_COOLDOWN_MS)) {
-						sorter.ejectBallAtExit(); // Perform the action
+					if (spindex.isNextArtifactAtExit() &&
+							(System.currentTimeMillis() - spindex.lastActionTimeMs > Settings.Hardware.Spindex.RAPID_FIRE_COOLDOWN_MS)) {
+						spindex.ejectBallAtExit(); // Perform the action
 					}
 					// This command is "fire-and-forget". It finishes on the first cycle
 					// whether it fired or not, preventing it from blocking other commands.
@@ -530,8 +530,8 @@ abstract class Command {
 		private State state = State.START;
 		private int targetSlot = -1;
 		
-		public IntakeCommand(Sorter sorter) {
-			super(sorter);
+		public IntakeCommand(Spindex spindex) {
+			super(spindex);
 		}
 		
 		@Override
@@ -543,12 +543,12 @@ abstract class Command {
 		
 		@Override
 		public void execute() {
-			synchronized (sorter.lock) { // Synchronize to safely access slots array
+			synchronized (spindex.lock) { // Synchronize to safely access slots array
 				switch (state) {
 					case START:
 						// Step 1: Find the first available empty slot
 						for (int i = 0; i < 3; i++) {
-							if (sorter.slots[i] == MatchSettings.ArtifactColor.UNKNOWN) {
+							if (spindex.slots[i] == MatchSettings.ArtifactColor.UNKNOWN) {
 								targetSlot = i;
 								break;
 							}
@@ -563,27 +563,27 @@ abstract class Command {
 					
 					case SEALING:
 						// Step 2: Ensure seals are closed and wait for any eject cooldown
-						sorter.closeBothSeals();
-						if (System.currentTimeMillis() - sorter.lastActionTimeMs > Settings.Hardware.Sorter.EJECT_EXIT_TIME_MS) {
+						spindex.closeBothSeals();
+						if (System.currentTimeMillis() - spindex.lastActionTimeMs > Settings.Hardware.Spindex.EJECT_EXIT_TIME_MS) {
 							state = State.ROTATING;
 						}
 						break;
 					
 					case ROTATING:
 						// Step 3: Rotate the target slot to the intake position
-						double intakePos = sorter.getIntakePositionForSlot(targetSlot);
-						sorter.setServoPosition(intakePos);
-						if (sorter.isAtTarget(intakePos)) {
+						double intakePos = spindex.getIntakePositionForSlot(targetSlot);
+						spindex.setServoPosition(intakePos);
+						if (spindex.isAtTarget(intakePos)) {
 							state = State.INTAKING;
 						}
 						break;
 					
 					case INTAKING:
 						// Step 4: Open the seal and wait for a color to be detected
-						sorter.openIntakeSeal();
-						MatchSettings.ArtifactColor detectedColor = sorter.colorSensor.getArtifactColor();
+						spindex.openIntakeSeal();
+						MatchSettings.ArtifactColor detectedColor = spindex.colorSensor.getArtifactColor();
 						if (detectedColor != MatchSettings.ArtifactColor.UNKNOWN) {
-							sorter.slots[targetSlot] = detectedColor; // Safely update the slot
+							spindex.slots[targetSlot] = detectedColor; // Safely update the slot
 							state = State.FINISHING;
 						}
 						// Note: You could add a timeout here to prevent getting stuck
@@ -591,7 +591,7 @@ abstract class Command {
 					
 					case FINISHING:
 						// Step 5: Close the seal and finish the command
-						sorter.closeBothSeals();
+						spindex.closeBothSeals();
 						state = State.FINISHED;
 						break;
 					
@@ -617,8 +617,8 @@ abstract class Command {
 		private final Deque<Command> commandQueue = new ArrayDeque<>();
 		private Command currentCommand;
 		
-		public SequentialCommand(Sorter sorter, Command... commands) {
-			super(sorter);
+		public SequentialCommand(Spindex spindex, Command... commands) {
+			super(spindex);
 			Collections.addAll(this.commandQueue, commands);
 		}
 		
