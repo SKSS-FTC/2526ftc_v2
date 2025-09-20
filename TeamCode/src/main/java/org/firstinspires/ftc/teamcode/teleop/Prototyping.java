@@ -9,6 +9,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.Actuator;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.Movement;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 
 /**
@@ -20,62 +21,64 @@ public class Prototyping extends LinearOpMode {
     //private Indexer indexer;
     //private Actuator actuator;
     private Outtake outtake;
-    /**
-     * Runs the OpMode.
-     */
+    private Movement movement;
+
+
     @Override
     public void runOpMode() throws InterruptedException {
-        GamepadEx gamepadEx1 = new GamepadEx(gamepad1);
-        GamepadEx gamepadEx2 = new GamepadEx(gamepad2);
-
-        //intake = new Intake(hardwareMap);
-        //indexer = new Indexer(hardwareMap);
-        //actuator = new Actuator(hardwareMap);
+        // intake = new Intake(hardwareMap);
+        // indexer = new Indexer(hardwareMap);
+        // actuator = new Actuator(hardwareMap);
+        movement = new Movement(hardwareMap);
         outtake = new Outtake(hardwareMap);
+        GamepadEx gamePadOne = new GamepadEx(gamepad1);
+        GamepadEx gamePadTwo = new GamepadEx(gamepad2);
+
 
         waitForStart();
-        //indexer.moveTo(Indexer.IndexerState.one);
-        //actuator.down();
         while (opModeIsActive()) {
-            gamepadEx1.readButtons();
-            gamepadEx2.readButtons();
-            teleopTick(gamepadEx2, telemetry);
-            telemetry.update();
-        }
+            gamePadOne.readButtons();
+            gamePadTwo.readButtons();
+            teleopTick(gamePadOne, gamePadTwo, telemetry);
+
+        } 
     }
 
-    public void teleopTick(GamepadEx two, Telemetry telemetry)
-    {
+    public void teleopTick(GamepadEx padOne, GamepadEx padTwo, Telemetry telemetry) {
+        movement.teleopTickFieldCentric(padOne.getLeftX(),padOne.getLeftY(),padOne.getRightX(), padOne.getButton(GamepadKeys.Button.START));//,padOne.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER),telemetry);
+
         telemetry.addData("Outtake Power: ",outtake.getPower());
-        if(two.wasJustPressed(GamepadKeys.Button.A))
+        if(padTwo.wasJustPressed(GamepadKeys.Button.A))
         {
             //intake.run(!intake.isRunning());
         }
-        if(two.wasJustPressed(GamepadKeys.Button.B))
+        if(padTwo.wasJustPressed(GamepadKeys.Button.B))
         {
             //indexer.moveTo(indexer.nextState());
         }
-        if(two.wasJustPressed(GamepadKeys.Button.X))
+        if(padTwo.wasJustPressed(GamepadKeys.Button.X))
         {
             //actuator.set(!actuator.isActivated());
         }
-        if(two.wasJustPressed(GamepadKeys.Button.Y))
+        if(padTwo.wasJustPressed(GamepadKeys.Button.Y))
         {
             //indexer.quickSpin();
         }
-        if(two.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)>0.01){
+        if(padTwo.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)>0.01){
             outtake.run();
         }
         else {
             outtake.stop();
         }
-        if(two.isDown(GamepadKeys.Button.DPAD_UP))
+        if(padTwo.isDown(GamepadKeys.Button.DPAD_UP))
         {
             outtake.setPower(outtake.getPower()+0.0005);
         }
-        else if(two.isDown(GamepadKeys.Button.DPAD_DOWN))
+        else if(padTwo.isDown(GamepadKeys.Button.DPAD_DOWN))
         {
             outtake.setPower(outtake.getPower()-0.0005);
         }
-    }
+
+        telemetry.update();
+  }
 }
