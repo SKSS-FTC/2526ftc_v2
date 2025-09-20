@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -14,144 +14,147 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @Autonomous(name = "Main Auto", group = ".Competition Modes")
 public class MainAuto extends OpMode {
 	
-	private final Pose startPose = new Pose(28.5, 128, Math.toRadians(180)); // Start Pose of our robot.
-	private final Pose scorePose = new Pose(60, 85, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-	private final Pose pickup1Pose = new Pose(37, 121, Math.toRadians(0)); // Highest (First Set) of Artifacts from the Spike Mark.
-	private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark.
-	private final Pose pickup3Pose = new Pose(49, 135, Math.toRadians(0)); // Lowest (Third Set) of Artifacts from the Spike Mark.
-	private Follower follower;
-	private Timer pathTimer, actionTimer, opmodeTimer;
-	private int pathState;
-	private Path scorePreload;
-	private PathChain grabPickup1;
-	private PathChain grabPickup2;
-	private PathChain grabPickup3;
-	private PathChain scorePickup1;
-	private PathChain scorePickup2;
-	private PathChain scorePickup3;
+	// Define the starting pose of the robot. This is the beginning of the first path.
+	private final Pose startPose = new Pose(65.533, 12.244, Math.toRadians(115));
 	
+	// Declare all the PathChain objects for our autonomous routine.
+	private PathChain startToPreload1;
+	private PathChain preload1ToScore;
+	private PathChain scoreToPreload2;
+	private PathChain preload2ToScore;
+	private PathChain scoreToPreload3;
+	private PathChain preload3ToScore;
+	
+	private Follower follower;
+	private Timer pathTimer, opmodeTimer;
+	private int pathState;
+	
+	/**
+	 * This method is where we define all of our paths.
+	 * It takes the generated path segments and combines them into logical sequences.
+	 */
 	public void buildPaths() {
-		/* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-		scorePreload = new Path(new BezierLine(startPose, scorePose));
-		scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
-
-    /* Here is an example for Constant Interpolation
-    scorePreload.setConstantInterpolation(startPose.getHeading()); */
-		
-		/* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-		grabPickup1 = follower.pathBuilder()
-				.addPath(new BezierLine(scorePose, pickup1Pose))
-				.setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
+		/*
+		 * Path: Start to Preload 1
+		 * Description: Moves from the starting position in the far launch zone
+		 * to the first preload pickup area.
+		 */
+		startToPreload1 = follower.pathBuilder()
+				.addPath(new BezierLine(new Pose(65.533, 12.244), new Pose(35.526, 28.455)))
+				.setLinearHeadingInterpolation(Math.toRadians(115), Math.toRadians(180))
+				.addPath(new BezierLine(new Pose(35.526, 28.455), new Pose(18.453, 28.628)))
+				.setTangentHeadingInterpolation()
 				.build();
 		
-		/* This is our scorePickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-		scorePickup1 = follower.pathBuilder()
-				.addPath(new BezierLine(pickup1Pose, scorePose))
-				.setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
+		/*
+		 * Path: Preload 1 to Score
+		 * Description: Moves from the first preload pickup area to the scoring area
+		 * in the close launch zone. Uses a curve for a smooth approach.
+		 */
+		preload1ToScore = follower.pathBuilder()
+				.addPath(new BezierCurve(new Pose(18.453, 28.628), new Pose(64.671, 44.493), new Pose(63.808, 69.499)))
+				.setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(130))
 				.build();
 		
-		/* This is our grabPickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-		grabPickup2 = follower.pathBuilder()
-				.addPath(new BezierLine(scorePose, pickup2Pose))
-				.setLinearHeadingInterpolation(scorePose.getHeading(), pickup2Pose.getHeading())
+		/*
+		 * Path: Score to Preload 2
+		 * Description: Moves from the scoring area back to the second preload pickup area.
+		 */
+		scoreToPreload2 = follower.pathBuilder()
+				.addPath(new BezierLine(new Pose(63.808, 69.499), new Pose(38.802, 54.668)))
+				.setLinearHeadingInterpolation(Math.toRadians(130), Math.toRadians(180))
+				.addPath(new BezierLine(new Pose(38.802, 54.668), new Pose(18.970, 54.496)))
+				.setTangentHeadingInterpolation()
 				.build();
 		
-		/* This is our scorePickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-		scorePickup2 = follower.pathBuilder()
-				.addPath(new BezierLine(pickup2Pose, scorePose))
-				.setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
+		/*
+		 * Path: Preload 2 to Score
+		 * Description: Moves from the second preload pickup area to the scoring area.
+		 */
+		preload2ToScore = follower.pathBuilder()
+				.addPath(new BezierLine(new Pose(18.970, 54.496), new Pose(52.081, 80.364)))
+				.setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(135))
 				.build();
 		
-		/* This is our grabPickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-		grabPickup3 = follower.pathBuilder()
-				.addPath(new BezierLine(scorePose, pickup3Pose))
-				.setLinearHeadingInterpolation(scorePose.getHeading(), pickup3Pose.getHeading())
+		/*
+		 * Path: Score to Preload 3
+		 * Description: Moves from the scoring area to the third and final preload pickup area.
+		 */
+		scoreToPreload3 = follower.pathBuilder()
+				.addPath(new BezierLine(new Pose(52.081, 80.364), new Pose(19.143, 80.019)))
+				.setConstantHeadingInterpolation(Math.toRadians(180))
 				.build();
 		
-		/* This is our scorePickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-		scorePickup3 = follower.pathBuilder()
-				.addPath(new BezierLine(pickup3Pose, scorePose))
-				.setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+		/*
+		 * Path: Preload 3 to Score
+		 * Description: Moves from the third preload pickup area to the scoring area for the final time.
+		 */
+		preload3ToScore = follower.pathBuilder()
+				.addPath(new BezierLine(new Pose(19.143, 80.019), new Pose(40.354, 92.091)))
+				.setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(126))
 				.build();
 	}
 	
+	/**
+	 * This is the state machine for the autonomous path. It executes each path in sequence.
+	 */
 	public void autonomousPathUpdate() {
 		switch (pathState) {
 			case 0:
-				follower.followPath(scorePreload);
+				// Start following the first path from the start to preload 1.
+				follower.followPath(startToPreload1);
 				setPathState(1);
 				break;
 			case 1:
-
-            /* You could check for
-            - Follower State: "if(!follower.isBusy()) {}"
-            - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
-            - Robot Position: "if(follower.getPose().getX() > 36) {}"
-            */
-				
-				/* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+				// When the robot is done moving, it's at the first preload location.
 				if (!follower.isBusy()) {
-					/* Score Preload */
-					
-					/* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-					follower.followPath(grabPickup1, true);
+					// TODO: Add your action to pick up the first preload element.
+					// Now, move to the scoring location.
+					follower.followPath(preload1ToScore);
 					setPathState(2);
 				}
 				break;
 			case 2:
-				/* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
+				// When the robot is done moving, it's at the scoring location.
 				if (!follower.isBusy()) {
-					/* Grab Sample */
-					
-					/* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-					follower.followPath(scorePickup1, true);
+					// TODO: Add your action to score the first element.
+					// Now, move to the second preload location.
+					follower.followPath(scoreToPreload2);
 					setPathState(3);
 				}
 				break;
 			case 3:
-				/* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+				// At the second preload location.
 				if (!follower.isBusy()) {
-					/* Score Sample */
-					
-					/* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-					follower.followPath(grabPickup2, true);
+					// TODO: Add your action to pick up the second preload element.
+					// Move to the scoring location.
+					follower.followPath(preload2ToScore);
 					setPathState(4);
 				}
 				break;
 			case 4:
-				/* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
+				// At the scoring location again.
 				if (!follower.isBusy()) {
-					/* Grab Sample */
-					
-					/* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-					follower.followPath(scorePickup2, true);
+					// TODO: Add your action to score the second element.
+					// Move to the third preload location.
+					follower.followPath(scoreToPreload3);
 					setPathState(5);
 				}
 				break;
 			case 5:
-				/* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+				// At the third preload location.
 				if (!follower.isBusy()) {
-					/* Score Sample */
-					
-					/* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-					follower.followPath(grabPickup3, true);
+					// TODO: Add your action to pick up the third preload element.
+					// Move to the scoring location for the last time.
+					follower.followPath(preload3ToScore);
 					setPathState(6);
 				}
 				break;
 			case 6:
-				/* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
+				// At the final scoring location.
 				if (!follower.isBusy()) {
-					/* Grab Sample */
-					
-					/* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-					follower.followPath(scorePickup3, true);
-					setPathState(7);
-				}
-				break;
-			case 7:
-				/* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-				if (!follower.isBusy()) {
-					/* Set the state to a Case we won't use or define, so it just stops running an new paths */
+					// TODO: Add your action to score the final element.
+					// Set state to -1 to stop the state machine.
 					setPathState(-1);
 				}
 				break;
@@ -159,7 +162,7 @@ public class MainAuto extends OpMode {
 	}
 	
 	/**
-	 * These change the states of the paths and actions. It will also reset the timers of the individual switches
+	 * Changes the state of the path and resets the path timer.
 	 **/
 	public void setPathState(int pState) {
 		pathState = pState;
@@ -171,21 +174,20 @@ public class MainAuto extends OpMode {
 	 **/
 	@Override
 	public void loop() {
-		
-		// These loop the movements of the robot, these must be called continuously in order to work
+		// These methods must be called continuously to update the robot's position and path following.
 		follower.update();
 		autonomousPathUpdate();
 		
-		// Feedback to Driver Hub for debugging
-		telemetry.addData("path state", pathState);
-		telemetry.addData("x", follower.getPose().getX());
-		telemetry.addData("y", follower.getPose().getY());
-		telemetry.addData("heading", follower.getPose().getHeading());
+		// Provide feedback to the Driver Hub for debugging.
+		telemetry.addData("Path State", pathState);
+		telemetry.addData("X", follower.getPose().getX());
+		telemetry.addData("Y", follower.getPose().getY());
+		telemetry.addData("Heading", Math.toDegrees(follower.getPose().getHeading()));
 		telemetry.update();
 	}
 	
 	/**
-	 * This method is called once at the init of the OpMode.
+	 * This method is called once when the OpMode is initialized.
 	 **/
 	@Override
 	public void init() {
@@ -193,11 +195,12 @@ public class MainAuto extends OpMode {
 		opmodeTimer = new Timer();
 		opmodeTimer.resetTimer();
 		
-		
+		// Initialize the follower with hardware map and constants.
 		follower = Constants.createFollower(hardwareMap);
+		// Build all the paths for the autonomous routine.
 		buildPaths();
+		// Set the robot's starting pose.
 		follower.setStartingPose(startPose);
-		
 	}
 	
 	/**
@@ -209,16 +212,16 @@ public class MainAuto extends OpMode {
 	
 	/**
 	 * This method is called once at the start of the OpMode.
-	 * It runs all the setup actions, including building paths and starting the path system
 	 **/
 	@Override
 	public void start() {
 		opmodeTimer.resetTimer();
+		// Set the initial path state to start the autonomous sequence.
 		setPathState(0);
 	}
 	
 	/**
-	 * We do not use this because everything should automatically disable
+	 * This method is called once when the OpMode is stopped.
 	 **/
 	@Override
 	public void stop() {
