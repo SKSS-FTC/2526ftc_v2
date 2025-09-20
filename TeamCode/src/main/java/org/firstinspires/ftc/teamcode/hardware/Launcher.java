@@ -119,17 +119,22 @@ public class Launcher {
 		public SyncBelt(DcMotor right, DcMotor left) {
 			this.beltRight = right;
 			this.beltLeft = left;
+			left.setDirection(DcMotor.Direction.REVERSE);
 			right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 			left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 			right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 			left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		}
 		
-		public final void spinUp() {
+		public final void spinUp(double motorSpeed) {
 			if (active) return;
 			active = true;
 			spinupTimestamp = System.currentTimeMillis();
-			setBasePower(Settings.Launcher.BELT_MOTOR_SPEED);
+			setBasePower(motorSpeed);
+		}
+		
+		public final void spinUp() {
+			spinUp(Settings.Launcher.BELT_MOTOR_SPEED);
 		}
 		
 		public final void spinDown() {
