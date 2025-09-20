@@ -140,7 +140,7 @@ public class Settings {
 		public static double goalHeight;
 		public static double maxYawError = 1;      // rad
 		public static double maxPitchError = 1;    // rad
-		public static double goalTolerance;    // cm (vertical tolerance window)
+		public static double goalTolerance;    // inches (vertical tolerance window)
 	}
 	
 	@Configurable

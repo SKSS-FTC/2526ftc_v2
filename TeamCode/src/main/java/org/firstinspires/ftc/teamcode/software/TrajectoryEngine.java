@@ -57,8 +57,8 @@ public class TrajectoryEngine {
 				: Settings.Positions.BLUE_GOAL_CENTER_Y;
 		
 		// 4. Calculate the vector from the robot to the target in the world frame
-		double dx = targetX - robotPose.getX(DistanceUnit.CM);
-		double dy = targetY - robotPose.getY(DistanceUnit.CM);
+		double dx = targetX - robotPose.getX(DistanceUnit.INCH);
+		double dy = targetY - robotPose.getY(DistanceUnit.INCH);
 		double d = Math.hypot(dx, dy);
 		
 		// 5. Calculate the required launcher yaw
@@ -135,7 +135,7 @@ public class TrajectoryEngine {
 		 *
 		 * @param yaw   The calculated yaw in radians.
 		 * @param pitch The calculated pitch in radians.
-		 * @param dist  The horizontal distance to the target in centimeters.
+		 * @param dist  The horizontal distance to the target in inches.
 		 */
 		public AimingSolution(double yaw, double pitch, double dist) {
 			this.hasSolution = true;

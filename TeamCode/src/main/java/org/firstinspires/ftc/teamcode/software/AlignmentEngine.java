@@ -31,7 +31,7 @@ public class AlignmentEngine {
 	
 	public static boolean isInsideTriangle(Pose2D pose, Pose A, Pose B, Pose C) {
 		// Create new Point objects for the pose's x and y
-		Pose P = new Pose(pose.getX(DistanceUnit.CM), pose.getY(DistanceUnit.CM));
+		Pose P = new Pose(pose.getX(DistanceUnit.INCH), pose.getY(DistanceUnit.INCH));
 		
 		// Use the crossProduct method to determine if the point is within the triangle
 		double s1 = crossProduct(A, B, P);
