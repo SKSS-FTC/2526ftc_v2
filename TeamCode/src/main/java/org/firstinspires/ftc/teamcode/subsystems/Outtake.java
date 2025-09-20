@@ -25,16 +25,12 @@ public class Outtake {
     public void setPower(double newPower)
     {
         power = newPower;
+        motor.set(power);
     }
 
     public double getPower()
     {
         return power;
-    }
-
-    public void runAtPower(double newPower)
-    {
-        motor.set(newPower);
     }
 
     //TODO: Make algorithm to determine power needed based on distance
