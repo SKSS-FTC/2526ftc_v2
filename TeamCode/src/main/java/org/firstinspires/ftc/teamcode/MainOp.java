@@ -1,15 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
 import org.firstinspires.ftc.teamcode.software.Drivetrain;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Main TeleOp class for driver-controlled period.
@@ -18,23 +16,15 @@ import java.util.concurrent.TimeUnit;
  * @noinspection ClassWithoutConstructor
  */
 @TeleOp(name = "MainOp", group = ".Competition Modes")
-public class MainOp extends LinearOpMode {
-	
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+public class MainOp extends OpMode {
 	public MatchSettings matchSettings;
+	private TelemetryManager logging;
 	private MechanismManager mechanisms;
 	private Controller mainController;
 	private Controller subController;
 	
-	/**
-	 * Main execution flow:
-	 * 1. Displays controller profile selection menu
-	 * 2. Initializes robot with selected profiles
-	 * 3. Runs main control loop for driver operation
-	 * 4. Handles shutdown when OpMode ends
-	 */
 	@Override
-	public final void runOpMode() {
+	public final void init() {
 		// Pull stored settings from auto
 		matchSettings = new MatchSettings(blackboard);
 		
@@ -42,32 +32,32 @@ public class MainOp extends LinearOpMode {
 		mechanisms = new MechanismManager(hardwareMap, matchSettings);
 		mainController = new Controller(gamepad1, mechanisms.pinpoint, matchSettings);
 		subController = new Controller(gamepad2, mechanisms.pinpoint, matchSettings);
-		// Wait for start
-		waitForStart();
-		
-		// Initialize mechanisms
+		logging = PanelsTelemetry.INSTANCE.getTelemetry();
+	}
+	
+	public final void start() {
 		mechanisms.init();
+	}
+	
+	public final void loop() {
+		mechanisms.update();
 		
-		// Main loop
-		while (opModeIsActive()) {
-			mechanisms.update();
-			
-			processControllerInputs();
-			updateTelemetry();
-			
-			mainController.saveLastState();
-			subController.saveLastState();
-			if (matchSettings.nextArtifactNeeded() == MatchSettings.ArtifactColor.GREEN) {
-				subController.setLedColor(0, 255, 0, 100);
-			} else if (matchSettings.nextArtifactNeeded() == MatchSettings.ArtifactColor.PURPLE) {
-				subController.setLedColor(255, 0, 255, 100);
-			} else {
-				subController.setLedColor(0, 0, 0, 0);
-			}
+		processControllerInputs();
+		logging.update();
+		
+		mainController.saveLastState();
+		subController.saveLastState();
+		if (matchSettings.nextArtifactNeeded() == MatchSettings.ArtifactColor.GREEN) {
+			subController.setLedColor(0, 255, 0, 100);
+		} else if (matchSettings.nextArtifactNeeded() == MatchSettings.ArtifactColor.PURPLE) {
+			subController.setLedColor(255, 0, 255, 100);
+		} else {
+			subController.setLedColor(0, 0, 0, 0);
 		}
-		
-		// Stop all executor tasks at the end
-		scheduler.shutdownNow();
+	}
+	
+	public final void stop() {
+		mechanisms.stop();
 	}
 	
 	/**
@@ -141,21 +131,5 @@ public class MainOp extends LinearOpMode {
 		if (subController.getProcessedValue(Controller.Action.INCREMENT_CLASSIFIER_STATE) > 0) {
 			matchSettings.incrementClassifier();
 		}
-	}
-	
-	/**
-	 * Update telemetry with current status
-	 */
-	private void updateTelemetry() {
-		// Add controller profile information
-		telemetry.addLine("Ready to go!");
-		telemetry.update();
-	}
-	
-	/**
-	 * Schedule a task to run after a delay
-	 */
-	private void scheduleTask(Runnable task, long delayMillis) {
-		scheduler.schedule(task, delayMillis, TimeUnit.MILLISECONDS);
 	}
 }

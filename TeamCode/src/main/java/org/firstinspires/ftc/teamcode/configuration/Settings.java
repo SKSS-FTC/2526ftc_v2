@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.configuration;
 
-import com.acmerobotics.dashboard.config.Config;
-import com.bylazar.ftcontrol.panels.json.Point;
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.Controller;
@@ -14,9 +13,9 @@ import java.util.EnumMap;
  *
  * @noinspection ClassWithoutConstructor
  */
-@Config
+@Configurable
 public class Settings {
-	@Config
+	@Configurable
 	public static class Controls {
 		// Using EnumMap for better performance and type safety with Enum keys
 		// The keys are the physical controller inputs, the values are the game actions.
@@ -61,14 +60,14 @@ public class Settings {
 	}
 	
 	// Movement settings
-	@Config
+	@Configurable
 	public static class Teleop {
 		// Multiplier applied to strafe movements to compensate for mechanical differences
 		public static final double strafe_power_coefficient = 1.2;
 	}
 	
 	// Deploy flags control what parts of the robot are on
-	@Config
+	@Configurable
 	public static class Deploy {
 		// Core Mechanisms
 		public static final boolean INTAKE = true;
@@ -80,14 +79,14 @@ public class Settings {
 	 * @noinspection InnerClassTooDeeplyNested
 	 */
 	// Hardware settings
-	@Config
+	@Configurable
 	public static class Hardware {
-		@Config
+		@Configurable
 		public static class Intake {
 			public static final double SPEED = 0.5;
 		}
 		
-		@Config
+		@Configurable
 		public static final class Spindex {
 			// Default calibrated servo positions for slots at intake
 			public static final double[] SLOT_INTAKE_POSITIONS = {0.10, 0.43, 0.77}; // TODO TUNE
@@ -106,7 +105,7 @@ public class Settings {
 			public static final double TOLERANCE = 5.0 / 360.0; // how close a slot must be to the exit in order to launch
 		}
 		
-		@Config
+		@Configurable
 		public static class IDs {
 			
 			// Drive motors
@@ -132,7 +131,7 @@ public class Settings {
 		}
 	}
 	
-	@Config
+	@Configurable
 	public static class Aiming {
 		public static final double gravity = 9.81;
 		// todo tune
@@ -144,7 +143,7 @@ public class Settings {
 		public static double goalTolerance;    // cm (vertical tolerance window)
 	}
 	
-	@Config
+	@Configurable
 	public static class Limelight {
 		/**
 		 * Limelight horizontal window size (degrees)
@@ -152,7 +151,7 @@ public class Settings {
 		public static final double limelightWindowSize = 40;
 	}
 	
-	@Config
+	@Configurable
 	public static class Launcher {
 		public static final double BELT_SYNC_KP = 0.05; // how fast the belts move to match each other
 		public static final double MIN_PITCH = 0; // degrees from horizontal when vert servo is fully down
@@ -166,7 +165,7 @@ public class Settings {
 		public static final long BELT_SPINUP_TIME_MS = 500; // TODO tune
 	}
 	
-	@Config
+	@Configurable
 	public static class Alignment {
 		// Translational control
 		/**
@@ -208,15 +207,22 @@ public class Settings {
 		public static final double BLUE_GOAL_CENTER_X = 50; // TODO tune
 		public static final double BLUE_GOAL_CENTER_Y = 50; // TODO tune
 		
-		public static final Point FAR_LAUNCH_ZONE_FRONT_CORNER = new Point(0, 0); // TODO tune
-		public static final Point FAR_LAUNCH_ZONE_LEFT_CORNER = new Point(0, 0); // TODO tune
-		public static final Point FAR_LAUNCH_ZONE_RIGHT_CORNER = new Point(0, 0); // TODO tune
+		public static final Pose FAR_LAUNCH_ZONE_FRONT_CORNER = new Pose(0, 0); // TODO tune
+		public static final Pose FAR_LAUNCH_ZONE_LEFT_CORNER = new Pose(0, 0); // TODO tune
+		public static final Pose FAR_LAUNCH_ZONE_RIGHT_CORNER = new Pose(0, 0); // TODO tune
 		
-		public static final Point CLOSE_LAUNCH_ZONE_FRONT_CORNER = new Point(0, 0); // TODO tune
-		public static final Point CLOSE_LAUNCH_ZONE_LEFT_CORNER = new Point(0, 0); // TODO tune
-		public static final Point CLOSE_LAUNCH_ZONE_RIGHT_CORNER = new Point(0, 0); // TODO tune
+		public static final Pose CLOSE_LAUNCH_ZONE_FRONT_CORNER = new Pose(0, 0); // TODO tune
+		public static final Pose CLOSE_LAUNCH_ZONE_LEFT_CORNER = new Pose(0, 0); // TODO tune
+		public static final Pose CLOSE_LAUNCH_ZONE_RIGHT_CORNER = new Pose(0, 0); // TODO tune
 		
 		public static final Pose BLUE_ENDING_POSE = new Pose(0, 0, 0); // TODO TUNE
 		public static final Pose RED_ENDING_POSE = new Pose(0, 0, 0); // TODO TUNE
+	}
+	
+	public static class ColorSensor {
+		public static final double[] GREEN_TARGET = {0, 200, 0};
+		public static final double[] PURPLE_TARGET = {200, 0, 200};
+		// Acceptable distance threshold (lower is stricter, higher is looser)
+		public static final double CONFIDENCE_THRESHOLD = 100.0;
 	}
 }

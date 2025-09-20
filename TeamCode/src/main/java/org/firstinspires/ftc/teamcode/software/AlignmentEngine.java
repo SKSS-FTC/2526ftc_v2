@@ -7,7 +7,7 @@ import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.FA
 import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.FAR_LAUNCH_ZONE_LEFT_CORNER;
 import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.FAR_LAUNCH_ZONE_RIGHT_CORNER;
 
-import com.bylazar.ftcontrol.panels.json.Point;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
 
@@ -29,9 +29,9 @@ public class AlignmentEngine {
 		this.limelightManager = limelightManager;
 	}
 	
-	public static boolean isInsideTriangle(Pose2D pose, Point A, Point B, Point C) {
+	public static boolean isInsideTriangle(Pose2D pose, Pose A, Pose B, Pose C) {
 		// Create new Point objects for the pose's x and y
-		Point P = new Point(pose.getX(DistanceUnit.CM), pose.getY(DistanceUnit.CM));
+		Pose P = new Pose(pose.getX(DistanceUnit.CM), pose.getY(DistanceUnit.CM));
 		
 		// Use the crossProduct method to determine if the point is within the triangle
 		double s1 = crossProduct(A, B, P);
@@ -44,7 +44,7 @@ public class AlignmentEngine {
 		return !(has_neg && has_pos);
 	}
 	
-	public static double crossProduct(Point A, Point B, Point C) {
+	public static double crossProduct(Pose A, Pose B, Pose C) {
 		return (B.getX() - A.getX()) * (C.getY() - A.getY()) - (B.getY() - A.getY()) * (C.getX() - A.getX());
 	}
 	

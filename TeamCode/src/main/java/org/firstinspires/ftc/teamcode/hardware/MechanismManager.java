@@ -65,4 +65,10 @@ public class MechanismManager {
 		spindex.update();
 		launcher.update();
 	}
+	
+	public void stop() {
+		intake.stop();
+		spindex.prepareForIntake();
+		launcher.stop();
+	}
 }

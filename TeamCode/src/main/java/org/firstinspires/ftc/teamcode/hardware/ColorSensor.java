@@ -1,21 +1,19 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
-import com.acmerobotics.dashboard.config.Config;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.ColorSensor.CONFIDENCE_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.ColorSensor.GREEN_TARGET;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.ColorSensor.PURPLE_TARGET;
+
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 
 // TODO tune color thresholds and confidence
-@Config
 public class ColorSensor {
+	final double[] rgbValues = {0, 0, 0};
 	// Target "center" colors for confidence-based matching
 	// These should be tuned to approximate measured values
-	public static final double[] greenTarget = {0, 200, 0};
-	public static final double[] purpleTarget = {200, 0, 200};
-	// Acceptable distance threshold (lower is stricter, higher is looser)
-	public static final double CONFIDENCE_THRESHOLD = 100.0;
 	final RevColorSensorV3 colorSensor;
-	final double[] rgbValues = {0, 0, 0};
 	
 	public ColorSensor(RevColorSensorV3 colorSensorV3) {
 		this.colorSensor = colorSensorV3;
@@ -39,8 +37,8 @@ public class ColorSensor {
 		rgbValues[1] = colorSensor.green();
 		rgbValues[2] = colorSensor.blue();
 		
-		double greenConfidence = computeDistance(rgbValues, greenTarget);
-		double purpleConfidence = computeDistance(rgbValues, purpleTarget);
+		double greenConfidence = computeDistance(rgbValues, GREEN_TARGET);
+		double purpleConfidence = computeDistance(rgbValues, PURPLE_TARGET);
 		
 		if (greenConfidence < purpleConfidence && greenConfidence < CONFIDENCE_THRESHOLD) {
 			return MatchSettings.ArtifactColor.GREEN;
