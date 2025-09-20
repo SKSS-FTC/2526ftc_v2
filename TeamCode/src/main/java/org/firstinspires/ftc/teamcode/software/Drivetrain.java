@@ -1,104 +1,175 @@
 package org.firstinspires.ftc.teamcode.software;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.configuration.Settings;
-import org.firstinspires.ftc.teamcode.configuration.Settings.Alignment;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Drivetrain class refactored to use the PedroPathing V2 library.
+ * It abstracts away direct motor control in favor of the Follower API for
+ * both manual (tele-op) and autonomous movement.
+ */
 public class Drivetrain {
 	
-	public final DcMotor frontLeftMotor;
-	public final DcMotor frontRightMotor;
-	public final DcMotor rearLeftMotor;
-	public final DcMotor rearRightMotor;
-	public final Map<String, DcMotor> motors = new HashMap<>();
-	public final State state = State.MANUAL;
-	
-	public Drivetrain(HardwareMap hardwareMap) {
-		frontLeftMotor = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.FRONT_LEFT_MOTOR);
-		frontRightMotor = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.FRONT_RIGHT_MOTOR);
-		rearLeftMotor = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.REAR_LEFT_MOTOR);
-		rearRightMotor = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.REAR_RIGHT_MOTOR);
-		
-		// IF A WHEEL IS GOING THE WRONG DIRECTION CHECK WIRING red/black
-		frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
-		frontRightMotor.setDirection(DcMotor.Direction.REVERSE);
-		rearLeftMotor.setDirection(DcMotor.Direction.FORWARD);
-		rearRightMotor.setDirection(DcMotor.Direction.REVERSE);
-		
-		frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		frontRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		rearLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		rearRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		
-		motors.put(Settings.Hardware.IDs.FRONT_LEFT_MOTOR, frontLeftMotor);
-		motors.put(Settings.Hardware.IDs.FRONT_RIGHT_MOTOR, frontRightMotor);
-		motors.put(Settings.Hardware.IDs.REAR_LEFT_MOTOR, rearLeftMotor);
-		motors.put(Settings.Hardware.IDs.REAR_RIGHT_MOTOR, rearRightMotor);
-	}
+	public final Follower follower;
+	// Define field-centric poses for autonomous targets.
+	// TODO: Tune these coordinates for your actual field and alliance.
+	private final Map<Position, Pose> positionPoses = new HashMap<>();
+	private State state;
 	
 	/**
-	 * Implements mecanum drive calculations and motor control
+	 * Initializes the Drivetrain and the PedroPathing Follower.
 	 *
-	 * @param drivePower  Forward/backward power (-1.0 to 1.0)
-	 * @param strafePower Left/right strafe power (-1.0 to 1.0)
-	 * @param rotation    Rotational power (-1.0 to 1.0)
-	 **/
-	public void mecanumDrive(double drivePower, double strafePower, double rotation, boolean asDeadeye) {
-		if (state != State.MANUAL) {
-			return; // automation is handling driving, do not manually drive
-		}
-		// Adjust the values for strafing and rotation
-		strafePower *= Settings.Teleop.strafe_power_coefficient;
-		double frontLeft = (drivePower + strafePower) + rotation;
-		double frontRight = (drivePower - strafePower) - rotation;
-		double rearLeft = (drivePower - strafePower) + rotation;
-		double rearRight = (drivePower + strafePower) - rotation;
+	 * @param hardwareMap The robot's hardware map.
+	 */
+	public Drivetrain(HardwareMap hardwareMap) {
+		// The Constants class now holds all hardware and tuning configurations.
+		follower = Constants.createFollower(hardwareMap);
+		follower.setStartingPose(new Pose()); // Set a default starting pose at (0,0,0)
+		switchToManual(); // Start in manual control mode.
 		
-		frontLeftMotor.setPower(frontLeft);
-		frontRightMotor.setPower(frontRight);
-		rearLeftMotor.setPower(rearLeft);
-		rearRightMotor.setPower(rearRight);
-	}
-	
-	// mecanum drive assumes you are not driving as deadeye
-	
-	public void interpolateToOffset(double offsetX, double offsetY, double offsetHeading) {
-		// translational distance
-		double dist = Math.hypot(offsetX, offsetY);
-		
-		// linear ramp for translational speed
-		double translationalScale = Math.min(1.0,
-				Math.max(0.0, (dist - Alignment.stopDistance) /
-						(Alignment.fullSpeedDistance - Alignment.stopDistance)));
-		
-		double drivePower = -offsetY / dist * translationalScale * Alignment.maxTranslationalSpeed;
-		double strafePower = -offsetX / dist * translationalScale * Alignment.maxTranslationalSpeed;
-		
-		// rotation
-		double absErr = Math.abs(offsetHeading);
-		double rotation = 0.0;
-		if (absErr > Alignment.headingDeadband) {
-			double rotScale = Math.min(1.0, absErr / Alignment.fullSpeedHeadingError);
-			rotation = Math.copySign(rotScale * Alignment.maxRotationSpeed, offsetHeading);
-		}
-		
-		mecanumDrive(drivePower, strafePower, rotation);
-	}
-	
-	public void mecanumDrive(double drivePower, double strafePower, double rotation) {
-		mecanumDrive(drivePower, strafePower, rotation, false);
+		// Initialize the poses for each predefined position
+		positionPoses.put(Position.CLOSE_SHOOT, new Pose(24, 48, Math.toRadians(45)));
+		positionPoses.put(Position.FAR_SHOOT, new Pose(72, 48, Math.toRadians(135)));
+		positionPoses.put(Position.HUMAN_PLAYER, new Pose(0, 72, Math.toRadians(90)));
+		positionPoses.put(Position.SECRET_TUNNEL, new Pose(120, 24, Math.toRadians(0)));
 	}
 	
 	/**
-	 * @noinspection EmptyMethod for now
+	 * This method MUST be called in the main loop of your OpMode to keep the
+	 * follower's internal state and localization updated.
+	 */
+	public void update() {
+		follower.update();
+		
+		// When an automated movement (GOTO or AIMING) is finished,
+		// automatically switch back to manual control.
+		if ((state == State.GOTO || state == State.AIMING) && !follower.isBusy()) {
+			switchToManual();
+		}
+	}
+	
+	/**
+	 * Implements mecanum drive using the PedroPathing Follower.
+	 *
+	 * @param drivePower   Forward/backward power (-1.0 to 1.0).
+	 * @param strafePower  Left/right strafe power (-1.0 to 1.0).
+	 * @param rotation     Rotational power (-1.0 to 1.0).
+	 * @param robotCentric True for robot-centric, false for field-centric.
+	 */
+	public void mecanumDrive(double drivePower, double strafePower, double rotation, boolean robotCentric) {
+		if (state != State.MANUAL) {
+			return; // Automation is handling driving, so ignore manual input.
+		}
+		// Gamepad inputs are typically inverted (up on stick is negative).
+		// The Follower expects a standard coordinate system (forward is positive).
+		follower.setTeleOpDrive(-drivePower, -strafePower, -rotation, robotCentric);
+	}
+	
+	/**
+	 * Overloaded mecanumDrive for robot-centric control by default.
+	 */
+	public void mecanumDrive(double drivePower, double strafePower, double rotation) {
+		mecanumDrive(drivePower, strafePower, rotation, true);
+	}
+	
+	/**
+	 * Moves the robot to correct for a given offset from a target (e.g., from an AprilTag).
+	 * This calculates a field-centric target pose based on the robot's current pose and
+	 * the robot-centric offsets, then creates and follows a path to it.
+	 *
+	 * @param offsetX       The robot's lateral offset from the target. Positive is to the right.
+	 * @param offsetY       The robot's forward offset from the target. Positive is in front.
+	 * @param offsetHeading The robot's heading offset from the target. Positive is clockwise.
+	 */
+	public void interpolateToOffset(double offsetX, double offsetY, double offsetHeading) {
+		this.state = State.AIMING;
+		Pose currentPose = follower.getPose();
+		double currentHeading = currentPose.getHeading();
+		
+		// We want to move by (-offsetX, -offsetY) in the robot's reference frame.
+		// Convert this robot-centric displacement into the field-centric frame.
+		double robotFrameDx = -offsetX;
+		double robotFrameDy = -offsetY;
+		
+		double fieldFrameDx = robotFrameDx * Math.cos(currentHeading) - robotFrameDy * Math.sin(currentHeading);
+		double fieldFrameDy = robotFrameDx * Math.sin(currentHeading) + robotFrameDy * Math.cos(currentHeading);
+		
+		// Calculate the absolute target pose in the field frame.
+		Pose targetPose = new Pose(
+				currentPose.getX() + fieldFrameDx,
+				currentPose.getY() + fieldFrameDy,
+				currentHeading - offsetHeading
+		);
+		
+		goTo(targetPose);
+	}
+	
+	/**
+	 * Commands the robot to follow a path to a predefined position.
+	 *
+	 * @param position The target position from the Position enum.
 	 */
 	public void goTo(Position position) {
-		// TODO automatic positions
+		Pose targetPose = positionPoses.get(position);
+		
+		if (targetPose == follower.getCurrentPath().endPose()) {
+			switchToManual();
+		}
+		if (targetPose != null) {
+			goTo(targetPose);
+		}
+	}
+	
+	/**
+	 * Commands the robot to follow a path to a specific field-centric pose.
+	 *
+	 * @param targetPose The absolute target pose.
+	 */
+	public void goTo(Pose targetPose) {
+		this.state = State.GOTO;
+		PathChain path = follower.pathBuilder()
+				.addPath(new Path(new BezierLine(follower::getPose, targetPose)))
+				.build();
+		follower.followPath(path);
+	}
+	
+	/**
+	 * Switches the drivetrain to manual (tele-op) control mode.
+	 * This will stop any active path following.
+	 */
+	public void switchToManual() {
+		this.state = State.MANUAL;
+		follower.startTeleopDrive();
+	}
+	
+	/**
+	 * @return The current state of the drivetrain (MANUAL, AIMING, GOTO).
+	 */
+	public State getState() {
+		return state;
+	}
+	
+	/**
+	 * @return true if the follower is busy following a path.
+	 */
+	public boolean isBusy() {
+		return follower.isBusy();
+	}
+	
+	/**
+	 * @return The robot's current estimated pose (x, y, heading) on the field.
+	 */
+	public Pose getPose() {
+		return follower.getPose();
 	}
 	
 	public enum Position {

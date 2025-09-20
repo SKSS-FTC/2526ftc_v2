@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.configuration;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.ftcontrol.panels.json.Point;
+import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.Controller;
 
@@ -37,6 +38,7 @@ public class Settings {
 			actionControlMap.put(Controller.Action.GOTO_FAR_SHOOT, Controller.Control.CROSS);
 			actionControlMap.put(Controller.Action.GOTO_HUMAN_PLAYER, Controller.Control.SQUARE);
 			actionControlMap.put(Controller.Action.GOTO_SECRET_TUNNEL, Controller.Control.TRIANGLE);
+			actionControlMap.put(Controller.Action.CANCEL_ASSISTED_DRIVING, Controller.Control.LEFT_STICK_BUTTON);
 			actionControlMap.put(Controller.Action.PARK_EXTEND, Controller.Control.START);
 			
 			// Secondary Controller Mapping
@@ -213,5 +215,8 @@ public class Settings {
 		public static final Point CLOSE_LAUNCH_ZONE_FRONT_CORNER = new Point(0, 0); // TODO tune
 		public static final Point CLOSE_LAUNCH_ZONE_LEFT_CORNER = new Point(0, 0); // TODO tune
 		public static final Point CLOSE_LAUNCH_ZONE_RIGHT_CORNER = new Point(0, 0); // TODO tune
+		
+		public static final Pose BLUE_ENDING_POSE = new Pose(0, 0, 0); // TODO TUNE
+		public static final Pose RED_ENDING_POSE = new Pose(0, 0, 0); // TODO TUNE
 	}
 }

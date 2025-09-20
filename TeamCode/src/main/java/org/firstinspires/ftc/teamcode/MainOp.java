@@ -53,7 +53,6 @@ public class MainOp extends LinearOpMode {
 			mechanisms.update();
 			
 			processControllerInputs();
-			
 			updateTelemetry();
 			
 			mainController.saveLastState();
@@ -95,6 +94,10 @@ public class MainOp extends LinearOpMode {
 				mechanisms.drivetrain.goTo(Drivetrain.Position.valueOf(action.name().substring("GOTO_".length())));
 				break; // only one goto action can be triggered at a time
 			}
+		}
+		
+		if (mainController.wasJustPressed(Controller.Action.CANCEL_ASSISTED_DRIVING)) {
+			mechanisms.drivetrain.switchToManual();
 		}
 		
 		//if (mainController.wasJustPressed(Controller.Action.PARK_EXTEND)) {
