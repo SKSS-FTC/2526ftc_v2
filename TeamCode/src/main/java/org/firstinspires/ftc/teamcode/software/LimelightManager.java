@@ -42,7 +42,7 @@ public class LimelightManager {
 		setCurrentPipeline(getPipelineFromColor(color));
 		currentResult = limelight.getLatestResult();
 		return currentResult.getTx() != 0 && currentResult.getTy() != 0
-				&& (Math.abs(currentResult.getTx()) < Settings.Limelight.limelightWindowSize);
+				&& (Math.abs(currentResult.getTx()) < Settings.Vision.LL_WINDOW_SIZE_DEGREES);
 	}
 	
 	public final Pipeline getPipelineFromColor(MatchSettings.ArtifactColor color) {

@@ -27,30 +27,30 @@ public class MechanismManager {
 	public MechanismManager(HardwareMap hardwareMap, MatchSettings matchSettings) {
 		drivetrain = new Drivetrain(hardwareMap);
 		
-		ColorSensor colorSensor = new ColorSensor(hardwareMap.get(RevColorSensorV3.class, Settings.Hardware.IDs.COLOR_SENSOR));
-		DcMotor intakeMotor = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.INTAKE_MOTOR);
+		ColorSensor colorSensor = new ColorSensor(hardwareMap.get(RevColorSensorV3.class, Settings.HardwareIDs.COLOR_SENSOR));
+		DcMotor intakeMotor = hardwareMap.get(DcMotor.class, Settings.HardwareIDs.INTAKE_MOTOR);
 		Servo[] intakeServoArray = new Servo[4];
 		for (int i = 0; i < 4; i++) {
-			intakeServoArray[i] = hardwareMap.get(Servo.class, Settings.Hardware.IDs.INTAKE_SERVO_ARRAY[i]);
+			intakeServoArray[i] = hardwareMap.get(Servo.class, Settings.HardwareIDs.INTAKE_SERVO_ARRAY[i]);
 		}
 		
 		intake = new Intake(intakeMotor, intakeServoArray, colorSensor);
 		
-		limelightManager = new LimelightManager(hardwareMap.get(Limelight3A.class, Settings.Hardware.IDs.LIMELIGHT), matchSettings);
-		GoBildaPinpointDriver pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, Settings.Hardware.IDs.PINPOINT);
+		limelightManager = new LimelightManager(hardwareMap.get(Limelight3A.class, Settings.HardwareIDs.LIMELIGHT), matchSettings);
+		GoBildaPinpointDriver pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, Settings.HardwareIDs.PINPOINT);
 		trajectoryEngine = new TrajectoryEngine(limelightManager, pinpoint, matchSettings);
 		alignmentEngine = new AlignmentEngine(matchSettings, drivetrain, limelightManager, pinpoint);
 		
-		Servo spindexServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.SPINDEX_SERVO);
-		Servo launcherTransferServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.LAUNCHER_TRANSFER_SERVO);
-		ColorSensor spindexColorSensor = new ColorSensor(hardwareMap.get(RevColorSensorV3.class, Settings.Hardware.IDs.SPINDEX_COLOR_SENSOR));
-		Servo intakeTransferServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.INTAKE_TRANSFER_SERVO);
+		Servo spindexServo = hardwareMap.get(Servo.class, Settings.HardwareIDs.SPINDEX_SERVO);
+		Servo launcherTransferServo = hardwareMap.get(Servo.class, Settings.HardwareIDs.LAUNCHER_TRANSFER_SERVO);
+		ColorSensor spindexColorSensor = new ColorSensor(hardwareMap.get(RevColorSensorV3.class, Settings.HardwareIDs.SPINDEX_COLOR_SENSOR));
+		Servo intakeTransferServo = hardwareMap.get(Servo.class, Settings.HardwareIDs.INTAKE_TRANSFER_SERVO);
 		spindex = new Spindex(spindexServo, launcherTransferServo, intakeTransferServo, spindexColorSensor, matchSettings);
 		
-		DcMotor launcherLauncherRight = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.LAUNCHER_LAUNCHER_RIGHT);
-		DcMotor launcherLauncherLeft = hardwareMap.get(DcMotor.class, Settings.Hardware.IDs.LAUNCHER_LAUNCHER_LEFT);
-		Servo horizontalServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.LAUNCHER_HORIZONTAL_SERVO);
-		Servo verticalServo = hardwareMap.get(Servo.class, Settings.Hardware.IDs.LAUNCHER_VERTICAL_SERVO);
+		DcMotor launcherLauncherRight = hardwareMap.get(DcMotor.class, Settings.HardwareIDs.LAUNCHER_LAUNCHER_RIGHT);
+		DcMotor launcherLauncherLeft = hardwareMap.get(DcMotor.class, Settings.HardwareIDs.LAUNCHER_LAUNCHER_LEFT);
+		Servo horizontalServo = hardwareMap.get(Servo.class, Settings.HardwareIDs.LAUNCHER_HORIZONTAL_SERVO);
+		Servo verticalServo = hardwareMap.get(Servo.class, Settings.HardwareIDs.LAUNCHER_VERTICAL_SERVO);
 		launcher = new Launcher(spindex, launcherLauncherRight, launcherLauncherLeft, horizontalServo, verticalServo, trajectoryEngine);
 	}
 	

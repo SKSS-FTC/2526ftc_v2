@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Intake.SPEED;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
-import org.firstinspires.ftc.teamcode.configuration.Settings;
 
 public class Intake {
 	public final DcMotor intakeMotor;
@@ -23,11 +24,11 @@ public class Intake {
 	}
 	
 	public void in() {
-		intakeMotor.setPower(Settings.Hardware.Intake.SPEED);
+		intakeMotor.setPower(SPEED);
 	}
 	
 	public void out() {
-		intakeMotor.setPower(-Settings.Hardware.Intake.SPEED);
+		intakeMotor.setPower(-SPEED);
 	}
 	
 	public void stop() {

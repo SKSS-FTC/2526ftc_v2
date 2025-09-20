@@ -29,10 +29,10 @@ public class Constants {
 			.drivePIDFCoefficients(new FilteredPIDFCoefficients(0.1, 0, 0, 0.6, 0));
 	
 	public static final MecanumConstants driveConstants = new MecanumConstants()
-			.leftFrontMotorName(Settings.Hardware.IDs.FRONT_LEFT_MOTOR)
-			.leftRearMotorName(Settings.Hardware.IDs.REAR_LEFT_MOTOR)
-			.rightFrontMotorName(Settings.Hardware.IDs.FRONT_RIGHT_MOTOR)
-			.rightRearMotorName(Settings.Hardware.IDs.REAR_RIGHT_MOTOR)
+			.leftFrontMotorName(Settings.HardwareIDs.FRONT_LEFT_MOTOR)
+			.leftRearMotorName(Settings.HardwareIDs.REAR_LEFT_MOTOR)
+			.rightFrontMotorName(Settings.HardwareIDs.FRONT_RIGHT_MOTOR)
+			.rightRearMotorName(Settings.HardwareIDs.REAR_RIGHT_MOTOR)
 			.leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
 			.leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
 			.rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
@@ -48,9 +48,9 @@ public class Constants {
 					.leftPodY(1)
 					.rightPodY(-1)
 					.strafePodX(-2.5)
-					.leftEncoder_HardwareMapName(Settings.Hardware.IDs.REAR_LEFT_MOTOR)
-					.rightEncoder_HardwareMapName(Settings.Hardware.IDs.REAR_RIGHT_MOTOR)
-					.strafeEncoder_HardwareMapName(Settings.Hardware.IDs.FRONT_RIGHT_MOTOR)
+					.leftEncoder_HardwareMapName(Settings.HardwareIDs.REAR_LEFT_MOTOR)
+					.rightEncoder_HardwareMapName(Settings.HardwareIDs.REAR_RIGHT_MOTOR)
+					.strafeEncoder_HardwareMapName(Settings.HardwareIDs.FRONT_RIGHT_MOTOR)
 					.leftEncoderDirection(Encoder.REVERSE)
 					.rightEncoderDirection(Encoder.REVERSE)
 					.strafeEncoderDirection(Encoder.FORWARD);

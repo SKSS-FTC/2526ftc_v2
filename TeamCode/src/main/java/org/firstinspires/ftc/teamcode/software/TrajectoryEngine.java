@@ -50,11 +50,11 @@ public class TrajectoryEngine {
 		// 3. Define the TARGET's fixed world coordinates from a settings file.
 		// This is a much more reliable approach than calculating from camera depth.
 		double targetX = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.RED)
-				? Settings.Positions.RED_GOAL_CENTER_X
-				: Settings.Positions.BLUE_GOAL_CENTER_X;
+				? Settings.Field.RED_GOAL_CENTER_X
+				: Settings.Field.BLUE_GOAL_CENTER_X;
 		double targetY = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.RED)
-				? Settings.Positions.RED_GOAL_CENTER_Y
-				: Settings.Positions.BLUE_GOAL_CENTER_Y;
+				? Settings.Field.RED_GOAL_CENTER_Y
+				: Settings.Field.BLUE_GOAL_CENTER_Y;
 		
 		// 4. Calculate the vector from the robot to the target in the world frame
 		double dx = targetX - robotPose.getX(DistanceUnit.INCH);
@@ -66,9 +66,9 @@ public class TrajectoryEngine {
 		double yawRelative = normalizeAngle(yawWorld - robotPose.getHeading(AngleUnit.RADIANS));
 		
 		// 6. Calculate the required launcher pitch using ballistic equations
-		double h = Settings.Aiming.goalHeight - Settings.Aiming.muzzleHeight;
-		double v = Settings.Aiming.muzzleSpeed;
-		double g = Settings.Aiming.gravity;
+		double h = Settings.Aiming.GOAL_HEIGHT - Settings.Aiming.MUZZLE_HEIGHT;
+		double v = Settings.Aiming.MUZZLE_SPEED;
+		double g = Settings.Aiming.GRAVITY;
 		
 		double discriminant = (v * v * v * v) - g * (g * d * d + 2 * h * v * v);
 		

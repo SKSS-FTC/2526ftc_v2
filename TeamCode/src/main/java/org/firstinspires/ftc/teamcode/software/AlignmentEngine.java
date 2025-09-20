@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.software;
 
-import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.CLOSE_LAUNCH_ZONE_FRONT_CORNER;
-import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.CLOSE_LAUNCH_ZONE_LEFT_CORNER;
-import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.CLOSE_LAUNCH_ZONE_RIGHT_CORNER;
-import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.FAR_LAUNCH_ZONE_FRONT_CORNER;
-import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.FAR_LAUNCH_ZONE_LEFT_CORNER;
-import static org.firstinspires.ftc.teamcode.configuration.Settings.Positions.FAR_LAUNCH_ZONE_RIGHT_CORNER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.CLOSE_LAUNCH_ZONE_FRONT_CORNER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.CLOSE_LAUNCH_ZONE_LEFT_CORNER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.CLOSE_LAUNCH_ZONE_RIGHT_CORNER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LAUNCH_ZONE_FRONT_CORNER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LAUNCH_ZONE_LEFT_CORNER;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LAUNCH_ZONE_RIGHT_CORNER;
 
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;

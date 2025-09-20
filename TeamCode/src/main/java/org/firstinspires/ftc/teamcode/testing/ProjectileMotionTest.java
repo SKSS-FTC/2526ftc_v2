@@ -36,8 +36,8 @@ public class ProjectileMotionTest extends LinearOpMode {
 	@Override
 	public final void runOpMode() {
 		// --- Motor Initialization ---
-		rightLauncherMotor = hardwareMap.get(DcMotorEx.class, Settings.Hardware.IDs.LAUNCHER_LAUNCHER_RIGHT);
-		leftLauncherMotor = hardwareMap.get(DcMotorEx.class, Settings.Hardware.IDs.LAUNCHER_LAUNCHER_LEFT);
+		rightLauncherMotor = hardwareMap.get(DcMotorEx.class, Settings.HardwareIDs.LAUNCHER_LAUNCHER_RIGHT);
+		leftLauncherMotor = hardwareMap.get(DcMotorEx.class, Settings.HardwareIDs.LAUNCHER_LAUNCHER_LEFT);
 		
 		rightLauncherMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		leftLauncherMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

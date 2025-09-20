@@ -1,11 +1,18 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
-import static org.firstinspires.ftc.teamcode.configuration.Settings.Hardware.Spindex.TOLERANCE;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Spindex.EJECT_EXIT_TIME_MS;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Spindex.EXIT_OFFSET;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Spindex.EXIT_SERVO_CLOSED_POSITION;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Spindex.EXIT_SERVO_OPEN_POSITION;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Spindex.INTAKE_SERVO_CLOSED_POSITION;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Spindex.INTAKE_SERVO_OPEN_POSITION;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Spindex.RAPID_FIRE_COOLDOWN_MS;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Spindex.SLOT_INTAKE_POSITIONS;
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Spindex.TOLERANCE;
 
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
-import org.firstinspires.ftc.teamcode.configuration.Settings;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -48,9 +55,9 @@ public class Spindex {
 		this.matchSettings = matchSettings;
 		
 		for (int i = 0; i < 3; i++) {
-			slotIntakePositions[i] = wrapServo(Settings.Hardware.Spindex.SLOT_INTAKE_POSITIONS[i]);
+			slotIntakePositions[i] = wrapServo(SLOT_INTAKE_POSITIONS[i]);
 		}
-		this.exitOffset = wrapServo(Settings.Hardware.Spindex.EXIT_OFFSET);
+		this.exitOffset = wrapServo(EXIT_OFFSET);
 		this.intakeOffset = wrapServo(this.exitOffset + 0.5); // Intake is 180 degrees from exit
 		
 		Arrays.fill(slots, MatchSettings.ArtifactColor.UNKNOWN);
@@ -166,7 +173,7 @@ public class Spindex {
 	}
 	
 	void openIntakeSeal() {
-		intakeSealServo.setPosition(Settings.Hardware.Spindex.INTAKE_SERVO_OPEN_POSITION);
+		intakeSealServo.setPosition(INTAKE_SERVO_OPEN_POSITION);
 	}
 	
 	// Add this public method to your Spindex class
@@ -215,15 +222,15 @@ public class Spindex {
 		
 		// Only proceed if a slot is actually aligned at the exit
 		if (slot != null) {
-			exitSealServo.setPosition(Settings.Hardware.Spindex.EXIT_SERVO_OPEN_POSITION);
+			exitSealServo.setPosition(EXIT_SERVO_OPEN_POSITION);
 			slots[slot] = MatchSettings.ArtifactColor.UNKNOWN;
 			lastActionTimeMs = System.currentTimeMillis();
 		}
 	}
 	
 	void closeBothSeals() {
-		exitSealServo.setPosition(Settings.Hardware.Spindex.EXIT_SERVO_CLOSED_POSITION);
-		intakeSealServo.setPosition(Settings.Hardware.Spindex.INTAKE_SERVO_CLOSED_POSITION);
+		exitSealServo.setPosition(EXIT_SERVO_CLOSED_POSITION);
+		intakeSealServo.setPosition(INTAKE_SERVO_CLOSED_POSITION);
 	}
 	
 	public boolean isAtTarget(double targetPosition) {
@@ -390,7 +397,7 @@ abstract class Command {
 				case SEALING:
 					spindex.closeBothSeals();
 					// Wait for eject cooldown before moving.
-					if (System.currentTimeMillis() - spindex.lastActionTimeMs > Settings.Hardware.Spindex.EJECT_EXIT_TIME_MS) {
+					if (System.currentTimeMillis() - spindex.lastActionTimeMs > EJECT_EXIT_TIME_MS) {
 						state = State.ROTATING;
 					}
 					break;
@@ -450,7 +457,7 @@ abstract class Command {
 			switch (state) {
 				case SEALING:
 					spindex.closeBothSeals();
-					if (System.currentTimeMillis() - spindex.lastActionTimeMs > Settings.Hardware.Spindex.EJECT_EXIT_TIME_MS) {
+					if (System.currentTimeMillis() - spindex.lastActionTimeMs > EJECT_EXIT_TIME_MS) {
 						state = State.ROTATING;
 					}
 					break;
@@ -467,7 +474,7 @@ abstract class Command {
 					break;
 				case FIRING:
 					// Wait for rapid-fire cooldown
-					if (System.currentTimeMillis() - spindex.lastActionTimeMs > Settings.Hardware.Spindex.RAPID_FIRE_COOLDOWN_MS) {
+					if (System.currentTimeMillis() - spindex.lastActionTimeMs > RAPID_FIRE_COOLDOWN_MS) {
 						spindex.ejectBallAtExit(); // This also updates lastActionTimeMs
 						targetQueue.poll(); // Fired, so remove from queue.
 						state = State.ROTATING; // Go back to rotating for the next target
@@ -501,7 +508,7 @@ abstract class Command {
 				case READY_TO_FIRE:
 					// Only fire if the correct artifact is at the exit AND cooldown has passed.
 					if (spindex.isNextArtifactAtExit() &&
-							(System.currentTimeMillis() - spindex.lastActionTimeMs > Settings.Hardware.Spindex.RAPID_FIRE_COOLDOWN_MS)) {
+							(System.currentTimeMillis() - spindex.lastActionTimeMs > RAPID_FIRE_COOLDOWN_MS)) {
 						spindex.ejectBallAtExit(); // Perform the action
 					}
 					// This command is "fire-and-forget". It finishes on the first cycle
@@ -564,7 +571,7 @@ abstract class Command {
 					case SEALING:
 						// Step 2: Ensure seals are closed and wait for any eject cooldown
 						spindex.closeBothSeals();
-						if (System.currentTimeMillis() - spindex.lastActionTimeMs > Settings.Hardware.Spindex.EJECT_EXIT_TIME_MS) {
+						if (System.currentTimeMillis() - spindex.lastActionTimeMs > EJECT_EXIT_TIME_MS) {
 							state = State.ROTATING;
 						}
 						break;
