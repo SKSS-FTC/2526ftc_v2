@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.atlas;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -14,7 +15,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import static java.lang.Math.*;
 
-public class Chassis {
+import java.lang.reflect.Parameter;
+
+public class AtlasChassis {
     public DcMotorEx backLeft, backRight, frontLeft, frontRight;
     public IMU imu;
     public AtlasPose pose;
@@ -35,7 +38,7 @@ public class Chassis {
 
     public static final double RAD_TO_DEG = 180.0 / Math.PI;
 
-    public Chassis(HardwareMap hardwareMap) {
+    public AtlasChassis(HardwareMap hardwareMap) {
         backLeft = getDcMotorEx(hardwareMap, "rearLeft");
         backRight = getDcMotorEx(hardwareMap, "rearRight");
         frontLeft = getDcMotorEx(hardwareMap, "frontLeft");
@@ -49,6 +52,12 @@ public class Chassis {
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        imu.initialize(new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
+                        RevHubOrientationOnRobot.UsbFacingDirection.UP
+                ))
+        );
         imu.resetYaw();
     }
 
@@ -61,8 +70,8 @@ public class Chassis {
 
     public void moveFieldRelative(double x, double y, double rx) {
         double yaw = yawRads + fieldRelativeOffset;
-        double rotX = x * cos(-yaw) - y * sin(-yaw);
-        double rotY = x * sin(-yaw) + y * cos(-yaw);
+        double rotX = x * sin(yaw) + y * cos(yaw);
+        double rotY = x * cos(yaw) - y * sin(yaw);
         movePower(rotX, rotY, rx);
     }
 
