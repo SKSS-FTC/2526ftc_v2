@@ -15,9 +15,8 @@ public class MatchConfigurationWizard {
 	private final Gamepad gamepad1;
 	private final Telemetry telemetry;
 	
-	// Track previous button states for edge detection
-	private boolean lastDpadUp = false;
-	private boolean lastDpadDown = false;
+	public boolean confirmed = false;
+	
 	
 	/**
 	 * Creates a new MatchConfigurationWizard
@@ -37,21 +36,29 @@ public class MatchConfigurationWizard {
 	 */
 	public void refresh() {
 		// Detect rising edge of dpad_up (just pressed)
-		if (gamepad1.dpad_up && !lastDpadUp) {
+		if (gamepad1.dpadUpWasPressed()) {
 			matchSettings.setAllianceColor(MatchSettings.AllianceColor.BLUE);
 		}
 		
 		// Detect rising edge of dpad_down (just pressed)
-		if (gamepad1.dpad_down && !lastDpadDown) {
+		if (gamepad1.dpadDownWasPressed()) {
 			matchSettings.setAllianceColor(MatchSettings.AllianceColor.RED);
+		}
+		
+		if (gamepad1.dpadLeftWasPressed()) {
+			matchSettings.setAutoStartingPosition(MatchSettings.AutoStartingPosition.CLOSE);
+		}
+		
+		if (gamepad1.dpadRightWasPressed()) {
+			matchSettings.setAutoStartingPosition(MatchSettings.AutoStartingPosition.FAR);
+		}
+		
+		if (gamepad1.crossWasPressed()) {
+			confirmed = !confirmed;
 		}
 		
 		// Update telemetry display
 		updateTelemetry();
-		
-		// Save current button states for next iteration
-		lastDpadUp = gamepad1.dpad_up;
-		lastDpadDown = gamepad1.dpad_down;
 	}
 	
 	/**
@@ -59,21 +66,32 @@ public class MatchConfigurationWizard {
 	 */
 	private void updateTelemetry() {
 		MatchSettings.AllianceColor currentColor = matchSettings.getAllianceColor();
+		MatchSettings.AutoStartingPosition autoStartingPosition = matchSettings.getAutoStartingPosition();
 		
-		telemetry.addLine("=== MATCH CONFIGURATION ===");
-		telemetry.addLine("");
-		telemetry.addData("Alliance Color", currentColor.toString());
-		telemetry.addLine("");
-		telemetry.addLine("Controls:");
-		telemetry.addLine("  D-Pad UP   → BLUE Alliance");
-		telemetry.addLine("  D-Pad DOWN → RED Alliance");
-		telemetry.addLine("");
-		
-		// Visual indicator
-		if (currentColor == MatchSettings.AllianceColor.BLUE) {
-			telemetry.addLine("🔵 BLUE Alliance Selected");
+		if (!confirmed) {
+			telemetry.addLine("=== MATCH CONFIGURATION ===");
+			telemetry.addLine("  D-Pad UP    → BLUE Alliance");
+			telemetry.addLine("  D-Pad DOWN  → RED Alliance");
+			telemetry.addLine("  D-Pad LEFT  → Close Starting Position");
+			telemetry.addLine("  D-Pad RIGHT → Far Starting Position");
+			telemetry.addLine("  CROSS       → Confirm Configuration");
 		} else {
-			telemetry.addLine("🔴 RED Alliance Selected");
+			telemetry.addLine("=== CONFIGURATION CONFIRMED ===");
+			telemetry.addLine("❎ Press cross to cancel");
+		}
+		
+		telemetry.addLine("");
+		
+		if (currentColor == MatchSettings.AllianceColor.BLUE) {
+			telemetry.addLine("\uD83D\uDD35 BLUE Alliance Selected");
+		} else {
+			telemetry.addLine("\uD83D\uDD34 RED Alliance Selected");
+		}
+		
+		if (autoStartingPosition == MatchSettings.AutoStartingPosition.CLOSE) {
+			telemetry.addLine("\uD83D\uDD0D Close Starting Position Selected");
+		} else {
+			telemetry.addLine("\uD83D\uDD2D Far Starting Position Selected");
 		}
 		
 		telemetry.update();

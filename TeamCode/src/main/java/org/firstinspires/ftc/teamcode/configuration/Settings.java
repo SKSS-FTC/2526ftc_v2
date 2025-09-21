@@ -14,39 +14,6 @@ import java.util.EnumMap;
  */
 @Configurable
 public class Settings {
-	
-	/**
-	 * Contains all settings for the autonomous period.
-	 * P_ prefixes denote Pose objects (for coordinates).
-	 * H_ prefixes denote Heading values in radians.
-	 */
-	@Configurable
-	public static class Autonomous {
-		// The robot's starting position and orientation on the field.
-		public static final Pose START_POSE = new Pose(65.533, 12.244, Math.toRadians(115));
-		
-		// Path Waypoints (Poses are used for x, y coordinates)
-		public static final Pose P_START = new Pose(65.533, 12.244);
-		public static final Pose P_WAYPOINT_1 = new Pose(35.526, 28.455);
-		public static final Pose P_PRELOAD_1_PICKUP = new Pose(18.453, 28.628);
-		public static final Pose P_SCORE_1_APPROACH = new Pose(64.671, 44.493);
-		public static final Pose P_SCORE_1 = new Pose(63.808, 69.499);
-		public static final Pose P_WAYPOINT_2 = new Pose(38.802, 54.668);
-		public static final Pose P_PRELOAD_2_PICKUP = new Pose(18.970, 54.496);
-		public static final Pose P_SCORE_2 = new Pose(52.081, 80.364);
-		public static final Pose P_PRELOAD_3_PICKUP = new Pose(19.143, 80.019);
-		public static final Pose P_SCORE_3 = new Pose(40.354, 92.091);
-		
-		// Path Headings (in radians for the pathing library)
-		public static final double H_START = Math.toRadians(115);
-		public static final double H_PRELOAD_1 = Math.toRadians(180);
-		public static final double H_SCORE_1 = Math.toRadians(130);
-		public static final double H_PRELOAD_2 = Math.toRadians(180);
-		public static final double H_SCORE_2 = Math.toRadians(135);
-		public static final double H_PRELOAD_3 = Math.toRadians(180);
-		public static final double H_SCORE_3 = Math.toRadians(126);
-	}
-	
 	/**
 	 * Maps controller inputs to robot actions for TeleOp.
 	 */
@@ -225,8 +192,6 @@ public class Settings {
 		public static final Pose CLOSE_LAUNCH_ZONE_LEFT_CORNER = new Pose(0, 0); // TODO tune
 		public static final Pose CLOSE_LAUNCH_ZONE_RIGHT_CORNER = new Pose(0, 0); // TODO tune
 		
-		public static final Pose BLUE_ENDING_POSE = new Pose(0, 0, 0); // TODO TUNE
-		public static final Pose RED_ENDING_POSE = new Pose(0, 0, 0); // TODO TUNE
 	}
 	
 	/**
@@ -239,5 +204,72 @@ public class Settings {
 		public static final boolean SPINDEX = true;
 		public static final boolean AUTOMATIONS = true;
 	}
+	
+	// A static class to hold all pose constants for organization.
+	public static class Autonomous {
+		// TODO TUNE ALL
+		// Headings are in radians. 90 degrees = Math.toRadians(90)
+		
+		// Poses for the FAR side of the field, RED alliance
+		public static class RedFar {
+			public static final Pose START = new Pose(12, 60, Math.toRadians(90));
+			public static final Pose WAYPOINT_1 = new Pose(24, 24, Math.toRadians(90));
+			public static final Pose PRELOAD_1_PICKUP = new Pose(12, 12, Math.toRadians(135));
+			public static final Pose SCORE_1_APPROACH = new Pose(36, 12, Math.toRadians(0));
+			public static final Pose SCORE_1 = new Pose(48, 36, Math.toRadians(0));
+			public static final Pose WAYPOINT_2 = new Pose(24, 12, Math.toRadians(180));
+			public static final Pose PRELOAD_2_PICKUP = new Pose(-24, 12, Math.toRadians(180));
+			public static final Pose SCORE_2 = new Pose(48, 36, Math.toRadians(0));
+			public static final Pose PRELOAD_3_PICKUP = new Pose(-48, 12, Math.toRadians(180));
+			public static final Pose SCORE_3 = new Pose(48, 36, Math.toRadians(0));
+		}
+		
+		// Poses for the FAR side of the field, BLUE alliance
+		// TODO These are currently mirrored from the RED values.
+		public static class BlueFar {
+			public static final Pose START = new Pose(132, 60, Math.toRadians(90));
+			public static final Pose WAYPOINT_1 = new Pose(120, 24, Math.toRadians(90));
+			public static final Pose PRELOAD_1_PICKUP = new Pose(132, 12, Math.toRadians(45));
+			public static final Pose SCORE_1_APPROACH = new Pose(108, 12, Math.toRadians(180));
+			public static final Pose SCORE_1 = new Pose(96, 36, Math.toRadians(180));
+			public static final Pose WAYPOINT_2 = new Pose(120, 12, Math.toRadians(0));
+			public static final Pose PRELOAD_2_PICKUP = new Pose(168, 12, Math.toRadians(0));
+			public static final Pose SCORE_2 = new Pose(96, 36, Math.toRadians(180));
+			public static final Pose PRELOAD_3_PICKUP = new Pose(192, 12, Math.toRadians(0));
+			public static final Pose SCORE_3 = new Pose(96, 36, Math.toRadians(180));
+		}
+		
+		// Poses for the CLOSE side of the field, RED alliance
+		// These are filler values and will need to be tuned.
+		public static class RedClose {
+			// Start near the backdrop, facing forward.
+			public static final Pose START = new Pose(12, -60, Math.toRadians(90));
+			// Position for the center spike mark.
+			public static final Pose SPIKE_MARK_CENTER = new Pose(12, -34, Math.toRadians(90));
+			// Scoring position on the backdrop. Robot is flush, facing left.
+			public static final Pose BACKDROP_SCORE = new Pose(48, -36, Math.toRadians(180));
+			// A middle waypoint to help navigate under the stage truss.
+			public static final Pose WAYPOINT_CENTER = new Pose(24, -12, Math.toRadians(180));
+			// Position to pick up pixels from the stack across the field.
+			public static final Pose STACK_PICKUP = new Pose(-58, -12, Math.toRadians(180));
+			// Parking position in the corner.
+			public static final Pose PARK_CORNER = new Pose(50, -60, Math.toRadians(180));
+		}
+		
+		// TODO These values are mirrored from the RedClose class.
+		public static class BlueClose {
+			// Start near the backdrop, facing forward.
+			public static final Pose START = new Pose(-12, -60, Math.toRadians(90));
+			// Position for the center spike mark.
+			public static final Pose SPIKE_MARK_CENTER = new Pose(-12, -34, Math.toRadians(90));
+			// Scoring position on the backdrop. Robot is flush, facing right.
+			public static final Pose BACKDROP_SCORE = new Pose(-48, -36, Math.toRadians(0));
+			// A middle waypoint to help navigate under the stage truss.
+			public static final Pose WAYPOINT_CENTER = new Pose(-24, -12, Math.toRadians(0));
+			// Position to pick up pixels from the stack across the field.
+			public static final Pose STACK_PICKUP = new Pose(58, -12, Math.toRadians(0));
+			// Parking position in the corner.
+			public static final Pose PARK_CORNER = new Pose(-50, -60, Math.toRadians(0));
+		}
+	}
 }
-

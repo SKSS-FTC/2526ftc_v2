@@ -12,6 +12,7 @@ import java.util.Objects;
 public class MatchSettings {
 	private static final String CLASSIFIER_STATE_KEY = "classifierState";
 	private static final String MOTIF_KEY = "motif";
+	private static final String AUTO_KEY = "autoStartingPosition";
 	private static final String ALLIANCE_COLOR_KEY = "allianceColor";
 	private final HashMap<String, Object> blackboard;
 	
@@ -61,6 +62,17 @@ public class MatchSettings {
 	public void setAllianceColor(AllianceColor color) {
 		if (color != null) {
 			blackboard.put(ALLIANCE_COLOR_KEY, color.name().toLowerCase());
+		}
+	}
+	
+	public AutoStartingPosition getAutoStartingPosition() {
+		String position = (String) blackboard.get(AUTO_KEY);
+		return Objects.equals(position, "close") ? AutoStartingPosition.CLOSE : AutoStartingPosition.FAR;
+	}
+	
+	public void setAutoStartingPosition(AutoStartingPosition position) {
+		if (position != null) {
+			blackboard.put(AUTO_KEY, position.name().toLowerCase());
 		}
 	}
 	
@@ -153,6 +165,11 @@ public class MatchSettings {
 		RED,
 		BLUE,
 		UNKNOWN
+	}
+	
+	public enum AutoStartingPosition {
+		CLOSE,
+		FAR
 	}
 	
 	public enum ArtifactColor {
