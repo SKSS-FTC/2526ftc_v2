@@ -20,7 +20,7 @@ public class FreeRide implements Command {
         double y = robot.input.getYInput();
         double x = robot.input.getXInput();
         double rx = robot.input.getRxInput();
-        robot.mecanumDrive.drive(y, x, rx, Math.sin(robot.imu.getYaw()), Math.cos(robot.imu.getYaw()));
+        robot.mecanumDrive.drive(y, x, rx);
     }
 
     @Override
@@ -30,6 +30,6 @@ public class FreeRide implements Command {
 
     @Override
     public void end() {
-        robot.mecanumDrive.drive(0, 0, 0, 0, 0);
+        robot.mecanumDrive.drive(0, 0, 0);
     }
 }

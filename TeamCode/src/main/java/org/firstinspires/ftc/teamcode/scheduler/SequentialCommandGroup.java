@@ -1,6 +1,4 @@
-package org.firstinspires.ftc.teamcode.command.logic;
-
-import org.firstinspires.ftc.teamcode.scheduler.Command;
+package org.firstinspires.ftc.teamcode.scheduler;
 
 import java.util.ArrayList;
 import java.util.List;

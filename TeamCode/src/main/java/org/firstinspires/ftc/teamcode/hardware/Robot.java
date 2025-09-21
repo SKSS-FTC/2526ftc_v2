@@ -39,7 +39,7 @@ public class Robot {
                 imu
         );
 
-        input = new Drive(gamepad1);
+        input = new Drive(gamepad1, imu);
 
 
     }

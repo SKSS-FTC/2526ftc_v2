@@ -8,6 +8,10 @@ public class MecanumDrive {
     private final DcMotorEx lb;
     private final DcMotorEx rf;
     private final DcMotorEx rb;
+    private double last_front_left = 0;
+    private double last_front_right = 0;
+    private double last_back_left = 0;
+    private double last_back_right = 0;
 
     public MecanumDrive(DcMotorEx lf, DcMotorEx lb, DcMotorEx rf, DcMotorEx rb){
         this.lb = lb;
@@ -21,22 +25,24 @@ public class MecanumDrive {
         rb.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-        public void drive(double y, double x, double rot, double sin, double cos){
-            double last_front_left = 0;
-            double last_front_right = 0;
-            double last_back_left = 0;
-            double last_back_right = 0;
-            double threshold = 0.02;
+        public void drive(double y, double x, double rot){
+            double threshold = 0.005;
 
-            double x_field = x * cos - y * sin;
-            double y_field = x * sin + y * cos;
+            double front_left  = y + x + rot;
+            double front_right = y - x - rot;
+            double back_left   = y - x + rot;
+            double back_right  = y + x - rot;
 
-            double denominator = Math.max(Math.abs(y_field) + Math.abs(x_field) + Math.abs(rot), 1);
+            double max = Math.max(1.0, Math.max(
+                    Math.abs(front_left),
+                    Math.max(Math.abs(front_right),
+                            Math.max(Math.abs(back_left), Math.abs(back_right)))
+            ));
 
-            double front_left = (y_field + x_field + rot) / denominator;
-            double front_right = (y_field - x_field - rot) / denominator;
-            double back_left = (y_field - x_field + rot) / denominator;
-            double back_right = (y_field + x_field - rot) / denominator;
+            front_left  /= max;
+            front_right /= max;
+            back_left   /= max;
+            back_right  /= max;
 
             if (Math.abs(front_left - last_front_left) > threshold) {
                 lf.setPower(front_left);
