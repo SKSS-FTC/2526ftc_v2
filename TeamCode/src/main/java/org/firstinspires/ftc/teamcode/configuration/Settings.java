@@ -97,8 +97,8 @@ public class Settings {
 		
 		// Subsystem motors and servos
 		public static final String INTAKE_MOTOR = "intakeMotor";
-		public static final String LAUNCHER_LAUNCHER_RIGHT = "launcherLauncherRight";
-		public static final String LAUNCHER_LAUNCHER_LEFT = "launcherLauncherLeft";
+		public static final String LAUNCHER_RIGHT = "launcherRight";
+		public static final String LAUNCHER_LEFT = "launcherLeft";
 		public static final String[] INTAKE_SERVO_ARRAY = {"intakeServoLowerLeft", "intakeServoLowerRight", "intakeServoUpperLeft", "intakeServoUpperRight"};
 		public static final String LAUNCHER_TRANSFER_SERVO = "launcherTransferServo";
 		public static final String INTAKE_TRANSFER_SERVO = "intakeTransferServo";

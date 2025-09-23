@@ -47,8 +47,8 @@ public class MechanismManager {
 		Servo intakeTransferServo = hardwareMap.get(Servo.class, Settings.HardwareIDs.INTAKE_TRANSFER_SERVO);
 		spindex = new Spindex(spindexServo, launcherTransferServo, intakeTransferServo, spindexColorSensor, matchSettings);
 		
-		DcMotor launcherLauncherRight = hardwareMap.get(DcMotor.class, Settings.HardwareIDs.LAUNCHER_LAUNCHER_RIGHT);
-		DcMotor launcherLauncherLeft = hardwareMap.get(DcMotor.class, Settings.HardwareIDs.LAUNCHER_LAUNCHER_LEFT);
+		DcMotor launcherLauncherRight = hardwareMap.get(DcMotor.class, Settings.HardwareIDs.LAUNCHER_RIGHT);
+		DcMotor launcherLauncherLeft = hardwareMap.get(DcMotor.class, Settings.HardwareIDs.LAUNCHER_LEFT);
 		Servo horizontalServo = hardwareMap.get(Servo.class, Settings.HardwareIDs.LAUNCHER_HORIZONTAL_SERVO);
 		Servo verticalServo = hardwareMap.get(Servo.class, Settings.HardwareIDs.LAUNCHER_VERTICAL_SERVO);
 		launcher = new Launcher(spindex, launcherLauncherRight, launcherLauncherLeft, horizontalServo, verticalServo, trajectoryEngine);

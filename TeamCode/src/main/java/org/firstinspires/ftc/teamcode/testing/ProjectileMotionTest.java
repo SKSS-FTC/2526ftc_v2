@@ -36,8 +36,8 @@ public class ProjectileMotionTest extends LinearOpMode {
 	@Override
 	public final void runOpMode() {
 		// --- Motor Initialization ---
-		rightLauncherMotor = hardwareMap.get(DcMotorEx.class, Settings.HardwareIDs.LAUNCHER_LAUNCHER_RIGHT);
-		leftLauncherMotor = hardwareMap.get(DcMotorEx.class, Settings.HardwareIDs.LAUNCHER_LAUNCHER_LEFT);
+		rightLauncherMotor = hardwareMap.get(DcMotorEx.class, Settings.HardwareIDs.LAUNCHER_RIGHT);
+		leftLauncherMotor = hardwareMap.get(DcMotorEx.class, Settings.HardwareIDs.LAUNCHER_LEFT);
 		
 		rightLauncherMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		leftLauncherMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -62,7 +62,7 @@ public class ProjectileMotionTest extends LinearOpMode {
 		imu.initialize(new IMU.Parameters(orientationOnRobot));
 		
 		telemetry.addLine("✅ Initialization Complete");
-		telemetry.addData("IMU initial angle", imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES));
+		telemetry.addData("IMU initial angle", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
 		telemetry.addLine("------------------------------------");
 		telemetry.addLine("Controls:");
 		telemetry.addLine("  DPAD Up&Down: Adjust Speed");
@@ -82,10 +82,11 @@ public class ProjectileMotionTest extends LinearOpMode {
 			}
 			commandedMotorSpeed = Math.max(-1.0, Math.min(1.0, commandedMotorSpeed));
 			
-			// --- Motor Control ---
-			if (gamepad1.left_trigger > 0.1) {
+			if (gamepad1.aWasPressed()) {
 				syncBelt.spinUp(commandedMotorSpeed);
-			} else {
+			}
+			
+			if (gamepad1.bWasPressed()) {
 				syncBelt.spinDown();
 			}
 			
@@ -94,12 +95,12 @@ public class ProjectileMotionTest extends LinearOpMode {
 			double leftRPM = (leftLauncherMotor.getVelocity() / TICKS_PER_REVOLUTION) * 60;
 			
 			YawPitchRollAngles robotOrientation = imu.getRobotYawPitchRollAngles();
-			double pitch = robotOrientation.getPitch(AngleUnit.DEGREES);
+			double yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
 			
 			// --- Telemetry ---
-			telemetry.addData("Commanded Power", "%.2f", commandedMotorSpeed);
+			telemetry.addData("Commanded Power", commandedMotorSpeed);
 			telemetry.addData("Average RPM", "%.2f", (rightRPM + leftRPM) / 2.0);
-			telemetry.addData("Launcher Angle", pitch);
+			telemetry.addData("Launcher Angle", yaw);
 			
 			telemetry.update();
 		}
