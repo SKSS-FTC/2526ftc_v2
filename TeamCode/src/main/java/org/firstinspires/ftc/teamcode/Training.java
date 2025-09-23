@@ -15,6 +15,7 @@ public class Training {
 
 
 
+
     private LinearOpMode opmode = null;
 
 
@@ -50,31 +51,31 @@ public class Training {
 
     public void forward() {
         // set powers for motors to go forward here
-        FrontRM.setPower(0.5);
-        FrontLM.setPower(0.5);
-        BackRM.setPower(0.5);
-        BackLM.setPower(0.5);
+        FrontRM.setPower(1);
+        FrontLM.setPower(1);
+        BackRM.setPower(1);
+        BackLM.setPower(1);
     }
     public void backwards() {
         // set powers for motors to go backwards here
-        FrontRM.setPower(-0.5);
-        FrontLM.setPower(-0.5);
-        BackRM.setPower(-0.5);
-        BackLM.setPower(-0.5);
+        FrontRM.setPower(-1);
+        FrontLM.setPower(-1);
+        BackRM.setPower(-1);
+        BackLM.setPower(-1);
     }
     public void left() {
         // set powers for motors to go left here
-        FrontRM.setPower(-0.5);
-        FrontLM.setPower(0.5);
-        BackRM.setPower(-0.5);
-        BackLM.setPower(0.5);
+        FrontRM.setPower(-1);
+        FrontLM.setPower(1);
+        BackRM.setPower(-1);
+        BackLM.setPower(1);
     }
     public void right() {
         // set powers for motors to go right here
-        FrontRM.setPower(0.5);
-        FrontLM.setPower(-0.5);
-        BackRM.setPower(0.5);
-        BackLM.setPower(-0.5);
+        FrontRM.setPower(1);
+        FrontLM.setPower(-1);
+        BackRM.setPower(1);
+        BackLM.setPower(-1);
     }
     public void stop() {
         // set motor power to stop

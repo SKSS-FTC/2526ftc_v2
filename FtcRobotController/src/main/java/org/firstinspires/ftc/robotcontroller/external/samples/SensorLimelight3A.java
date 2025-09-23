@@ -67,7 +67,7 @@ import java.util.List;
  *   below the name of the Limelight on the top level configuration screen.
  */
 @TeleOp(name = "Sensor: Limelight3A", group = "Sensor")
-@Disabled
+//@Disabled
 public class SensorLimelight3A extends LinearOpMode {
 
     private Limelight3A limelight;
@@ -79,7 +79,7 @@ public class SensorLimelight3A extends LinearOpMode {
 
         telemetry.setMsTransmissionInterval(11);
 
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(7);
 
         /*
          * Starts polling for data.  If you neglect to call start(), getLatestResult() will return null.
@@ -101,7 +101,7 @@ public class SensorLimelight3A extends LinearOpMode {
 
             LLResult result = limelight.getLatestResult();
             if (result.isValid()) {
-                // Access general information
+                // Access general information :3
                 Pose3D botpose = result.getBotpose();
                 double captureLatency = result.getCaptureLatency();
                 double targetingLatency = result.getTargetingLatency();
