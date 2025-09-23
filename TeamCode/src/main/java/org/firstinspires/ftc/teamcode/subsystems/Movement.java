@@ -38,8 +38,7 @@ public class Movement {
 
         imu.initialize(parameters);
 
-        //reversed motor to reflect installation
-
+        // reversed motor, so that when positive power is applied to all motors left and right spin in opp. directions(move foward instead of spinning)
         rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
         rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -51,10 +50,10 @@ public class Movement {
 
     // tick for teleop
 
-    public void teleopTick(double leftStickX, double leftStickY, double rightStickX,/* boolean toggle,*/ Telemetry telemetry){
+    public void teleopTick(double leftStickX, double leftStickY, double rightStickX/*, boolean toggle,*/){
         double axial = -leftStickY * STRAFE_MULTIPLIER;  // Note: pushing stick forward gives negative value
         double lateral = -leftStickX * STRAFE_MULTIPLIER;
-        double yaw = -rightStickX * ROTATION_MULTIPLIER;
+        double yaw = rightStickX * ROTATION_MULTIPLIER;
 
         // Combine the joystick requests for each axis-motion to determine each wheel's power.
         // Set up a variable for each drive wheel to save the power level for telemetry.
@@ -88,7 +87,7 @@ public class Movement {
     public void teleopTickFieldCentric(double leftStickX, double leftStickY, double rightStickX, boolean start){
         double axial = -leftStickY; // Remember, Y stick value is reversed
         double lateral = -leftStickX;
-        double yaw = -rightStickX;
+        double yaw = rightStickX;
 
         // This button choice was made so that it is hard to hit on accident,
         // it can be freely changed based on preference.
@@ -120,5 +119,24 @@ public class Movement {
         rightBack.setPower(backRightPower);
     }
 
+    public DcMotor getLeftFront() {
+        return leftFront;
+    }
+
+    public DcMotor getLeftBack() {
+        return leftBack;
+    }
+
+    public DcMotor getRightFront() {
+        return rightFront;
+    }
+
+    public DcMotor getRightBack() {
+        return rightBack;
+    }
+
+    public IMU getImu() {
+        return imu;
+    }
 }
 
