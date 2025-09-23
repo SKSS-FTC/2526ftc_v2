@@ -268,7 +268,7 @@ public abstract class CompTeleOpTemplate extends RobotOpMode {
         );
         gamepadEx2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenActive(robot.pullHangDownCommand.copy());
 
-
+        robot.followerSubsystem.getFollower().setPose(new Pose(0,0,0));
 
         robot.followerSubsystem.setDefaultCommand(robot.followerTeleOpCommand);
     }

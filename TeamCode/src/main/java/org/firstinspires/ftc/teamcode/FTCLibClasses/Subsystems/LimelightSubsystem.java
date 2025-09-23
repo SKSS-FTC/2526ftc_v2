@@ -51,12 +51,13 @@ public class LimelightSubsystem extends SubsystemBase {
             this.color = LimelightColors.BLUE;
         }
     }
-    public Pose3D getAprilTagPose(){
+    public Pose3D getAprilTagPose(int alg){
         limelight3A.pipelineSwitch(5);
         limelight3A.updateRobotOrientation(robotPose.get().getHeading()*180/Math.PI);
         LLResult result= limelight3A.getLatestResult();
         if (result!= null){
-            return result.getBotpose();
+            if (alg==1) return result.getBotpose();
+            return result.getBotpose_MT2();
         }
         return new Pose3D(new Position(),new YawPitchRollAngles(AngleUnit.DEGREES,0,0,0,0));
     }

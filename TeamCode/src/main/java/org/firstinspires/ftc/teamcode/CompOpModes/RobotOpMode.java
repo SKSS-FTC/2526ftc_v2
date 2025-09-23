@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.CompOpModes;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -23,7 +22,6 @@ public abstract class RobotOpMode extends OpMode {
 
     protected String telemetryToAdd = "";
 
-    protected MultipleTelemetry multipleTelemetry;
 
 
 
@@ -34,11 +32,11 @@ public abstract class RobotOpMode extends OpMode {
     @Override
     public void init(){
 
-        multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        //multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         setAllianceColor();
         drivePad = new GamepadEx(gamepad1);
         gamepadEx2 = new GamepadEx(gamepad2);
-        robot = new Robot(hardwareMap,drivePad,gamepadEx2, multipleTelemetry,allianceColor);
+        robot = new Robot(hardwareMap,drivePad,gamepadEx2, telemetry,allianceColor);
         createLogic();
     }
 
@@ -49,16 +47,16 @@ public abstract class RobotOpMode extends OpMode {
         } else if (gamepad1.a){
             //curBot = Bot.PRACTICE;
         }
-        switch (curBot) {
-            case COMP:
-                multipleTelemetry.addLine("Initiating Comp Bot Opmode");
-                break;
-            case PRACTICE:
-                multipleTelemetry.addLine("Initiating Practice Bot Opmode");
-                break;
-        }
-        multipleTelemetry.addLine("Press b to initiate the comp opmode and a to initiate the practice bot opmode");
-        multipleTelemetry.update();
+//        switch (curBot) {
+//            case COMP:
+//                multipleTelemetry.addLine("Initiating Comp Bot Opmode");
+//                break;
+//            case PRACTICE:
+//                multipleTelemetry.addLine("Initiating Practice Bot Opmode");
+//                break;
+//        }
+//        multipleTelemetry.addLine("Press b to initiate the comp opmode and a to initiate the practice bot opmode");
+//        multipleTelemetry.update();
     }
 
     @Override

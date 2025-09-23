@@ -351,7 +351,7 @@ abstract public class FourSampleAutoBase extends RobotOpMode {
                 (Boolean b)->{},
                 ()->{return false;}
         );
-        Command telemetryTimer = new FunctionalCommand(()->{},()->{multipleTelemetry.addData("time",time); },(Boolean b)->{},()->false);
+        Command telemetryTimer = new FunctionalCommand(()->{},()->{telemetry.addData("time",time); },(Boolean b)->{},()->false);
         //puts all commands together
         SequentialCommandGroup autoRoutine = new SequentialCommandGroup(
                 new InstantCommand(timer::reset),
