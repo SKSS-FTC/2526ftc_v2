@@ -20,7 +20,7 @@ public class AprilTag26 extends OpMode {
     AprilTagProcessor processor;
     VisionPortal vPortal;
     Servo servo;
-    int width = 1920;
+    int width = 640;
     @Override
     public void init(){
         servo=hardwareMap.get(Servo.class,"servo");
@@ -28,7 +28,7 @@ public class AprilTag26 extends OpMode {
         vPortal=new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(CameraName.class,"Webcam 1"))
                 .addProcessor(processor)
-                .setCameraResolution(new Size(width,1080))
+                .setCameraResolution(new Size(width,480))
                 .setStreamFormat(VisionPortal.StreamFormat.YUY2)
                 .enableLiveView(true)
                 .setAutoStopLiveView(true)
@@ -40,7 +40,7 @@ public class AprilTag26 extends OpMode {
 
     @Override
     public void loop(){
-        double k =.0000000012;
+        double k =.000006;
         ArrayList<AprilTagDetection> detections = processor.getDetections();
         boolean isdetected = false;
         double heading =0;
