@@ -29,10 +29,31 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import android.graphics.Color;
+import android.view.View;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
+
 
 
 @TeleOp(name="TestOpMode.java", group="Linear OpMode")
@@ -41,10 +62,11 @@ public class TestOpMode extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor frontLeft = null;
+   /* private DcMotor frontLeft = null;
     private DcMotor backLeft = null;
     private DcMotor frontRight = null;
-    private DcMotor backRight = null;
+    private DcMotor backRight = null;*/
+   public class SensorColor extends LinearOpMode {
     private DcMotor ballLauncher1 = null;
     private DcMotor ballLauncher2 = null;
 
@@ -53,10 +75,10 @@ public class TestOpMode extends LinearOpMode {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
-        frontLeft = hardwareMap.get(DcMotor.class, "front_left");
+       /* frontLeft = hardwareMap.get(DcMotor.class, "front_left");
         backLeft = hardwareMap.get(DcMotor.class, "back_left");
         frontRight = hardwareMap.get(DcMotor.class, "front_right");
-        backRight = hardwareMap.get(DcMotor.class, "back_right");
+        backRight = hardwareMap.get(DcMotor.class, "back_right");*/
         ballLauncher1 = hardwareMap.get(DcMotor.class, "ball_launcher1");
         ballLauncher2 = hardwareMap.get(DcMotor.class, "ball_launcher2");
 
@@ -70,10 +92,10 @@ public class TestOpMode extends LinearOpMode {
         // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
         // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+      /*  frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
-        backRight.setDirection(DcMotor.Direction.FORWARD);
+        backRight.setDirection(DcMotor.Direction.FORWARD);*/
         ballLauncher1.setDirection(DcMotor.Direction.FORWARD);
         ballLauncher2.setDirection(DcMotor.Direction.FORWARD);
 
@@ -125,3 +147,96 @@ public class TestOpMode extends LinearOpMode {
 
         }
     }}
+ public void runOpMode() {
+
+     NormalizedColorSensor colorSensor = hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
+
+
+     if (colorSensor instanceof SwitchableLight) {
+         ((SwitchableLight)colorSensor).enableLight(true);
+     }
+
+
+
+
+
+     while (opModeIsActive()) {
+
+         NormalizedRGBA colors = colorSensor.getNormalizedColors();
+
+         double r = colors.red / 255.0;
+         double g = colors.green / 255.0;
+         double b = colors.blue / 255.0;
+
+         double M = Math.max(r, Math.max(g, b)); // Max value
+         double m = Math.min(r, Math.min(g, b)); // Min value
+         double C = M - m;
+
+
+
+
+
+
+
+         double max = Math.max(r, Math.max(g, b));
+         double min = Math.min(r, Math.min(g, b));
+
+
+         double HPrime = 0;
+         double H;
+
+         if (C == 0) {
+
+
+         } else if (max == r) {
+
+             HPrime = ((g - b) / C) % 6;
+         } else if (max == g) {
+
+             HPrime = ((b - r) / C) + 2;
+         } else {
+
+
+             HPrime = ((r - g) / C) + 4;
+         }
+
+         H = 60 * HPrime;
+
+         if (H >= 100 && H <= 200) {
+             telemetry.addLine()
+                     .addData("Green", "%.3f");
+         }
+
+
+
+
+
+         telemetry.addLine()
+                 .addData("R", "%.3f", colors.red);
+         telemetry.addLine()
+                 .addData("G", "%.3f", colors.green);
+         telemetry.addLine()
+                 .addData("B", "%.3f", colors.blue);
+         telemetry.addLine()
+                 .addData("H", "%.3f", H);
+
+         telemetry.update();
+
+
+     }
+    
+ }
+
+
+
+        };
+
+
+
+
+
+
+
+
+
+
