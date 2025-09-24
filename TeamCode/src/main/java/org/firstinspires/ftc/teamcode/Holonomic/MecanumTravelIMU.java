@@ -129,8 +129,18 @@ public class MecanumTravelIMU extends LinearOpMode
     // calcs for TICKS_PER_INCH at
     // https://docs.google.com/spreadsheets/d/1PRGoHqyCUkSiiUiAUla-mElgsUdoqUssUntqvU-TYFY/edit?usp=sharing
     // static final double     TICKS_PER_INCH = 217.3267045; // REV Robotics Core Hex motor (REV-41-1300) & 75mm wheel
-    static final double     TICKS_PER_INCH = 56.9887969189608; // REV Robotics HD Hex motor & 75mm Mecanum wheel
-    // static final double     TICKS_PER_INCH = 45.283963; // goBILDA 5203 (19.2:1) and 96mm Mecanum wheel
+    // static final double     TICKS_PER_INCH = 56.9887969189608; // REV Robotics HD Hex motor & 75mm Mecanum wheel
+    // static final double     TICKS_PER_INCH = 31.95; // REV Robotics HD Hex motor & 75mm Mecanum wheel
+    /*
+        AndyMark NeveRest motor encoder generates 28 ticks per revolution of internal shaft
+        Gear ratio is 12.7:1, external shaft rotates 12.7 times for 1 rotation of internal shaft
+        Ticks per external shaft revolution =  28 * 12.7 = 355.6
+        goBILDA Mecanum wheel diameter is 96 mm, nominal
+        Diameter, inches = 96 / 25.4 = 3.78
+        Circumference, inches = π * D = 3.14 * 3.78 = 11.8692
+        TICKS_PER_INCH = 355.6 / 11.8692 = 29.96
+     */
+    static final double     TICKS_PER_INCH = 29.96; // SWYFT Drive: AndyMark NeveRest motor, goBILDA 96 mm mecanum wheel
 
     TouchSensor             touch;
     BNO055IMU               imu;

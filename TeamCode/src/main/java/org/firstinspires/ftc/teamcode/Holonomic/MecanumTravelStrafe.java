@@ -124,7 +124,8 @@ public class MecanumTravelStrafe extends LinearOpMode
     private static final  String TAG = MecanumTravelStrafe.class.getSimpleName(); // for use in logging
     Datalog datalog = new Datalog(TAG);
     //static final double     TICKS_PER_INCH = 56.9887969189608; // REV Robotics HD Hex motor & 75mm Mecanum wheel
-    static final double     TICKS_PER_INCH = 45.283963; // goBILDA 5203 19.2:1 Motor 96mm Mecanum wheel
+    // static final double     TICKS_PER_INCH = 45.283963; // goBILDA 5203 19.2:1 Motor 96mm Mecanum wheel
+    static final double     TICKS_PER_INCH = 29.96; // SWYFT Drive AndyMark NeveRest motor 12.7:1 Motor 96mm Mecanum wheel
 
     TouchSensor             touch;
     BNO055IMU               imu;

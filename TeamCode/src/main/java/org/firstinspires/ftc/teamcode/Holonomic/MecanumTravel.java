@@ -78,7 +78,6 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -103,7 +102,7 @@ public class MecanumTravel {
     public void init(HardwareMap hwMap, BNO055IMU imux, DcMotorEx[] motorx, double COUNTS_PER_INCH) {
         for (int i = 0; i < motorx.length; i++) {
             motor[i] = motorx[i];
-            motor[i].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motor[i].setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
         imu = imux;
         TICKS_PER_INCH = COUNTS_PER_INCH;
