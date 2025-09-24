@@ -24,9 +24,7 @@ public class AprilTagAimer {
     }
 
     private double angleWrapDegrees(double angle) {
-        while (angle > 180) angle -= 360;
-        while (angle < -180) angle += 360;
-        return angle;
+        return (angle + 180) % 360 - 180;
     }
 
     public void startTurnToAprilTag(double bearing) {
