@@ -31,6 +31,8 @@ public class PrototypeFollower {
         this.telemetry = opMode.telemetry;
     }
 
+    boolean paused = false;
+
     public void run() {
         // Ensure all events exist in the map
         for (Waypoint wp : waypoints) {
@@ -74,7 +76,7 @@ public class PrototypeFollower {
 
             double dx = positionTargetValue(waypoint.x - chassis.pose.x);
             double dy = positionTargetValue(waypoint.y - chassis.pose.y);
-            double dr = rotationTargetValue(waypoint.r, chassis.yawDeg);
+            double dr = -rotationTargetValue(waypoint.r, chassis.yawDeg);
 
             telemetry.addLine("mx: " + dx);
             telemetry.addLine("my: " + dy);

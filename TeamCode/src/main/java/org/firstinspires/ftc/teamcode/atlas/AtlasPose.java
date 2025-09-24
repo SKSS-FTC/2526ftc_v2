@@ -34,8 +34,8 @@ public class AtlasPose {
         double dx = sin(yawRads) * dxLocal + cos(yawRads) * dyLocal;
         double dy = cos(yawRads) * dxLocal - sin(yawRads) * dyLocal;
 
-        x -= dx * metersPerTick;
-        y += dy * metersPerTick;
+        x += dx * metersPerTick;
+        y -= dy * metersPerTick;
 
         long time = System.currentTimeMillis();
         pastStates.add(new PastState(time, dx, dy, x, y));

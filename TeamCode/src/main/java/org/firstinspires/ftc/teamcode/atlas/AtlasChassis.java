@@ -40,17 +40,14 @@ public class AtlasChassis {
 
     public AtlasChassis(HardwareMap hardwareMap) {
         backLeft = getDcMotorEx(hardwareMap, "rearLeft");
-        backRight = getDcMotorEx(hardwareMap, "rearRight");
-        frontLeft = getDcMotorEx(hardwareMap, "frontLeft");
-        frontRight = getDcMotorEx(hardwareMap, "frontRight");
+        backRight = getDcMotorEx(hardwareMap, "rearRight", false);
+        frontLeft = getDcMotorEx(hardwareMap, "frontLeft", true);
+        frontRight = getDcMotorEx(hardwareMap, "frontRight", true);
 
         // Make sure imu exists in hardware map
         imu = hardwareMap.get(IMU.class, "imu");
 
         pose = new AtlasPose(metersPerTick);
-
-        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
         imu.initialize(new IMU.Parameters(
                 new RevHubOrientationOnRobot(
@@ -61,18 +58,23 @@ public class AtlasChassis {
         imu.resetYaw();
     }
 
-    private DcMotorEx getDcMotorEx(HardwareMap hardwareMap, String name) {
+    private DcMotorEx getDcMotorEx(HardwareMap hardwareMap, String name, boolean reversed) {
         DcMotorEx motor = (DcMotorEx) hardwareMap.get(DcMotor.class, name);
+        if (reversed) motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        else motor.setDirection(DcMotorSimple.Direction.FORWARD);
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         return motor;
     }
+    private DcMotorEx getDcMotorEx(HardwareMap hardwareMap, String name) {
+        return getDcMotorEx(hardwareMap, name, false);
+    }
 
     public void moveFieldRelative(double x, double y, double rx) {
         double yaw = yawRads + fieldRelativeOffset;
-        double rotX = x * sin(yaw) + y * cos(yaw);
-        double rotY = x * cos(yaw) - y * sin(yaw);
-        movePower(rotX, rotY, rx);
+        double rotatedX = x * Math.cos(-yaw) - y * Math.sin(-yaw);
+        double rotatedY = x * Math.sin(-yaw) + y * Math.cos(-yaw);
+        movePower(-rotatedX, rotatedY, rx);
     }
 
     public void movePower(double x, double y, double r) {

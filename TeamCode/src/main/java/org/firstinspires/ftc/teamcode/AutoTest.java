@@ -12,9 +12,9 @@ public class AutoTest extends LinearOpMode {
     public void runOpMode() {
         Waypoint[] waypoints = new Waypoint[]{
                 new Waypoint(0.0, 0.0, 0.0, 1.0, 1.0, false, new String[]{}),
-                new Waypoint(3000.0, 0.0, 0.0, 1.0, 1.0, false, new String[]{}),
-                new Waypoint(3000.0, 3000.0, 0.0, 1.0, 1.0, false, new String[]{}),
-                new Waypoint(0.0, 3000.0, 0.0, 1.0, 1.0, false, new String[]{}),
+                new Waypoint(1400.0, 0.0, 0.0, 1.0, 1.0, false, new String[]{}),
+                new Waypoint(1400.0, 1400.0, 0.0, 1.0, 1.0, false, new String[]{}),
+                new Waypoint(0.0, 1400.0, 0.0, 1.0, 1.0, false, new String[]{}),
                 new Waypoint(0.0, 0.0, 0.0, 1.0, 1.0, false, new String[]{})
         };
 
