@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.Implementations.TelemetryWrapper;
 import org.firstinspires.ftc.teamcode.Interfaces.TelemetryI;
 import org.firstinspires.ftc.teamcode.RobotHardware.Hardware;
 import org.firstinspires.ftc.teamcode.TelemetryHelper;
-import org.firstinspires.ftc.teamcode.
 @TeleOp
 public class HighTel extends LinearOpMode {
 
