@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.configuration;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.Controller;
@@ -212,31 +213,45 @@ public class Settings {
 		
 		// Poses for the FAR side of the field, RED alliance
 		public static class RedFar {
-			public static final Pose START = new Pose(12, 60, Math.toRadians(90));
-			public static final Pose WAYPOINT_1 = new Pose(24, 24, Math.toRadians(90));
-			public static final Pose PRELOAD_1_PICKUP = new Pose(12, 12, Math.toRadians(135));
-			public static final Pose SCORE_1_APPROACH = new Pose(36, 12, Math.toRadians(0));
-			public static final Pose SCORE_1 = new Pose(48, 36, Math.toRadians(0));
-			public static final Pose WAYPOINT_2 = new Pose(24, 12, Math.toRadians(180));
-			public static final Pose PRELOAD_2_PICKUP = new Pose(-24, 12, Math.toRadians(180));
-			public static final Pose SCORE_2 = new Pose(48, 36, Math.toRadians(0));
-			public static final Pose PRELOAD_3_PICKUP = new Pose(-48, 12, Math.toRadians(180));
-			public static final Pose SCORE_3 = new Pose(48, 36, Math.toRadians(0));
+			public static final Pose START = new Pose(65.533, 12.244, Math.toRadians(90));
+			public static final Pose PRESET_1_PREP = new Pose(35.526, 28.455, Math.toRadians(180));
+			public static final Pose PRESET_1_END = new Pose(18.453, 28.628, Math.toRadians(180));
+			public static final BezierCurve BEZIER_LAUNCH_1 = new BezierCurve(
+					new Pose(18.453, 28.628),
+					new Pose(64.671, 44.493),
+					new Pose(63.808, 69.499)
+			);
+			
+			public static final Pose ENDING_LAUNCH_1 = new Pose(63.808, 69.499, Math.toRadians(130));
+			
+			public static final Pose PRESET_2_PREP = new Pose(38.802, 54.668, Math.toRadians(180));
+			public static final Pose PRESET_2_END = new Pose(18.970, 54.496, Math.toRadians(180));
+			public static final Pose LAUNCH_2 = new Pose(52, 80, Math.toRadians(135));
+			public static final Pose PRESET_3_END = new Pose(19.143, 80.019, Math.toRadians(180));
+			public static final Pose SCORE_3 = new Pose(40.354, 92.091, Math.toRadians(125));
+			public static final Pose PARK = new Pose(40.354, 92.091, Math.toRadians(125));
 		}
 		
 		// Poses for the FAR side of the field, BLUE alliance
-		// TODO These are currently mirrored from the RED values.
+		// TODO These are currently copied from the RED values.
 		public static class BlueFar {
-			public static final Pose START = new Pose(132, 60, Math.toRadians(90));
-			public static final Pose WAYPOINT_1 = new Pose(120, 24, Math.toRadians(90));
-			public static final Pose PRELOAD_1_PICKUP = new Pose(132, 12, Math.toRadians(45));
-			public static final Pose SCORE_1_APPROACH = new Pose(108, 12, Math.toRadians(180));
-			public static final Pose SCORE_1 = new Pose(96, 36, Math.toRadians(180));
-			public static final Pose WAYPOINT_2 = new Pose(120, 12, Math.toRadians(0));
-			public static final Pose PRELOAD_2_PICKUP = new Pose(168, 12, Math.toRadians(0));
-			public static final Pose SCORE_2 = new Pose(96, 36, Math.toRadians(180));
-			public static final Pose PRELOAD_3_PICKUP = new Pose(192, 12, Math.toRadians(0));
-			public static final Pose SCORE_3 = new Pose(96, 36, Math.toRadians(180));
+			public static final Pose START = new Pose(65.533, 12.244, Math.toRadians(90));
+			public static final Pose PRESET_1_PREP = new Pose(35.526, 28.455, Math.toRadians(180));
+			public static final Pose PRESET_1_END = new Pose(18.453, 28.628, Math.toRadians(180));
+			public static final BezierCurve BEZIER_LAUNCH_1 = new BezierCurve(
+					new Pose(18.453, 28.628),
+					new Pose(64.671, 44.493),
+					new Pose(63.808, 69.499)
+			);
+			
+			public static final Pose ENDING_LAUNCH_1 = new Pose(63.808, 69.499, Math.toRadians(130));
+			
+			public static final Pose PRESET_2_PREP = new Pose(38.802, 54.668, Math.toRadians(180));
+			public static final Pose PRESET_2_END = new Pose(18.970, 54.496, Math.toRadians(180));
+			public static final Pose LAUNCH_2 = new Pose(52, 80, Math.toRadians(135));
+			public static final Pose PRESET_3_END = new Pose(19.143, 80.019, Math.toRadians(180));
+			public static final Pose SCORE_3 = new Pose(40.354, 92.091, Math.toRadians(125));
+			public static final Pose PARK = new Pose(40.354, 92.091, Math.toRadians(125));
 		}
 		
 		// Poses for the CLOSE side of the field, RED alliance
@@ -245,31 +260,48 @@ public class Settings {
 			// Start near the backdrop, facing forward.
 			public static final Pose START = new Pose(12, -60, Math.toRadians(90));
 			// Position for the center spike mark.
-			public static final Pose SPIKE_MARK_CENTER = new Pose(12, -34, Math.toRadians(90));
+			public static final Pose PRESET_1_PREP = new Pose(12, -34, Math.toRadians(90));
 			// Scoring position on the backdrop. Robot is flush, facing left.
-			public static final Pose BACKDROP_SCORE = new Pose(48, -36, Math.toRadians(180));
+			public static final Pose PRESET_1_END = new Pose(48, -36, Math.toRadians(180));
 			// A middle waypoint to help navigate under the stage truss.
-			public static final Pose WAYPOINT_CENTER = new Pose(24, -12, Math.toRadians(180));
+			public static final Pose LAUNCH_1 = new Pose(24, -12, Math.toRadians(180));
 			// Position to pick up pixels from the stack across the field.
-			public static final Pose STACK_PICKUP = new Pose(-58, -12, Math.toRadians(180));
-			// Parking position in the corner.
-			public static final Pose PARK_CORNER = new Pose(50, -60, Math.toRadians(180));
+			public static final Pose PRESET_2_PREP = new Pose(12, -34, Math.toRadians(90));
+			// Scoring position on the backdrop. Robot is flush, facing left.
+			public static final Pose PRESET_2_END = new Pose(48, -36, Math.toRadians(180));
+			// A middle waypoint to help navigate under the stage truss.
+			public static final Pose LAUNCH_2 = new Pose(24, -12, Math.toRadians(180));
+			public static final Pose PRESET_3_PREP = new Pose(12, -34, Math.toRadians(90));
+			// Scoring position on the backdrop. Robot is flush, facing left.
+			public static final Pose PRESET_3_END = new Pose(48, -36, Math.toRadians(180));
+			// A middle waypoint to help navigate under the stage truss.
+			public static final Pose LAUNCH_3 = new Pose(24, -12, Math.toRadians(180));
+			public static final Pose PARK = new Pose(24, -12, Math.toRadians(180));
+			
 		}
 		
 		// TODO These values are mirrored from the RedClose class.
 		public static class BlueClose {
 			// Start near the backdrop, facing forward.
-			public static final Pose START = new Pose(-12, -60, Math.toRadians(90));
+			public static final Pose START = new Pose(60, 85, Math.toRadians(120));
 			// Position for the center spike mark.
-			public static final Pose SPIKE_MARK_CENTER = new Pose(-12, -34, Math.toRadians(90));
-			// Scoring position on the backdrop. Robot is flush, facing right.
-			public static final Pose BACKDROP_SCORE = new Pose(-48, -36, Math.toRadians(0));
+			public static final Pose PRESET_1_PREP = new Pose(37, 82.5, Math.toRadians(180));
+			// Scoring position on the backdrop. Robot is flush, facing left.
+			public static final Pose PRESET_1_END = new Pose(15., 82.5, Math.toRadians(180));
 			// A middle waypoint to help navigate under the stage truss.
-			public static final Pose WAYPOINT_CENTER = new Pose(-24, -12, Math.toRadians(0));
+			public static final Pose LAUNCH_1 = new Pose(53, 85, Math.toRadians(120));
 			// Position to pick up pixels from the stack across the field.
-			public static final Pose STACK_PICKUP = new Pose(58, -12, Math.toRadians(0));
-			// Parking position in the corner.
-			public static final Pose PARK_CORNER = new Pose(-50, -60, Math.toRadians(0));
+			public static final Pose PRESET_2_PREP = new Pose(42, 57, Math.toRadians(180));
+			// Scoring position on the backdrop. Robot is flush, facing left.
+			public static final Pose PRESET_2_END = new Pose(14, 57, Math.toRadians(180));
+			// A middle waypoint to help navigate under the stage truss.
+			public static final Pose LAUNCH_2 = new Pose(66, 66, Math.toRadians(125));
+			public static final Pose PRESET_3_PREP = new Pose(41.5, 33, Math.toRadians(180));
+			// Scoring position on the backdrop. Robot is flush, facing left.
+			public static final Pose PRESET_3_END = new Pose(13, 33, Math.toRadians(180));
+			// A middle waypoint to help navigate under the stage truss.
+			public static final Pose LAUNCH_3 = new Pose(63, 20, Math.toRadians(120));
+			public static final Pose PARK = new Pose(63, 20, Math.toRadians(120));
 		}
 	}
 }

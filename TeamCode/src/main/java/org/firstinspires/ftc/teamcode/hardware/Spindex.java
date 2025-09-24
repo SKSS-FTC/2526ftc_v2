@@ -119,6 +119,15 @@ public class Spindex {
 		}
 	}
 	
+	public boolean isEmpty() {
+		for (MatchSettings.ArtifactColor slot : slots) {
+			if (slot != MatchSettings.ArtifactColor.UNKNOWN) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	private void rotateSlotToExit(int slotIndex) {
 		double targetPos = getExitPositionForSlot(slotIndex);
 		submitCommand(new Command.RotateCommand(this, targetPos));
