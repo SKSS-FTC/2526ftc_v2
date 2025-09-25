@@ -20,13 +20,14 @@ public class NorthwestFest extends OpMode {
 	
 	@Override
 	public final void init() {
-		frontLeftMotor = hardwareMap.get(DcMotor.class, "frontLeftMotor");
-		frontRightMotor = hardwareMap.get(DcMotor.class, "frontRightMotor");
-		backLeftMotor = hardwareMap.get(DcMotor.class, "backLeftMotor");
-		backRightMotor = hardwareMap.get(DcMotor.class, "backRightMotor");
-		// TODO reverse motors n stuff
+		frontLeftMotor = hardwareMap.get(DcMotor.class, "frontLeft");
+		frontRightMotor = hardwareMap.get(DcMotor.class, "frontRight");
+		backLeftMotor = hardwareMap.get(DcMotor.class, "rearLeft");
+		backRightMotor = hardwareMap.get(DcMotor.class, "rearRight");
+		
 		frontRightMotor.setDirection(DcMotor.Direction.REVERSE);
 		backRightMotor.setDirection(DcMotor.Direction.REVERSE);
+		frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
 	}
 	
 	
@@ -36,10 +37,10 @@ public class NorthwestFest extends OpMode {
 		double rotatePower = gamepad1.right_stick_x;
 		
 		if (gamepad1.right_bumper) {
-			rotatePower = -0.5;
+			rotatePower = 0.5;
 		}
 		if (gamepad1.left_bumper) {
-			rotatePower = 0.5;
+			rotatePower = -0.5;
 		}
 		if (gamepad1.dpad_up) {
 			drivePower = 0.5;
