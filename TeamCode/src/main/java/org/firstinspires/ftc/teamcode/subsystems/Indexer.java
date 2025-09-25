@@ -62,20 +62,7 @@ public class Indexer {
 
     public void moveTo(IndexerState newState)
     {
-        switch(newState){
-            case one:
-                indexerServo.turnToAngle(ANGLE_ONE);
-                break;
-            case two:
-                indexerServo.turnToAngle(ANGLE_TWO);
-                break;
-            case three:
-                indexerServo.turnToAngle(ANGLE_THREE);
-                break;
-            case oneAlt:
-                indexerServo.turnToAngle(ANGLE_ALT);
-                break;
-        }
+        indexerServo.turnToAngle((stateToNum(newState) - 1)* 120);
     }
 
     public IndexerState numToState(int num)
