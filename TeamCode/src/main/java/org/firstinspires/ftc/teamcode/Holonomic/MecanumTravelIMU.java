@@ -47,13 +47,13 @@
  * </p>
  * <p>
  * forward travel:
- *       ^                   ^
- *       |                   |
- *       0 left front        2 right front
- *                 X
- *       ^                   ^
- *       |                   |
- *       1 left back         3 right back
+ * ^                   ^
+ * |                   |
+ * 0 left front        2 right front
+ * X
+ * ^                   ^
+ * |                   |
+ * 1 left back         3 right back
  *
  * hard coded numbers to avoid the use of enum construct for such a simple program
  * motor positions:
@@ -74,16 +74,16 @@
  *
  * @see https://docs.revrobotics.com/rev-control-system/sensors/encoders/motor-based-encoders
  * HD Hex Motor (REV-41-1291) Encoder Specifications
- *      HD Hex Motor Reduction                  Bare Motor      40:1            20:1
- *      Free speed, RPM                         6,000           150             300
- *      Cycles per rotation of encoder shaft    28 (7 Rises)    28 (7 Rises)    28 (7 Rises)
- *      Ticks per rotation of output shaft      28              1120            560
+ * HD Hex Motor Reduction                  Bare Motor      40:1            20:1
+ * Free speed, RPM                         6,000           150             300
+ * Cycles per rotation of encoder shaft    28 (7 Rises)    28 (7 Rises)    28 (7 Rises)
+ * Ticks per rotation of output shaft      28              1120            560
  * TICKS_PER_MOTOR_REV = 560            REV HD Hex UltraPlanetary 20:1 cartridge
  * DRIVE_GEAR_REDUCTION = 1.0
  * WHEEL_DIAMETER_MM = 75.0             REV Mecanum wheel
  * MM_TO_INCH = 0.03937008
  * TICKS_PER_INCH = (TICKS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_MM * MM_TO_INCH * PI)
- *                = 56.9887969189608
+ * = 56.9887969189608
  * <p>
  * Hardware map
  * Device name      Control Hub setting
@@ -96,58 +96,53 @@
  * sensorLED        n/a
  * gamepad2         USB2
  * </p>
+ * The RevHubOrientationOnRobot.LogoFacingDirection enum has the following six values:
+ *  UP: The REV Hub logo faces upwards, away from the robot chassis.
+ *  DOWN: The REV Hub logo faces downwards, towards the robot chassis.
+ *  FORWARD: The REV Hub logo faces forward, in the direction of the robot's front.
+ *  BACKWARD: The REV Hub logo faces backward, in the direction of the robot's rear.
+ *  LEFT: The REV Hub logo faces left, relative to the robot's forward direction.
+ *  RIGHT: The REV Hub logo faces right, relative to the robot's forward direction
+ * The values for the USB port direction are:
+ *  UP: The USB ports face upwards, away from the robot chassis.
+ *  DOWN: The USB ports face downwards, towards the robot chassis.
+ *  FORWARD: The USB ports face forward, in the direction of the robot's front.
+ *  BACKWARD: The USB ports face backward, in the direction of the robot's rear.
+ *  LEFT: The USB ports face left, relative to the robot's forward direction.
+ *  RIGHT: The USB ports face right, relative to the robot's forward direction.
  */
 
 package org.firstinspires.ftc.teamcode.Holonomic;
 
-import android.provider.ContactsContract;
-
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import org.firstinspires.ftc.teamcode.Utility.Datalogger;
 
 @TeleOp(name = "Mecanum: Travel IMU", group = "Test")
 // @Disabled
-
-public class MecanumTravelIMU extends LinearOpMode
-{
-    private static final  String TAG = MecanumTravelIMU.class.getSimpleName(); // for use in logging
+public class MecanumTravelIMU extends LinearOpMode {
+    private static final String TAG = MecanumTravelIMU.class.getSimpleName(); // for use in logging
     Datalog datalog = new Datalog(TAG);
-    // calcs for TICKS_PER_INCH at
-    // https://docs.google.com/spreadsheets/d/1PRGoHqyCUkSiiUiAUla-mElgsUdoqUssUntqvU-TYFY/edit?usp=sharing
-    // static final double     TICKS_PER_INCH = 217.3267045; // REV Robotics Core Hex motor (REV-41-1300) & 75mm wheel
-    // static final double     TICKS_PER_INCH = 56.9887969189608; // REV Robotics HD Hex motor & 75mm Mecanum wheel
-    // static final double     TICKS_PER_INCH = 31.95; // REV Robotics HD Hex motor & 75mm Mecanum wheel
-    /*
-        AndyMark NeveRest motor encoder generates 28 ticks per revolution of internal shaft
-        Gear ratio is 12.7:1, external shaft rotates 12.7 times for 1 rotation of internal shaft
-        Ticks per external shaft revolution =  28 * 12.7 = 355.6
-        goBILDA Mecanum wheel diameter is 96 mm, nominal
-        Diameter, inches = 96 / 25.4 = 3.78
-        Circumference, inches = π * D = 3.14 * 3.78 = 11.8692
-        TICKS_PER_INCH = 355.6 / 11.8692 = 29.96
-     */
-    static final double     TICKS_PER_INCH = 29.96; // SWYFT Drive: AndyMark NeveRest motor, goBILDA 96 mm mecanum wheel
 
-    TouchSensor             touch;
-    BNO055IMU               imu;
-    Orientation             lastAngles = new Orientation();
-    double                  globalAngle, initialPower = .40, correction;
-    boolean                 aButton, bButton, touched;
+    static final double TICKS_PER_INCH = 29.96; // SWYFT Drive: AndyMark NeveRest motor, goBILDA 96 mm mecanum wheel
+
+    TouchSensor touch;
+    IMU imu; // Universal IMU interface
+    YawPitchRollAngles lastAngles;
+    double globalAngle, initialPower = .40, correction;
+    boolean aButton, bButton, touched;
     private final ElapsedTime runtime = new ElapsedTime();
+
     // motor entities for drivetrain
     String[] motorLabels = {
             "motorLeftFront",           // port 0 Control Hub
@@ -155,113 +150,58 @@ public class MecanumTravelIMU extends LinearOpMode
             "motorRightFront",          // port 2 Control Hub
             "motorRightBack"            // port 3 Control Hub
     };
-    DcMotorEx[] motor = new DcMotorEx[]{null, null, null, null}; // couldn't initialize hardwareMap here?!!
+    DcMotorEx[] motor = new DcMotorEx[]{null, null, null, null};
     int[] motorTicks = {0, 0, 0, 0};    // current tick count from encoder for the respective motors
 
-    /**
-     * @param travelLength the linear distance to travel, inches
-     * @param travelPower the initial power setting of all motors
-     * Function to backup the robot after a stop to ensure it does not
-     * collide with any object. This function will require further tuning.
-     * N.B.
-     * STOP_AND_RESET_ENCODER MUST precede RUN_WITHOUT_ENCODER
-     * The motor is to set the current encoder position to zero.
-     * In contrast to RUN_TO_POSITION, the motor is not rotated in order to achieve this;
-     * rather, the current rotational position of the motor is simply reinterpreted as the new zero value.
-     * However, as a side effect of placing a motor in this mode, power is removed from the motor,
-     * causing it to stop, though it is unspecified whether the motor enters brake or float mode.
-     * Further, it should be noted that setting a motor toSTOP_AND_RESET_ENCODER may or may not be a transient state:
-     * motors connected to some motor controllers will remain in this mode until explicitly transitioned
-     * to a different one, while motors connected to other motor controllers
-     * will automatically transition to a different mode after the reset of the encoder is complete.
-     * See REV Robotics Core Hex and HD UltraPlanetary motor specifications
-     *
-     * Bosch BNO055 https://www.bosch-sensortec.com/products/smart-sensors/bno055/#documents
-     * SensorMode
-     *    ACCGYRO
-     *    ACCMAG
-     *    ACCONLY
-     *    AMG
-     *    COMPASS
-     *    CONFIG
-     *    DISABLED
-     *    GYROONLY
-     *    IMU           Fusion of accelerometer and gyroscope
-     *    M4G           Fusion of accelerometer and magnetometer compensating limitations of gyroscope
-     *    MAGGYRO
-     *    MAGONLY
-     *    NDOF          Fusion of all 3 sensors with FMC enabled; incomplete figure 8 pattern will calibrate magnetometer
-     *    NDOF_FMC_OFF  Fusion of all 3 sensors but needs figure 8 pattern for magnetometer calibration
-     *    BNO055IMU interface abstracts the functionality of the Bosch/Sensortec BNO055 9-axis absolute orientation sensor.
-     *    The BNO055 can output the following sensor data
-     *    Absolute Orientation (Euler Vector, 100Hz) Three axis orientation data based on a 360° sphere
-     *    Absolute Orientation (Quaterion, 100Hz) Four point quaternion output for more accurate data manipulation
-     *    Angular Velocity Vector (100Hz) Three axis of 'rotation speed' in rad/s
-     *    Acceleration Vector (100Hz) Three axis of acceleration (gravity + linear motion) in m/s^2
-     *    Magnetic Field Strength Vector (20Hz) Three axis of magnetic field sensing in micro Tesla (uT)
-     *    Linear Acceleration Vector (100Hz) Three axis of linear acceleration data (acceleration minus gravity) in m/s^2
-     *    Gravity Vector (100Hz) Three axis of gravitational acceleration (minus any movement) in m/s^2
-     *    Temperature (1Hz) Ambient temperature in degrees celsius
-     *    Of those, the first (the gravity-corrected absolute orientation vector) is the most useful in FTC robot design.
-     */
     private void LinearTravel(double travelLength, double travelPower) {
         double appliedPower = travelPower;
-        boolean travelCompleted = false;// = true when length has been traveled by robot
+        boolean travelCompleted = false;
         double ticksError;
         double ticksToGo;
         double travelTicks = TICKS_PER_INCH * travelLength;
         double yawError;
 
-        for (DcMotorEx dcMotor: motor)
-        {
-            dcMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER); // The motor is to set the current encoder position to zero
-            dcMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER); // apply a particular power level to the motor run at any velocity with specified power level
+        for (DcMotorEx dcMotor : motor) {
+            dcMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            dcMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
-        for (int i = 0; i < motor.length; i++)              // for each motor
-        {
-            motorTicks[i] = 0;                              // no time to debug, eh?
+        for (int i = 0; i < motor.length; i++) {
+            motorTicks[i] = 0;
         }
+
         resetAngle();
-        while (opModeIsActive() && !travelCompleted)            // drive until end of period.
-        {
-            ticksError = ((motorTicks[1] + motorTicks[2]) - (motorTicks[0] + motorTicks[3]) ) * 0.007;
-            yawError = checkDirection();  // Use gyro to drive in a straight line.
+
+        while (opModeIsActive() && !travelCompleted) {
+            ticksError = ((motorTicks[1] + motorTicks[2]) - (motorTicks[0] + motorTicks[3])) * 0.007;
+            yawError = checkDirection();
             correction = -ticksError + yawError;
 
-            for (int i = 0; i < motor.length; i++)              // for each motor
-            {
-                motorTicks[i] = motor[i].getCurrentPosition();  // have we travelled far enough?
+            for (int i = 0; i < motor.length; i++) {
+                motorTicks[i] = motor[i].getCurrentPosition();
             }
+
             ticksToGo = (Math.abs(travelTicks) - Math.abs(motorTicks[0])) / Math.abs(travelTicks);
-            if (ticksToGo < 0.10)
-            {
+            if (ticksToGo < 0.10) {
                 appliedPower = travelPower * ticksToGo;
                 correction = correction * ticksToGo;
             }
-            if (Math.abs(motorTicks[0]) < Math.abs(travelTicks))                    // are we there yet?
-            {
-                /*
-                 * steering power applied along X axis principles
-                 * motors 0,3 pair
-                 * motors 1,2 pair
-                 */
+
+            if (Math.abs(motorTicks[0]) < Math.abs(travelTicks)) {
                 motor[0].setPower(appliedPower - correction);
                 motor[1].setPower(appliedPower + correction);
                 motor[2].setPower(appliedPower + correction);
                 motor[3].setPower(appliedPower - correction);
 
-                telemetry.addData("1 IMU heading", lastAngles.firstAngle);
-                telemetry.addData("2 Global heading", globalAngle);
-                telemetry.addData("3 Correction", correction);
-                telemetry.addData("4 Current ticks:", motorTicks[0]);
-                telemetry.addData("5 Travel length:", travelLength);
-                telemetry.addData("6 Target ticks:", travelTicks);
-                telemetry.addData("7 Motor power:", motor[0].getPower());
-                telemetry.addData("8 Travel power:", travelPower);
+                telemetry.addData("1 IMU Heading", getAngle());
+                telemetry.addData("2 Correction", correction);
+                telemetry.addData("3 Current ticks:", motorTicks[0]);
+                telemetry.addData("4 Target ticks:", travelTicks);
+                telemetry.addData("5 Motor power:", motor[0].getPower());
                 telemetry.update();
-                datalog.yaw.set(lastAngles.firstAngle);
-                datalog.pitch.set(lastAngles.secondAngle);
-                datalog.roll.set(lastAngles.thirdAngle);
+
+                datalog.yaw.set(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+                datalog.pitch.set(imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES));
+                datalog.roll.set(imu.getRobotYawPitchRollAngles().getRoll(AngleUnit.DEGREES));
                 datalog.yawError.set(yawError);
                 datalog.ticksError.set(ticksError);
                 datalog.correction.set(correction);
@@ -273,306 +213,162 @@ public class MecanumTravelIMU extends LinearOpMode
                 datalog.leftBack.set(motor[1].getPower());
                 datalog.rightFront.set(motor[2].getPower());
                 datalog.rightBack.set(motor[3].getPower());
-                datalog.writeLine();        // The logged timestamp is taken when writeLine() is called
+                datalog.writeLine();
 
-                aButton = gamepad1.a;       // allow teleop to change direction by 90 degrees
-                bButton = gamepad1.b;       // A - Cross; B - Circle
-                //touched = touch.isPressed();
-                if (/*touched || */aButton || bButton) {
-                    backup();               // for a safer turn in the subsequent operation
+                aButton = gamepad1.a;
+                bButton = gamepad1.b;
 
-                    if (/*touched || */aButton) rotate(-90, travelPower); // turn 90 degrees right
-
-                    if (bButton) rotate(90, travelPower);             // turn 90 degrees left
+                if (aButton) {
+                    backup();
+                    rotate(-90, travelPower);
                 }
-            }
-            else
-            {
-                travelCompleted = true; // Alhamdolillah! Travelled the specified linear length.
-            }
-        }
-        fullStop();                     // turn the motors off
-    }
 
-    /**
-     * Function to backup the robot after a stop to ensure it does not
-     * collide with any object. This function will require further tuning
-     * of the parameter value to the sleep function.
-     * For REV Robotics Mecanum kit drivetrain, the clearance required is 3.5" from the obstacle
-     * Suggested parameter changes to this function:
-     * backup directions:
-     * Value    Direction       Bearing, degrees         Obstacle(s) (e.g. walls)
-     * 0        due north       0                           behind
-     * 1        due east        90                          left
-     * 2        due south east  135                         front and left
-     * 3        due south       180                         front
-     * 4        due south west  225                         front and right
-     * 5        due west        270                         right obstacle
-     */
-    private void backup() {
-        for (DcMotorEx dcMotor : motor)
-        {
-            dcMotor.setPower(-0.3);     // mode = 3 from above table
+                if (bButton) {
+                    backup();
+                    rotate(90, travelPower);
+                }
+            } else {
+                travelCompleted = true;
+            }
         }
-        sleep(500);                     // adjust parameter value based on drive train dimensions and motors
         fullStop();
     }
-    /**
-     * Function to stop power to all defined motors in the arraylist motor[]
-     * and to wait for 1 second.
-     * The stopping action is controlled by the setting chosen for the motor
-     * based on vendor specification by the program during the initialization.
-     */
+
+    private void backup() {
+        for (DcMotorEx dcMotor : motor) {
+            dcMotor.setPower(-0.3);
+        }
+        sleep(500);
+        fullStop();
+    }
+
     private void fullStop() {
         for (DcMotorEx dcMotor : motor) {
-            dcMotor.setPower(0.0);      // since the following RunMode varies with motors play it safe with this call
-            dcMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER); // see note, if any, on vendor specs for the corresponding motor
-            dcMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER); // apply a particular power level to the motor run at any velocity with specified power level
+            dcMotor.setPower(0.0);
+            dcMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+            dcMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            dcMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
-        sleep(250);                     // allow the motors to come to a full stop
+        sleep(250);
     }
 
     @Override
-    public void runOpMode() throws InterruptedException   // called when init button is  pressed.
-    {
-        // Initialize the hardware variables
-        // The strings used here must correspond
-        // to the names assigned during the robot configuration step on the Driver Hub
-        for (int i = 0; i < motor.length; i++)
-        {
-            motor[i] = hardwareMap.get(DcMotorEx.class, motorLabels[i]); // motorLabels for user friendly messages elsewhere
+    public void runOpMode() throws InterruptedException {
+        // Initialize motors
+        for (int i = 0; i < motor.length; i++) {
+            motor[i] = hardwareMap.get(DcMotorEx.class, motorLabels[i]);
+            motor[i].setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+            motor[i].setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            motor[i].setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
-        // REV Robotics motors may need two of the following
-        // four statements to be enabled - PLEASE TEST before 1st use!
-        motor[0].setDirection(DcMotorEx.Direction.FORWARD); // motorLeftFront
-        motor[1].setDirection(DcMotorEx.Direction.FORWARD); // motorLeftBack
-        motor[2].setDirection(DcMotorEx.Direction.REVERSE); // motorRightFront
-        motor[3].setDirection(DcMotorEx.Direction.REVERSE); // motorRightBack
-        // default condition but play it safe anyway
-        for (DcMotorEx dcMotor : motor) {
-            /*
-             * motor stops and then brakes
-             * actively resisting any external force
-             * which attempts to turn the motor
-             */
-            dcMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE); // stops and then brakes, actively resisting any external force which attempts to turn the motor
-            dcMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            dcMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER); // apply a particular power level to the motor run at any velocity with specified power level
-        }
-        //touch = hardwareMap.touchSensor.get("sensorTouch");        // get a reference to touch sensor.
+        motor[0].setDirection(DcMotorEx.Direction.FORWARD);
+        motor[1].setDirection(DcMotorEx.Direction.FORWARD);
+        motor[2].setDirection(DcMotorEx.Direction.REVERSE);
+        motor[3].setDirection(DcMotorEx.Direction.REVERSE);
 
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode                = BNO055IMU.SensorMode.NDOF; // Fusion of all 3 sensors with FMC enabled; incomplete figure 8 pattern will calibrate magnetometer
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES; // | RADIANS
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC; // | MILLI_EARTH_GRAVITY
-        parameters.loggingEnabled      = false;                     // debugging aid: enable logging for this device?
-        imu = hardwareMap.get(BNO055IMU.class, "imu");   // Retrieve and initialize the IMU
-        imu.initialize(parameters);     // Initialize the sensor using the indicated set of parameters
-        // The execution of this method can take a fairly long while,
-        // possibly several tens of milliseconds
-        double travelLength = 0.0;     // 12" linear, will parametrically evaluate other lengths too!
-        double deltaTravel = 3.0;
+        // Initialize IMU
+        imu = hardwareMap.get(IMU.class, "imu");
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.FORWARD;
+        RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
+        IMU.Parameters parameters = new IMU.Parameters(orientationOnRobot);
+        imu.initialize(parameters);
 
-        telemetry.addData("Mode", "Calibrating...");
-        telemetry.update();
-
-        while (!isStopRequested() && !imu.isGyroCalibrated())        // make sure the imu gyro is calibrated before continuing.
-        {
-            sleep(50);                  // calibration time does not exceed ~3 secs in practice
-            idle();
-        }
-
-        telemetry.addData("Calibration status", imu.getCalibrationStatus().toString());
+        telemetry.addData("Status", "IMU initialized with orientation");
+        telemetry.addData("Robot Orientation", "Logo Facing: FORWARD, USB Facing: UP");
         telemetry.addData("Mode", "Select Start");
         telemetry.update();
 
-        waitForStart();                 // wait for Start button
+        waitForStart();
 
         telemetry.addData("Mode", "running");
         telemetry.update();
-        sleep(1000);
-        //lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        // 6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72
-        for (int i = 0; i < 3; i++)
-        {
+
+        double travelLength = 0.0;
+        double deltaTravel = 3.0;
+
+        for (int i = 0; i < 3; i++) {
             travelLength += deltaTravel;
-            LinearTravel(travelLength, initialPower);   // modularized for future use in Automomous
-            //LinearTravel(-travelLength, -initialPower);   // modularized for future use in Automomous
+            LinearTravel(travelLength, initialPower);
             long pauseInterval = 5000;
             telemetry.addData("Traveled", travelLength + " inches");
             telemetry.addData("Paused", pauseInterval + " milliseconds");
             telemetry.update();
             sleep(pauseInterval);
         }
-
     }
 
-    /**
-     * Resets the cumulative angle tracking to zero and initializes the lastAngles entity
-     */
-    private void resetAngle()
-    {
-        /*
-         * Returns the absolute orientation of the sensor as
-         * a set three angles with indicated parameters
-         * reference - the axes reference in which the result will be expressed
-         * order - the axes order in which the result will be expressed
-         * angleUnit - the angle units in which the result will be expressed
-         * lastAngles - absolute orientation of the sensor
-         */
-        lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-        globalAngle = 0;
+    private void resetAngle() {
+        imu.resetYaw();
     }
 
-    /**
-     * Get current cumulative angle rotation from last reset.
-     * @return Angle in degrees. + = left, - = right.
-     */
-    private double getAngle()
-    {
-        // We experimentally determined the Z axis is the axis we want to use for heading angle.
-        // We have to process the angle because the imu works in euler angles so the Z axis is
-        // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
-        // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
-
-        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-        double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
-
-        if (deltaAngle < -180)
-            deltaAngle += 360;
-        else if (deltaAngle > 180)
-            deltaAngle -= 360;
-
-        globalAngle += deltaAngle;
-
-        lastAngles = angles;
-
-        return globalAngle;
+    private double getAngle() {
+        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
     }
 
-    /**
-     * If the current cumulative heading angle is not zero then the robot is
-     * not travel in a straight line. Use a simple proportional control to
-     * correct the deviation.
-     * <p>
-     *     The gain value is essentially the proportional control correction factor.
-     *     This value may require some tuning based on field experiments.
-     * </p>
-     * @return Power adjustment, + is adjust left - is adjust right.
-     */
-    private double checkDirection()
-    {
+    private double checkDirection() {
         double correction, angle, gain = 0.0055;
-
         angle = getAngle();
-
         if (angle == 0)
-            correction = 0;             // no adjustment.
+            correction = 0;
         else
-            correction = -angle;        // reverse sign of angle for correction.
-
+            correction = -angle;
         correction = correction * gain;
-
         return correction;
     }
 
-    /**
-     * Rotate left or right the number of degrees. Does not support turning more than 180 degrees.
-     * <p>
-     * getAngle() returns + when rotating counter clockwise (left) and - when rotating
-     * clockwise (right).
-     * </p>
-     * @param degrees Degrees to turn, + is left - is right
-     */
-    private void rotate(int degrees, double power)
-    {
-        double  leftPower, rightPower;
+    private void rotate(int degrees, double power) {
+        double leftPower, rightPower;
 
-        resetAngle();                   // reset heading for tracking with IMU data
+        resetAngle();
 
-        if (degrees < 0)
-        {                               // turn right
+        if (degrees < 0) {
             leftPower = power;
             rightPower = -power;
-        }
-        else if (degrees > 0)
-        {                               // turn left.
+        } else if (degrees > 0) {
             leftPower = -power;
             rightPower = power;
-        }
-        else return;
+        } else return;
 
-        motor[0].setPower(leftPower);   // set power to rotate
+        motor[0].setPower(leftPower);
         motor[1].setPower(rightPower);
         motor[2].setPower(rightPower);
         motor[3].setPower(leftPower);
-        if (degrees < 0)                // rotate until turn is completed
-        {
-            // On right turn we have to get off zero first.
-            //noinspection StatementWithEmptyBody
-            while (opModeIsActive() && getAngle() == 0) {}
 
-            //noinspection StatementWithEmptyBody
-            while (opModeIsActive() && getAngle() > degrees) {}
+        if (degrees < 0) {
+            while (opModeIsActive() && getAngle() > degrees) {
+            }
+        } else {
+            while (opModeIsActive() && getAngle() < degrees) {
+            }
         }
-        else                                // left turn.
-            //noinspection StatementWithEmptyBody
-            while (opModeIsActive() && getAngle() < degrees) {}
 
         fullStop();
-
-        resetAngle();                          // reset angle tracking on new heading
+        imu.resetYaw();
     }
 
-
-    /*
-     * This class encapsulates all the fields that will go into the datalog.
-     */
-    public static class Datalog
-    {
-        // The underlying datalogger object - it cares only about an array of loggable fields
+    public static class Datalog {
         private final Datalogger datalogger;
-
-        // These are all of the fields that we want in the datalog.
-        // Note that order here is NOT important. The order is important in the setFields() call below
         public Datalogger.GenericField opModeStatus = new Datalogger.GenericField("OpModeStatus");
-        public Datalogger.GenericField yaw          = new Datalogger.GenericField("Yaw");
-        public Datalogger.GenericField pitch        = new Datalogger.GenericField("Pitch");
-        public Datalogger.GenericField roll         = new Datalogger.GenericField("Roll");
-        public Datalogger.GenericField yawError     = new Datalogger.GenericField("YawError");
-        public Datalogger.GenericField ticksError   = new Datalogger.GenericField("TicksError");
-        public Datalogger.GenericField correction   = new Datalogger.GenericField("Correction");
-        public Datalogger.GenericField targetTicks  = new Datalogger.GenericField("TargetTicks");
-        public Datalogger.GenericField motorTicks   = new Datalogger.GenericField("MotorTicks");
-        public Datalogger.GenericField ticksToGo   = new Datalogger.GenericField("TicksToGo");
+        public Datalogger.GenericField yaw = new Datalogger.GenericField("Yaw");
+        public Datalogger.GenericField pitch = new Datalogger.GenericField("Pitch");
+        public Datalogger.GenericField roll = new Datalogger.GenericField("Roll");
+        public Datalogger.GenericField yawError = new Datalogger.GenericField("YawError");
+        public Datalogger.GenericField ticksError = new Datalogger.GenericField("TicksError");
+        public Datalogger.GenericField correction = new Datalogger.GenericField("Correction");
+        public Datalogger.GenericField targetTicks = new Datalogger.GenericField("TargetTicks");
+        public Datalogger.GenericField motorTicks = new Datalogger.GenericField("MotorTicks");
+        public Datalogger.GenericField ticksToGo = new Datalogger.GenericField("TicksToGo");
         public Datalogger.GenericField appliedPower = new Datalogger.GenericField("AppliedPower");
-        public Datalogger.GenericField leftFront    = new Datalogger.GenericField("motorLeftFront");
-        public Datalogger.GenericField leftBack     = new Datalogger.GenericField("motorLeftBack");
-        public Datalogger.GenericField rightFront   = new Datalogger.GenericField("motorRightFront");
-        public Datalogger.GenericField rightBack    = new Datalogger.GenericField("motorRightBack");
-        /*
-            telemetry.addData("4 Current ticks:", motorTicks[0]);
-            telemetry.addData("5 Travel length:", travelLength);
-            telemetry.addData("7 Motor power:", motor[0].getPower());
-            telemetry.addData("8 Travel power:", travelPower);
-         */
+        public Datalogger.GenericField leftFront = new Datalogger.GenericField("motorLeftFront");
+        public Datalogger.GenericField leftBack = new Datalogger.GenericField("motorLeftBack");
+        public Datalogger.GenericField rightFront = new Datalogger.GenericField("motorRightFront");
+        public Datalogger.GenericField rightBack = new Datalogger.GenericField("motorRightBack");
 
-        public Datalog(String name)
-        {
-            // Build the underlying datalog object
+        public Datalog(String name) {
             datalogger = new Datalogger.Builder()
-
-                    // Pass through the filename
                     .setFilename(name)
-
-                    // Request an automatic timestamp field
                     .setAutoTimestamp(Datalogger.AutoTimestamp.DECIMAL_SECONDS)
-
-                    // Tell it about the fields we care to log.
-                    // Note that order *IS* important here! The order in which we list
-                    // the fields is the order in which they will appear in the log.
                     .setFields(
                             opModeStatus,
                             yaw,
@@ -591,10 +387,7 @@ public class MecanumTravelIMU extends LinearOpMode
                     .build();
         }
 
-        // Tell the datalogger to gather the values of the fields
-        // and write a new line in the log.
-        public void writeLine()
-        {
+        public void writeLine() {
             datalogger.writeLine();
         }
     }

@@ -62,8 +62,8 @@ import java.util.Locale;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
-@TeleOp(name = "AprilTag: Basic 'n Easy", group = "Vision")
-// @Disabled
+@TeleOp(name = "AprilTag: Basic 'n Easy", group = "AprilTag")
+//@Disabled
 public class AprilTagEasy extends LinearOpMode {
 
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera

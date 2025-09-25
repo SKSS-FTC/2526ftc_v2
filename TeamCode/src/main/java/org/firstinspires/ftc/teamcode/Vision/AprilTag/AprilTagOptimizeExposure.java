@@ -63,7 +63,7 @@ import java.util.concurrent.TimeUnit;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
 
-@TeleOp(name="AprilTag: Optimize Exposure", group = "Vision")
+@TeleOp(name="AprilTag: Optimize Exposure", group = "AprilTag")
 // @Disabled
 public class AprilTagOptimizeExposure extends LinearOpMode
 {

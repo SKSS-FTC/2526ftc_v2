@@ -67,8 +67,8 @@ import java.util.Locale;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
-@TeleOp(name = "AprilTag: Localization Test", group = "Vision")
-// @Disabled
+@TeleOp(name = "AprilTag: Localization Test", group = "AprilTag")
+//@Disabled
 public class AprilTagLocalization extends LinearOpMode {
 
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
@@ -136,10 +136,8 @@ public class AprilTagLocalization extends LinearOpMode {
                 visionPortal.resumeStreaming();
             }
 
-
             sleep(20);  // Share the CPU
         }
-
 
         visionPortal.close();   // Save more CPU resources when camera is no longer needed
 

@@ -39,18 +39,37 @@ package org.firstinspires.ftc.teamcode.Vision.AprilTag;
  * velocity based on the robot's real-time position relative to the target,
  * ensuring a consistent shot even with variations in the robot's path.
  * Workflow
- *  Initialize hardware including Vision Processor under runOpMode()
- *  Add a LAUNCH_VELOCITY_MAP
- *  Create a velocity calculation method getLaunchVelocityFromDistance()
- *  Update state machine: (DRIVE_TO_PRELAUNCH, SPIN_UP_LAUNCHER, FIRE_ARTIFACT)
- *  Refine telemetry for requiredVelocity (setpoint) and launcherVelocity (measured value)
+ * Initialize hardware including Vision Processor under runOpMode()
+ * Add a LAUNCH_VELOCITY_MAP
+ * Create a velocity calculation method getLaunchVelocityFromDistance()
+ * Update state machine: (DRIVE_TO_PRELAUNCH, SPIN_UP_LAUNCHER, FIRE_ARTIFACT)
+ * Refine telemetry for requiredVelocity (setpoint) and launcherVelocity (measured value)
  * @see https://ftc-resources.firstinspires.org/ftc/game/manual
- *
+ * The two parameters you can pass to the RevHubOrientationOnRobot constructor are:
+ * logoFacingDirection: This specifies which side of the robot the Rev Hub's logo is facing. Options are:
+ * RevHubOrientationOnRobot.LogoFacingDirection.UP
+ * RevHubOrientationOnRobot.LogoFacingDirection.DOWN
+ * RevHubOrientationOnRobot.LogoFacingDirection.LEFT
+ * RevHubOrientationOnRobot.LogoFacingDirection.RIGHT
+ * RevHubOrientationOnRobot.LogoFacingDirection.FORWARD
+ * RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD
+ * usbFacingDirection: This specifies which side of the robot the USB ports are facing. The options are:
+ * RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+ * RevHubOrientationOnRobot.UsbFacingDirection.UP
+ * RevHubOrientationOnRobot.UsbFacingDirection.DOWN
+ * RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+ * RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
+ * RevHubOrientationOnRobot.UsbFacingDirection.LEFT
+ * RevHubOrientationOnRobot.UsbFacingDirection.RIGHT
+ * @see https://ftc-docs.firstinspires.org/en/latest/programming_resources/imu/imu.html
  */
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 
 // Vision-related imports
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -59,11 +78,14 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
 import java.util.List;
+import java.util.Locale;
 
+// The FTC SDK does not include a built-in PID controller class.
 
 public class FlyByLaunch extends LinearOpMode {
 
@@ -71,6 +93,7 @@ public class FlyByLaunch extends LinearOpMode {
     private DcMotorEx frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
     private DcMotorEx launcherMotor;
     private Servo launchTrigger;
+    private IMU imu;
 
     // --- LAUNCHER CONSTANTS (Tune these!) ---
     private static final double LAUNCHER_SETPOINT_VELOCITY = 1500; // Ticks/second, adjust based on your motor
@@ -90,7 +113,9 @@ public class FlyByLaunch extends LinearOpMode {
     // --- POSE ESTIMATION (AprilTag-based) ---
     private double robotX = 0.0;
     private double robotY = 0.0;
-    private double robotHeading = 0.0;
+    private double robotHeading = 0.0; // This will be updated by either IMU or AprilTag
+    private double requiredVelocity = 0.0;
+    private double launcherVelocity = 0.0;
 
     // --- PID Controller Object ---
     private PIDFController launcherPID;
@@ -109,6 +134,12 @@ public class FlyByLaunch extends LinearOpMode {
         FIRE_ARTIFACT,
         POST_FIRE
     }
+
+    // --- QUADRATIC REGRESSION COEFFICIENTS ---
+    // These coefficients are pre-calculated using the DataAnalysis utility.
+    private static final double COEFF_A = 0.000302; // Replace with your calculated value
+    private static final double COEFF_B = 14.75;    // Replace with your calculated value
+    private static final double COEFF_C = 950.0;    // Replace with your calculated value
 
     @Override
     public void runOpMode() {
@@ -131,6 +162,16 @@ public class FlyByLaunch extends LinearOpMode {
 
         launchTrigger = hardwareMap.get(Servo.class, "launch_trigger");
 
+        // --- IMU INITIALIZATION ---
+        imu = hardwareMap.get(IMU.class, "imu");
+        // FIX: The constructor for RevHubOrientationOnRobot no longer takes no arguments.
+        // You MUST specify the logo and USB facing directions.
+        // These are example values; you should tune them for your specific robot.
+        imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD)));
+
+        // Reset the yaw angle to zero. This is the only reset method available now.
+        imu.resetYaw();
+
         // --- PID Controller Initialization ---
         launcherPID = new PIDFController(PID_kP, PID_kI, PID_kD, PID_kF);
 
@@ -139,7 +180,7 @@ public class FlyByLaunch extends LinearOpMode {
 
         RobotState currentState = RobotState.DRIVE_TO_PRELAUNCH;
 
-        telemetry.addData("Status", "Initialized with PID and AprilTag");
+        telemetry.addData("Status", "Initialized with PID, IMU, and AprilTag");
         telemetry.update();
 
         waitForStart();
@@ -165,9 +206,16 @@ public class FlyByLaunch extends LinearOpMode {
 
                 case SPIN_UP_LAUNCHER:
                     telemetry.addData("State", "SPIN_UP_LAUNCHER");
+
+                    // Calculate the distance to the final target
+                    double distanceToTarget = Math.sqrt(Math.pow(TARGET_X - robotX, 2) + Math.pow(TARGET_Y - robotY, 2));
+
+                    // Use the quadratic function to get the required velocity
+                    requiredVelocity = getLaunchVelocity(distanceToTarget);
+
                     // Use the PID controller to set the launcher motor power
-                    double launcherVelocity = launcherMotor.getVelocity();
-                    double motorPower = launcherPID.calculate(LAUNCHER_SETPOINT_VELOCITY, launcherVelocity);
+                    launcherVelocity = launcherMotor.getVelocity();
+                    double motorPower = launcherPID.calculate(requiredVelocity, launcherVelocity);
                     launcherMotor.setPower(motorPower);
 
                     // Continue driving towards the final target
@@ -175,8 +223,7 @@ public class FlyByLaunch extends LinearOpMode {
                     mecanumDrive(Math.cos(angleToTarget), Math.sin(angleToTarget), 0);
 
                     // Check if we are at the target and the launcher is ready
-                    double distanceToTarget = Math.sqrt(Math.pow(TARGET_X - robotX, 2) + Math.pow(TARGET_Y - robotY, 2));
-                    if (distanceToTarget < 5.0 && launcherVelocity > (LAUNCHER_SETPOINT_VELOCITY * 0.95)) {
+                    if (distanceToTarget < 5.0 && launcherVelocity > (requiredVelocity * 0.95)) {
                         currentState = RobotState.FIRE_ARTIFACT;
                     }
                     break;
@@ -197,28 +244,31 @@ public class FlyByLaunch extends LinearOpMode {
             }
 
             telemetry.addData("Robot Pos", "(%.2f, %.2f)", robotX, robotY);
-            telemetry.addData("Launcher Velocity", launcherMotor.getVelocity());
+            // Updated telemetry to reflect the new logic
+            telemetry.addData("Robot Heading (IMU)", "%.2f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            telemetry.addData("Robot Heading (Used)", "%.2f", Math.toDegrees(robotHeading));
+            telemetry.addData("Required Velocity", "%.2f", requiredVelocity);
+            telemetry.addData("Launcher Velocity", "%.2f", launcherVelocity);
             telemetry.update();
         }
         visionPortal.close();
     }
 
     private void mecanumDrive(double x, double y, double rot) {
-        double frontLeftPower = x + y + rot;
-        double frontRightPower = -x + y - rot;
-        double backLeftPower = -x + y + rot;
-        double backRightPower = x + y - rot;
+        // Use the heading from our combined IMU/AprilTag source
+        double botHeading = robotHeading;
 
-        double maxPower = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
-        maxPower = Math.max(maxPower, Math.abs(backLeftPower));
-        maxPower = Math.max(maxPower, Math.abs(backRightPower));
+        // Rotate the movement vectors by the inverse of the robot's heading to achieve field-centric control
+        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
-        if (maxPower > 1.0) {
-            frontLeftPower /= maxPower;
-            frontRightPower /= maxPower;
-            backLeftPower /= maxPower;
-            backRightPower /= maxPower;
-        }
+        // Denominator is the largest motor power (absolute value) or 1
+        // This ensures all powers are normalized to a value between -1 and 1
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rot), 1);
+        double frontLeftPower = (rotY + rotX + rot) / denominator;
+        double backLeftPower = (rotY - rotX + rot) / denominator;
+        double frontRightPower = (rotY - rotX - rot) / denominator;
+        double backRightPower = (rotY + rotX - rot) / denominator;
 
         frontLeftMotor.setPower(frontLeftPower);
         frontRightMotor.setPower(frontRightPower);
@@ -241,21 +291,35 @@ public class FlyByLaunch extends LinearOpMode {
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
 
         if (!currentDetections.isEmpty()) {
+            // FIX: Corrected the typo from `currentDemos` to `currentDetections`
             AprilTagDetection detection = currentDetections.get(0); // Take the first detected tag
-
-            // This assumes a single tag is detected and the robot's pose is calculated relative to it
-            // For a more advanced setup, you would use multiple tags and a pose fusion algorithm
 
             if (detection.metadata != null) {
                 // The detection.robotPose is the pose of the robot *relative to the tag*.
-                // This means a positive X value is right of the tag, Y is forward from the tag.
                 robotX = detection.ftcPose.x;
                 robotY = detection.ftcPose.y;
+
+                // FIX: The IMU interface no longer supports setting a yaw value.
+                // We will now directly use the AprilTag's yaw to update our robotHeading.
                 robotHeading = detection.ftcPose.yaw;
 
-                // Add telemetry for debugging
                 telemetry.addData("AprilTag ID", detection.id);
             }
+        } else {
+            // If no AprilTag is detected, fall back to the IMU for heading.
+            robotHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         }
+    }
+
+    /**
+     * Calculates the required launch velocity based on distance using
+     * a pre-calibrated quadratic regression model.
+     *
+     * @param distance The distance from the robot to the target in inches.
+     * @return The required launcher motor velocity in ticks per second.
+     */
+    private double getLaunchVelocity(double distance) {
+        // We use the coefficients derived from the DataAnalysis utility.
+        return (COEFF_A * distance * distance) + (COEFF_B * distance) + COEFF_C;
     }
 }

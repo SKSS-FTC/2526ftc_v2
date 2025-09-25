@@ -52,6 +52,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 @Autonomous(name="Drive To AprilTag - Continuous Offsets", group = "AprilTag")
+//@Disabled
 public class AprilTagDriveToTagOffset extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
