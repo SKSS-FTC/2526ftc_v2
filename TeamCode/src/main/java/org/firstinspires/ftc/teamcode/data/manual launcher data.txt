@@ -20,3 +20,14 @@ DIAGONAL: 44.5
 
 POWER 1 OUT OUT OUT OUT OUT OUT OUT OUT OUT OUT
 
+horizontal: 35
+vertical: 30
+diagonal: 45
+bottom of wheel to top of ramp: 5.5
+power 1 IN OUT OUT IN OUT OUT OUT IN IN OUT IN OUT IN IN IN IN OUT OUT OUT IN IN
+
+horizontal: 35
+vertical: 30
+diagonal: 45
+bottom of wheel to top of ramp: 5.5
+power .8 IN IN OUT OUT OUT IN IN OUT IN OUT OUT OUT OUT OUT OUT OUT IN OUT OUT IN
