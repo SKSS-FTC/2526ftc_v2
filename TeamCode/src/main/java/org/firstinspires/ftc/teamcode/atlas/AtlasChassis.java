@@ -38,12 +38,13 @@ public class AtlasChassis {
 
     public static final double RAD_TO_DEG = 180.0 / Math.PI;
 
+    private DcMotor.ZeroPowerBehavior zeroPowerBehavior;
     public AtlasChassis(HardwareMap hardwareMap) {
+        zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE;
         backLeft = getDcMotorEx(hardwareMap, "rearLeft");
         backRight = getDcMotorEx(hardwareMap, "rearRight", false);
         frontLeft = getDcMotorEx(hardwareMap, "frontLeft", true);
         frontRight = getDcMotorEx(hardwareMap, "frontRight", true);
-
         // Make sure imu exists in hardware map
         imu = hardwareMap.get(IMU.class, "imu");
 
@@ -64,6 +65,7 @@ public class AtlasChassis {
         else motor.setDirection(DcMotorSimple.Direction.FORWARD);
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor.setZeroPowerBehavior(zeroPowerBehavior);
         return motor;
     }
     private DcMotorEx getDcMotorEx(HardwareMap hardwareMap, String name) {
@@ -85,7 +87,7 @@ public class AtlasChassis {
         backRight.setPower((y + x - r) / denominator);
     }
 
-    public void update(Telemetry telemetry) {
+    public double update(Telemetry telemetry) {
         long currentTime = System.currentTimeMillis();
         double deltaTimeMS = currentTime - lastUpdateTime;
         double deltaTime = deltaTimeMS * 0.001;
@@ -124,5 +126,6 @@ public class AtlasChassis {
             telemetry.addLine("position (" + pose.x + ", " + pose.y + ")");
             telemetry.addLine("yaw " + yawDeg);
         }
+        return deltaTime;
     }
 }
