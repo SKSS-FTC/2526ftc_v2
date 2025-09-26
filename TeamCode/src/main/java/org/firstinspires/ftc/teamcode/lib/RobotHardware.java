@@ -4,7 +4,14 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class RobotHardware {
+    private static RobotHardware instance;
     // drivetrain
+    public static RobotHardware getInstance() {
+        if (instance == null) {
+            instance = new RobotHardware();
+        }
+        return instance;
+    }
     public DcMotorEx dtFL;
     public DcMotorEx dtFR;
     public DcMotorEx dtBL;
