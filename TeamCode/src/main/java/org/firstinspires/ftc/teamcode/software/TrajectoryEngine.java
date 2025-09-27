@@ -65,7 +65,7 @@ public class TrajectoryEngine {
 		
 		// 6. Calculate the required launcher pitch using ballistic equations
 		double h = Settings.Aiming.GOAL_HEIGHT - Settings.Aiming.MUZZLE_HEIGHT;
-		double v = Settings.Aiming.MUZZLE_SPEED;
+		double v = Settings.Aiming.MUZZLE_TANGENTIAL_MAX_SPEED;
 		double g = Settings.Aiming.GRAVITY;
 		
 		double discriminant = (v * v * v * v) - g * (g * d * d + 2 * h * v * v);

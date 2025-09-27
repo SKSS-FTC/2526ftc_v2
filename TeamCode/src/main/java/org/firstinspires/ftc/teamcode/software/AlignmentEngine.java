@@ -9,12 +9,12 @@ import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LA
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.limelightvision.LLResult;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
+import org.firstinspires.ftc.teamcode.hardware.Mechanism;
 
-public class AlignmentEngine {
+public class AlignmentEngine extends Mechanism {
 	private final Drivetrain drivetrain;
 	private final Follower follower;
 	private final MatchSettings matchSettings;
@@ -46,13 +46,22 @@ public class AlignmentEngine {
 		return (B.getX() - A.getX()) * (C.getY() - A.getY()) - (B.getY() - A.getY()) * (C.getX() - A.getX());
 	}
 	
+	public void init() {
+	
+	}
+	
+	public boolean isAligned() {
+		Pose currentPose = follower.getPose();
+		Pose targetPose = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.BLUE)
+				? Settings.Field.BLUE_GOAL_POSE
+				: Settings.Field.RED_GOAL_POSE;
+		
+		double angleError = angleToTarget(currentPose, targetPose);
+		return Math.abs(angleError) < Settings.Aiming.MAX_YAW_ERROR;
+	}
+	
 	public void run() {
 		Pose currentPose = follower.getPose();
-		if (!isInLaunchZone(currentPose)) {
-			return;
-		}
-		
-		LLResult llResult = limelightManager.detectGoal();
 		
 		Pose targetPose = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.BLUE)
 				? Settings.Field.BLUE_GOAL_POSE
@@ -61,14 +70,15 @@ public class AlignmentEngine {
 		double angleError = angleToTarget(currentPose, targetPose);
 		
 		
-		if (llResult == null || !llResult.isValid()) {
-			drivetrain.interpolateToOffset(0, 0, angleError);
-			return;
-		}
-		
-		double xError = limelightManager.limelight.getLatestResult().getTx();
-		
-		drivetrain.interpolateToOffset(xError, 0, angleError);
+		drivetrain.interpolateToOffset(0, 0, angleError);
+	}
+	
+	public void update() {
+	}
+	
+	@Override
+	public void stop() {
+	
 	}
 	
 	public boolean isInLaunchZone(Pose pose) {

@@ -7,14 +7,18 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
+import org.firstinspires.ftc.teamcode.hardware.Intake;
+import org.firstinspires.ftc.teamcode.hardware.Launcher;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
+import org.firstinspires.ftc.teamcode.hardware.Spindex;
+import org.firstinspires.ftc.teamcode.software.AlignmentEngine;
 import org.firstinspires.ftc.teamcode.software.Drivetrain;
+
+import java.util.function.Consumer;
 
 /**
  * Main TeleOp class for driver-controlled period.
  * Handles controller profile selection and robot operation during matches.
- *
- * @noinspection ClassWithoutConstructor
  */
 @TeleOp(name = "MainOp", group = ".Competition Modes")
 public class MainOp extends OpMode {
@@ -24,6 +28,19 @@ public class MainOp extends OpMode {
 	private Controller mainController;
 	private Controller subController;
 	private Follower follower;
+	
+	/**
+	 * Null-safe mechanism execution helper
+	 */
+	private static <T> void ifMechanismValid(T obj, Consumer<T> action) {
+		if (obj != null) {
+			try {
+				action.accept(obj);
+			} catch (Exception ignored) {
+				// swallow failures
+			}
+		}
+	}
 	
 	@Override
 	public final void init() {
@@ -37,18 +54,21 @@ public class MainOp extends OpMode {
 		logging = PanelsTelemetry.INSTANCE.getTelemetry();
 	}
 	
+	@Override
 	public final void start() {
-		mechanisms.init();
+		ifMechanismValid(mechanisms, m -> m.init());
 	}
 	
+	@Override
 	public final void loop() {
-		mechanisms.update();
+		ifMechanismValid(mechanisms, m -> m.update());
 		
 		processControllerInputs();
 		logging.update();
 		
 		mainController.saveLastState();
 		subController.saveLastState();
+		
 		if (matchSettings.nextArtifactNeeded() == MatchSettings.ArtifactColor.GREEN) {
 			subController.setLedColor(0, 255, 0, 100);
 		} else if (matchSettings.nextArtifactNeeded() == MatchSettings.ArtifactColor.PURPLE) {
@@ -58,80 +78,77 @@ public class MainOp extends OpMode {
 		}
 	}
 	
+	@Override
 	public final void stop() {
-		mechanisms.stop();
+		ifMechanismValid(mechanisms, m -> m.stop());
 	}
 	
 	/**
 	 * Process controller inputs
 	 */
 	private void processControllerInputs() {
-		
-		// MAIN CONTROLLER INPUTS
-		// Get drivetrain controls
+		// Drivetrain
 		double drive = mainController.getProcessedDrive();
 		double strafe = mainController.getProcessedStrafe();
 		double rotate = mainController.getProcessedRotation();
+		ifMechanismValid(mechanisms.drivetrain, dt -> dt.mecanumDrive(drive, strafe, rotate));
 		
-		// Apply the values to drivetrain
-		mechanisms.drivetrain.mecanumDrive(drive, strafe, rotate);
-		
-		// Go to predetermined positions, overriding the mecanum drive if a button is pressed
+		// Go-to actions
 		Controller.Action[] gotoActions = {
-				Controller.Action.GOTO_CLOSE_SHOOT, Controller.Action.GOTO_FAR_SHOOT,
-				Controller.Action.GOTO_HUMAN_PLAYER, Controller.Action.GOTO_SECRET_TUNNEL
+				Controller.Action.GOTO_CLOSE_SHOOT,
+				Controller.Action.GOTO_FAR_SHOOT,
+				Controller.Action.GOTO_HUMAN_PLAYER,
+				Controller.Action.GOTO_SECRET_TUNNEL
 		};
 		for (Controller.Action action : gotoActions) {
 			if (mainController.wasJustPressed(action)) {
-				mechanisms.drivetrain.goTo(Drivetrain.Position.valueOf(action.name().substring("GOTO_".length())));
-				break; // only one goto action can be triggered at a time
+				ifMechanismValid(mechanisms.drivetrain, dt ->
+						dt.goTo(Drivetrain.Position.valueOf(action.name().substring("GOTO_".length())))
+				);
+				break;
 			}
 		}
 		
 		if (mainController.wasJustPressed(Controller.Action.CANCEL_ASSISTED_DRIVING)) {
-			mechanisms.drivetrain.switchToManual();
+			ifMechanismValid(mechanisms.drivetrain, Drivetrain::switchToManual);
 		}
 		
-		//if (mainController.wasJustPressed(Controller.Action.PARK_EXTEND)) {
-		// we arent implementing this until like state bro
-		//}
-		
-		// Intake controls using Controller's isPressed
+		// Alignment & Launcher
 		if (subController.getProcessedValue(Controller.Action.AIM) > 0.2) {
-			mechanisms.alignmentEngine.run();
-			mechanisms.launcher.ready();
+			ifMechanismValid(mechanisms.get(AlignmentEngine.class), AlignmentEngine::run);
+			ifMechanismValid(mechanisms.get(Launcher.class), Launcher::ready);
 		} else {
-			mechanisms.launcher.stop();
+			ifMechanismValid(mechanisms.get(Launcher.class), Launcher::stop);
 		}
 		
 		if (subController.wasJustPressed(Controller.Action.LAUNCH)) {
-			mechanisms.launcher.launch();
+			ifMechanismValid(mechanisms.get(Launcher.class), Launcher::launch);
 		}
 		
+		// Intake & Spindex
 		if (subController.getProcessedValue(Controller.Action.INTAKE) > 0) {
-			mechanisms.spindex.prepareForIntake();
-			mechanisms.intake.in();
+			ifMechanismValid(mechanisms.get(Spindex.class), Spindex::prepareForIntake);
+			ifMechanismValid(mechanisms.get(Intake.class), Intake::in);
 		} else {
-			mechanisms.intake.stop();
+			ifMechanismValid(mechanisms.get(Intake.class), Intake::stop);
 		}
 
-        /*
-        if (subController.getProcessedValue(Controller.Action.RELEASE_EXTRAS) > 0) {
-            mechanisms.spindex.loadExtra();
-        }
-        if (subController.getProcessedValue(Controller.Action.RELEASE_PURPLE) > 0) {
-            mechanisms.spindex.loadPurple();
-        }
-        if (subController.getProcessedValue(Controller.Action.RELEASE_GREEN) > 0) {
-            mechanisms.spindex.loadGreen();
-        }
-         */
+    /*
+    Optional extra loads (commented out)
+    if (subController.getProcessedValue(Controller.Action.RELEASE_EXTRAS) > 0)
+        ifMechanismValid(mechanisms.get(Spindex.class), Spindex::loadExtra);
+    if (subController.getProcessedValue(Controller.Action.RELEASE_PURPLE) > 0)
+        ifMechanismValid(mechanisms.get(Spindex.class), Spindex::loadPurple);
+    if (subController.getProcessedValue(Controller.Action.RELEASE_GREEN) > 0)
+        ifMechanismValid(mechanisms.get(Spindex.class), Spindex::loadGreen);
+    */
 		
-		if (subController.getProcessedValue(Controller.Action.EMPTY_CLASSIFIER_STATE) > 0) {
+		// Classifier controls
+		if (subController.getProcessedValue(Controller.Action.EMPTY_CLASSIFIER_STATE) > 0)
 			matchSettings.emptyClassifier();
-		}
-		if (subController.getProcessedValue(Controller.Action.INCREMENT_CLASSIFIER_STATE) > 0) {
+		
+		if (subController.getProcessedValue(Controller.Action.INCREMENT_CLASSIFIER_STATE) > 0)
 			matchSettings.incrementClassifier();
-		}
 	}
+	
 }

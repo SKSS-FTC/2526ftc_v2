@@ -7,6 +7,8 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.hardware.Mechanism;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +17,7 @@ import java.util.Map;
  * It abstracts away direct motor control in favor of the Follower API for
  * both manual (tele-op) and autonomous movement.
  */
-public class Drivetrain {
+public class Drivetrain extends Mechanism {
 	
 	public final Follower follower;
 	// Define field-centric poses for autonomous targets.
@@ -41,6 +43,11 @@ public class Drivetrain {
 		positionPoses.put(Position.SECRET_TUNNEL, new Pose(120, 24, Math.toRadians(0)));
 	}
 	
+	@Override
+	public void init() {
+	
+	}
+	
 	/**
 	 * This method MUST be called in the main loop of your OpMode to keep the
 	 * follower's internal state and localization updated.
@@ -53,6 +60,11 @@ public class Drivetrain {
 		if ((state == State.GOTO || state == State.AIMING) && !follower.isBusy()) {
 			switchToManual();
 		}
+	}
+	
+	@Override
+	public void stop() {
+		follower.followPath(new PathChain());
 	}
 	
 	/**

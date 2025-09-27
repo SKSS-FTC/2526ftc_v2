@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 
-public class Intake {
+public class Intake extends Mechanism {
 	public final DcMotor intakeMotor;
 	
 	public final ColorSensor colorSensor;
