@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
 import org.firstinspires.ftc.teamcode.software.TrajectoryEngine;
 
-public class Launcher {
+public class Launcher extends Mechanism {
 	private final TrajectoryEngine trajectoryEngine;
 	
 	private final Servo horizontalServo;

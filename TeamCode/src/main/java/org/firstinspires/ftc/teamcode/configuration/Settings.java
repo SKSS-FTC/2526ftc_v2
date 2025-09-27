@@ -166,12 +166,11 @@ public class Settings {
 	@Configurable
 	public static class Aiming {
 		public static final double GRAVITY = 9.81;
-		public static double MUZZLE_SPEED; // m/s, TODO: tune
-		public static double MUZZLE_HEIGHT; // inches, TODO: tune
-		public static double GOAL_HEIGHT; // inches, TODO: tune
+		public static double MUZZLE_TANGENTIAL_MAX_SPEED; // m/s, TODO: tune
+		public static double MUZZLE_HEIGHT = 5; // inches, TODO: tune
+		public static double GOAL_HEIGHT = 37.5; // inches
 		public static double MAX_YAW_ERROR = 1;   // rad
-		public static double MAX_PITCH_ERROR = 1; // rad
-		public static double GOAL_TOLERANCE;  // inches (vertical tolerance window)
+		public static double MAX_PITCH_ERROR = 0.2; // rad
 	}
 	
 	/**
@@ -179,19 +178,15 @@ public class Settings {
 	 */
 	@Configurable
 	public static class Field {
-		public static double RED_GOAL_CENTER_X = 50; // TODO tune
-		public static double RED_GOAL_CENTER_Y = 50; // TODO tune
+		public static Pose RED_GOAL_POSE = new Pose(131, 137.5, Math.toRadians(225));
+		public static Pose BLUE_GOAL_POSE = new Pose(12.5, 137.5, Math.toRadians(315));
+		public static Pose FAR_LAUNCH_ZONE_FRONT_CORNER = new Pose(72, 24);
+		public static Pose FAR_LAUNCH_ZONE_LEFT_CORNER = new Pose(50, 0);
+		public static Pose FAR_LAUNCH_ZONE_RIGHT_CORNER = new Pose(95, 0);
 		
-		public static double BLUE_GOAL_CENTER_X = 50; // TODO tune
-		public static double BLUE_GOAL_CENTER_Y = 50; // TODO tune
-		
-		public static Pose FAR_LAUNCH_ZONE_FRONT_CORNER = new Pose(0, 0); // TODO tune
-		public static Pose FAR_LAUNCH_ZONE_LEFT_CORNER = new Pose(0, 0); // TODO tune
-		public static Pose FAR_LAUNCH_ZONE_RIGHT_CORNER = new Pose(0, 0); // TODO tune
-		
-		public static Pose CLOSE_LAUNCH_ZONE_FRONT_CORNER = new Pose(0, 0); // TODO tune
-		public static Pose CLOSE_LAUNCH_ZONE_LEFT_CORNER = new Pose(0, 0); // TODO tune
-		public static Pose CLOSE_LAUNCH_ZONE_RIGHT_CORNER = new Pose(0, 0); // TODO tune
+		public static Pose CLOSE_LAUNCH_ZONE_FRONT_CORNER = new Pose(72, 72);
+		public static Pose CLOSE_LAUNCH_ZONE_LEFT_CORNER = new Pose(15, 128);
+		public static Pose CLOSE_LAUNCH_ZONE_RIGHT_CORNER = new Pose(129, 128);
 		
 	}
 	
@@ -201,9 +196,12 @@ public class Settings {
 	 */
 	@Configurable
 	public static class Deploy {
-		public static boolean INTAKE = true;
-		public static boolean SPINDEX = true;
-		public static boolean AUTOMATIONS = true;
+		public static boolean INTAKE = false;
+		public static boolean LAUNCHER = false;
+		public static boolean LIMELIGHT = true;
+		public static boolean SPINDEX = false;
+		public static boolean TRAJECTORY_ENGINE = false;
+		public static boolean ALIGNMENT_ENGINE = true;
 	}
 	
 	// A static class to hold all pose constants for organization.

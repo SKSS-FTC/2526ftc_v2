@@ -7,7 +7,7 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.hardware.Mechanism;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ import java.util.Map;
  * It abstracts away direct motor control in favor of the Follower API for
  * both manual (tele-op) and autonomous movement.
  */
-public class Drivetrain {
+public class Drivetrain extends Mechanism {
 	
 	public final Follower follower;
 	// Define field-centric poses for autonomous targets.
@@ -30,9 +30,9 @@ public class Drivetrain {
 	 *
 	 * @param hardwareMap The robot's hardware map.
 	 */
-	public Drivetrain(HardwareMap hardwareMap) {
+	public Drivetrain(HardwareMap hardwareMap, Follower follower) {
 		// The Constants class now holds all hardware and tuning configurations.
-		follower = Constants.createFollower(hardwareMap);
+		this.follower = follower;
 		follower.setStartingPose(new Pose()); // Set a default starting pose at (0,0,0)
 		switchToManual(); // Start in manual control mode.
 		
@@ -41,6 +41,11 @@ public class Drivetrain {
 		positionPoses.put(Position.FAR_SHOOT, new Pose(72, 48, Math.toRadians(135)));
 		positionPoses.put(Position.HUMAN_PLAYER, new Pose(0, 72, Math.toRadians(90)));
 		positionPoses.put(Position.SECRET_TUNNEL, new Pose(120, 24, Math.toRadians(0)));
+	}
+	
+	@Override
+	public void init() {
+	
 	}
 	
 	/**
@@ -55,6 +60,11 @@ public class Drivetrain {
 		if ((state == State.GOTO || state == State.AIMING) && !follower.isBusy()) {
 			switchToManual();
 		}
+	}
+	
+	@Override
+	public void stop() {
+		follower.followPath(new PathChain());
 	}
 	
 	/**

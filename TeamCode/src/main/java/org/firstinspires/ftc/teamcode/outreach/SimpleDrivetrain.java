@@ -10,8 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  *
  * @noinspection ClassWithoutConstructor
  */
-@TeleOp(name = "Outreach", group = "Outreach")
-public class NorthwestFest extends OpMode {
+@TeleOp(name = "SimpleDrivetrain", group = "Outreach")
+public class SimpleDrivetrain extends OpMode {
 	public DcMotor frontLeftMotor;
 	public DcMotor frontRightMotor;
 	public DcMotor backLeftMotor;
@@ -37,22 +37,22 @@ public class NorthwestFest extends OpMode {
 		double rotatePower = gamepad1.right_stick_x;
 		
 		if (gamepad1.right_bumper) {
-			rotatePower = 0.5;
+			rotatePower = -0.1;
 		}
 		if (gamepad1.left_bumper) {
-			rotatePower = -0.5;
+			rotatePower = 0.1;
 		}
 		if (gamepad1.dpad_up) {
-			drivePower = 0.5;
+			drivePower = 0.2;
 		}
 		if (gamepad1.dpad_down) {
-			drivePower = -0.5;
+			drivePower = -0.2;
 		}
 		if (gamepad1.dpad_left) {
-			strafePower = -0.5;
+			strafePower = -0.2;
 		}
 		if (gamepad1.dpad_right) {
-			strafePower = 0.5;
+			strafePower = 0.2;
 		}
 		
 		mecanumDrive(strafePower, drivePower, rotatePower);
@@ -63,17 +63,6 @@ public class NorthwestFest extends OpMode {
 		double frontRightPower = drivePower - strafePower - rotatePower;
 		double backLeftPower = drivePower - strafePower + rotatePower;
 		double backRightPower = drivePower + strafePower - rotatePower;
-		
-		double maxPower = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
-		maxPower = Math.max(maxPower, Math.abs(backLeftPower));
-		maxPower = Math.max(maxPower, Math.abs(backRightPower));
-		
-		if (maxPower > 1.0) {
-			frontLeftPower /= maxPower;
-			frontRightPower /= maxPower;
-			backLeftPower /= maxPower;
-			backRightPower /= maxPower;
-		}
 		
 		frontLeftMotor.setPower(frontLeftPower);
 		frontRightMotor.setPower(frontRightPower);

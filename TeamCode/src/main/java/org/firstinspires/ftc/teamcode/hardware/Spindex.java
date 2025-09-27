@@ -28,7 +28,7 @@ import java.util.List;
  * The Spindex's main loop simply executes the current command, making the system
  * highly scalable, readable, and robust against interruptions.
  */
-public class Spindex {
+public class Spindex extends Mechanism {
 	// Hardware & Config (public for Command access)
 	public final Servo spindexServo;
 	public final Servo exitSealServo;
@@ -98,6 +98,10 @@ public class Spindex {
 		if (color != MatchSettings.ArtifactColor.UNKNOWN) {
 			slots[getSlotIndexAtSensor()] = color;
 		}
+	}
+	
+	public void stop() {
+		rotateSlotToExit(0);
 	}
 	
 	// Add this method to your Spindex class
