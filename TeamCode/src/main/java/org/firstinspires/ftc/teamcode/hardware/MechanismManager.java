@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
+import com.pedropathing.follower.Follower;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.software.AlignmentEngine;
 import org.firstinspires.ftc.teamcode.software.Drivetrain;
 import org.firstinspires.ftc.teamcode.software.LimelightManager;
@@ -22,11 +24,11 @@ public class MechanismManager {
 	public final AlignmentEngine alignmentEngine;
 	public final TrajectoryEngine trajectoryEngine;
 	public final Drivetrain drivetrain;
-	public GoBildaPinpointDriver pinpoint;
+	public final Follower follower;
 	
 	public MechanismManager(HardwareMap hardwareMap, MatchSettings matchSettings) {
-		drivetrain = new Drivetrain(hardwareMap);
-		
+		follower = Constants.createFollower(hardwareMap);
+		drivetrain = new Drivetrain(hardwareMap, follower);
 		ColorSensor colorSensor = new ColorSensor(hardwareMap.get(RevColorSensorV3.class, Settings.HardwareIDs.COLOR_SENSOR));
 		DcMotor intakeMotor = hardwareMap.get(DcMotor.class, Settings.HardwareIDs.INTAKE_MOTOR);
 		Servo[] intakeServoArray = new Servo[4];
@@ -38,7 +40,7 @@ public class MechanismManager {
 		
 		limelightManager = new LimelightManager(hardwareMap.get(Limelight3A.class, Settings.HardwareIDs.LIMELIGHT), matchSettings);
 		GoBildaPinpointDriver pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, Settings.HardwareIDs.PINPOINT);
-		trajectoryEngine = new TrajectoryEngine(limelightManager, pinpoint, matchSettings);
+		trajectoryEngine = new TrajectoryEngine(limelightManager, follower, matchSettings);
 		alignmentEngine = new AlignmentEngine(matchSettings, drivetrain, limelightManager, pinpoint);
 		
 		Servo spindexServo = hardwareMap.get(Servo.class, Settings.HardwareIDs.SPINDEX_SERVO);

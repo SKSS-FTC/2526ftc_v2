@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -22,6 +23,7 @@ public class MainOp extends OpMode {
 	private MechanismManager mechanisms;
 	private Controller mainController;
 	private Controller subController;
+	private Follower follower;
 	
 	@Override
 	public final void init() {
@@ -30,8 +32,8 @@ public class MainOp extends OpMode {
 		
 		// Initialize robot systems
 		mechanisms = new MechanismManager(hardwareMap, matchSettings);
-		mainController = new Controller(gamepad1, mechanisms.pinpoint, matchSettings);
-		subController = new Controller(gamepad2, mechanisms.pinpoint, matchSettings);
+		mainController = new Controller(gamepad1, mechanisms.follower, matchSettings);
+		subController = new Controller(gamepad2, mechanisms.follower, matchSettings);
 		logging = PanelsTelemetry.INSTANCE.getTelemetry();
 	}
 	

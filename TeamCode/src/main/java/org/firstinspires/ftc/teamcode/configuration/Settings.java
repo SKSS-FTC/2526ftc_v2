@@ -179,12 +179,8 @@ public class Settings {
 	 */
 	@Configurable
 	public static class Field {
-		public static double RED_GOAL_CENTER_X = 50; // TODO tune
-		public static double RED_GOAL_CENTER_Y = 50; // TODO tune
-		
-		public static double BLUE_GOAL_CENTER_X = 50; // TODO tune
-		public static double BLUE_GOAL_CENTER_Y = 50; // TODO tune
-		
+		public static Pose RED_GOAL_POSE = new Pose(131, 137.5, Math.toRadians(225));
+		public static Pose BLUE_GOAL_POSE = new Pose(12.5, 137.5, Math.toRadians(315));
 		public static Pose FAR_LAUNCH_ZONE_FRONT_CORNER = new Pose(0, 0); // TODO tune
 		public static Pose FAR_LAUNCH_ZONE_LEFT_CORNER = new Pose(0, 0); // TODO tune
 		public static Pose FAR_LAUNCH_ZONE_RIGHT_CORNER = new Pose(0, 0); // TODO tune

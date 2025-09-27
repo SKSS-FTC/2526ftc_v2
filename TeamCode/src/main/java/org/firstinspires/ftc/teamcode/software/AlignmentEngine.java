@@ -7,31 +7,29 @@ import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LA
 import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LAUNCH_ZONE_LEFT_CORNER;
 import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LAUNCH_ZONE_RIGHT_CORNER;
 
+import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
+import org.firstinspires.ftc.teamcode.configuration.Settings;
 
 public class AlignmentEngine {
 	private final Drivetrain drivetrain;
-	private final GoBildaPinpointDriver pinpoint;
+	private final Follower follower;
 	private final MatchSettings matchSettings;
 	private final LimelightManager limelightManager;
 	
-	public AlignmentEngine(MatchSettings matchSettings, Drivetrain drivetrain, LimelightManager limelightManager, GoBildaPinpointDriver pinpoint) {
+	public AlignmentEngine(MatchSettings matchSettings, Drivetrain drivetrain, LimelightManager limelightManager, Follower follower) {
 		this.drivetrain = drivetrain;
-		this.pinpoint = pinpoint;
+		this.follower = follower;
 		this.matchSettings = matchSettings;
 		this.limelightManager = limelightManager;
 	}
 	
-	public static boolean isInsideTriangle(Pose2D pose, Pose A, Pose B, Pose C) {
+	public static boolean isInsideTriangle(Pose pose, Pose A, Pose B, Pose C) {
 		// Create new Point objects for the pose's x and y
-		Pose P = new Pose(pose.getX(DistanceUnit.INCH), pose.getY(DistanceUnit.INCH));
+		Pose P = new Pose(pose.getX(), pose.getY());
 		
 		// Use the crossProduct method to determine if the point is within the triangle
 		double s1 = crossProduct(A, B, P);
@@ -49,26 +47,31 @@ public class AlignmentEngine {
 	}
 	
 	public void run() {
-		pinpoint.getPosition();
-		if (!isInLaunchZone()) {
+		Pose currentPose = follower.getPose();
+		if (!isInLaunchZone(currentPose)) {
 			return;
 		}
-		
-		// This is wrong lol. it should move to have best angle tho
 		
 		LLResult llResult = limelightManager.detectGoal();
+		
+		Pose targetPose = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.BLUE)
+				? Settings.Field.BLUE_GOAL_POSE
+				: Settings.Field.RED_GOAL_POSE;
+		
+		double angleError = angleToTarget(currentPose, targetPose);
+		
+		
 		if (llResult == null || !llResult.isValid()) {
+			drivetrain.interpolateToOffset(0, 0, angleError);
 			return;
 		}
 		
-		double Ta = limelightManager.limelight.getLatestResult().getTa();
+		double xError = limelightManager.limelight.getLatestResult().getTx();
 		
-		drivetrain.interpolateToOffset(0, 0, Ta);
+		drivetrain.interpolateToOffset(xError, 0, angleError);
 	}
 	
-	public boolean isInLaunchZone() {
-		Pose2D pose = pinpoint.getPosition();
-		
+	public boolean isInLaunchZone(Pose pose) {
 		// Check if the pose is inside the FAR launch zone
 		boolean inFarZone = isInsideTriangle(
 				pose,
@@ -89,7 +92,17 @@ public class AlignmentEngine {
 		return inFarZone || inCloseZone;
 	}
 	
-	private double wrappedHeading() {
-		return (pinpoint.getHeading(AngleUnit.RADIANS) + Math.PI) % (2 * Math.PI) - Math.PI;
+	// returns signed smallest angle (radians) the robot must rotate to face target
+	private double angleToTarget(Pose currentPose, Pose targetPose) {
+		double dx = targetPose.getX() - currentPose.getX();
+		double dy = targetPose.getY() - currentPose.getY();
+		
+		double desired = Math.atan2(dy, dx); // absolute angle to goal
+		double current = currentPose.getHeading();
+		
+		double error = desired - current;
+		while (error > Math.PI) error -= 2 * Math.PI;
+		while (error <= -Math.PI) error += 2 * Math.PI;
+		return error; // radians, positive -> rotate CCW, negative -> rotate CW
 	}
 }

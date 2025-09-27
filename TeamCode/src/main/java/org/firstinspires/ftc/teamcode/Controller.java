@@ -1,9 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
 
@@ -15,13 +14,13 @@ import java.util.HashMap;
 public class Controller extends Gamepad {
 	private final Gamepad gamepad;
 	private final HashMap<Control, Double> previousControlState;
-	private final GoBildaPinpointDriver pinpoint;
+	private final Follower follower;
 	
 	private final MatchSettings matchSettings;
 	
-	public Controller(Gamepad gamepad, GoBildaPinpointDriver pinpoint, MatchSettings matchSettings) {
+	public Controller(Gamepad gamepad, Follower follower, MatchSettings matchSettings) {
 		this.gamepad = gamepad;
-		this.pinpoint = pinpoint;
+		this.follower = follower;
 		this.matchSettings = matchSettings;
 		this.previousControlState = new HashMap<>();
 		// Populate the initial state in the constructor
@@ -71,7 +70,7 @@ public class Controller extends Gamepad {
 	}
 	
 	public final double getProcessedDrive() {
-		double headingRadians = pinpoint.getHeading(AngleUnit.RADIANS);
+		double headingRadians = follower.getHeading();
 		
 		// Get DPad input for absolute directions
 		double dpadNorth = getProcessedValue(Action.ABS_NORTH);
@@ -94,7 +93,7 @@ public class Controller extends Gamepad {
 	}
 	
 	public final double getProcessedStrafe() {
-		double headingRadians = Math.toRadians(pinpoint.getHeading(AngleUnit.DEGREES));
+		double headingRadians = follower.getHeading();
 		double dpadEast = getProcessedValue(Action.ABS_EAST);
 		double dpadWest = getProcessedValue(Action.ABS_WEST);
 		double fieldCentricX = dpadEast - dpadWest;

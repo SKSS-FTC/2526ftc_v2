@@ -7,8 +7,6 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,9 +28,9 @@ public class Drivetrain {
 	 *
 	 * @param hardwareMap The robot's hardware map.
 	 */
-	public Drivetrain(HardwareMap hardwareMap) {
+	public Drivetrain(HardwareMap hardwareMap, Follower follower) {
 		// The Constants class now holds all hardware and tuning configurations.
-		follower = Constants.createFollower(hardwareMap);
+		this.follower = follower;
 		follower.setStartingPose(new Pose()); // Set a default starting pose at (0,0,0)
 		switchToManual(); // Start in manual control mode.
 		

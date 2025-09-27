@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.configuration.MatchConfigurationWizard;
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Main Auto", group = ".Competition Modes")
 public class MainAuto extends OpMode {
@@ -517,8 +516,6 @@ public class MainAuto extends OpMode {
 		matchSettings = new MatchSettings(blackboard);
 		wizard = new MatchConfigurationWizard(matchSettings, gamepad1, telemetry);
 		mechanisms = new MechanismManager(hardwareMap, matchSettings);
-		
-		follower = Constants.createFollower(hardwareMap);
 	}
 	
 	@Override

@@ -1,23 +1,21 @@
 package org.firstinspires.ftc.teamcode.software;
 
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
 
 public class TrajectoryEngine {
 	
-	private final GoBildaPinpointDriver pinpoint;
+	private final Follower follower;
 	private final MatchSettings matchSettings;
 	private final LimelightManager limelightManager;
 	
-	public TrajectoryEngine(LimelightManager limelightManager, GoBildaPinpointDriver pinpoint, MatchSettings matchSettings) {
+	public TrajectoryEngine(LimelightManager limelightManager, Follower follower, MatchSettings matchSettings) {
 		this.limelightManager = limelightManager;
-		this.pinpoint = pinpoint;
+		this.follower = follower;
 		this.matchSettings = matchSettings;
 	}
 	
@@ -39,7 +37,7 @@ public class TrajectoryEngine {
 	 */
 	private AimingSolution calculateSolution() {
 		// 1. Get all sensor data ONCE
-		Pose2D robotPose = pinpoint.getPosition();
+		Pose robotPose = follower.getPose();
 		LLResult limelightResult = limelightManager.detectGoal();
 		
 		// 2. Robustly check for a valid target
@@ -50,20 +48,20 @@ public class TrajectoryEngine {
 		// 3. Define the TARGET's fixed world coordinates from a settings file.
 		// This is a much more reliable approach than calculating from camera depth.
 		double targetX = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.RED)
-				? Settings.Field.RED_GOAL_CENTER_X
-				: Settings.Field.BLUE_GOAL_CENTER_X;
+				? Settings.Field.RED_GOAL_POSE.getX()
+				: Settings.Field.BLUE_GOAL_POSE.getX();
 		double targetY = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.RED)
-				? Settings.Field.RED_GOAL_CENTER_Y
-				: Settings.Field.BLUE_GOAL_CENTER_Y;
+				? Settings.Field.RED_GOAL_POSE.getY()
+				: Settings.Field.BLUE_GOAL_POSE.getY();
 		
 		// 4. Calculate the vector from the robot to the target in the world frame
-		double dx = targetX - robotPose.getX(DistanceUnit.INCH);
-		double dy = targetY - robotPose.getY(DistanceUnit.INCH);
+		double dx = targetX - robotPose.getX();
+		double dy = targetY - robotPose.getY();
 		double d = Math.hypot(dx, dy);
 		
 		// 5. Calculate the required launcher yaw
 		double yawWorld = Math.atan2(dy, dx);
-		double yawRelative = normalizeAngle(yawWorld - robotPose.getHeading(AngleUnit.RADIANS));
+		double yawRelative = normalizeAngle(yawWorld - robotPose.getHeading());
 		
 		// 6. Calculate the required launcher pitch using ballistic equations
 		double h = Settings.Aiming.GOAL_HEIGHT - Settings.Aiming.MUZZLE_HEIGHT;
