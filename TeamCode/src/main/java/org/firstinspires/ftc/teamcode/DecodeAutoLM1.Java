@@ -10,9 +10,15 @@
     import com.qualcomm.robotcore.hardware.DcMotor;
     import com.qualcomm.robotcore.hardware.DcMotorSimple;
     import com.qualcomm.robotcore.hardware.IMU;
+    import com.qualcomm.robotcore.util.ElapsedTime;
+
     import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
     @Autonomous(name = "Auto LM1")
     public class DecodeAutoLM1 extends LinearOpMode{
+        // Timer and counter variables
+        private ElapsedTime timer;
+        private int counter;
+        
         GoBildaPinpointDriver odo;
         private AutoConstants autoConstants;
         DcMotor frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
@@ -25,6 +31,9 @@
 
         @Override
         public void runOpMode() {
+            // Initialize timer and counter
+            timer = new ElapsedTime();
+            counter = 0;
 
             initAuto();
             telemetry.addData("Init status:", "Initialized required components");
@@ -32,6 +41,20 @@
             telemetry.update();
             waitForStart();
             if(isStopRequested()) return;
+            
+            // Start the counter loop
+            while (opModeIsActive()) {
+                // Update counter every second
+                if (timer.seconds() >= 1.0) {
+                    counter++;
+                    timer.reset();
+                    telemetry.addData("Counter:", counter);
+                    telemetry.update();
+                }
+                
+                // Small delay to prevent excessive CPU usage
+                sleep(10);
+            }
 /*    Treading Example
             try {  //temp remove this
                 Thread.sleep(5000);
