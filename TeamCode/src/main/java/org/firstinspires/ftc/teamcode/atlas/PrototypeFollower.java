@@ -43,6 +43,9 @@ public class PrototypeFollower {
             }
         }
 
+        chassis.pose.x = waypoints[0].x;
+        chassis.pose.y = waypoints[0].y;
+
         while (opMode.opModeIsActive()) {
             chassis.update(telemetry);
             Waypoint waypoint = waypoints[currentWaypoint];
@@ -76,7 +79,7 @@ public class PrototypeFollower {
 
             double dx = positionTargetValue(waypoint.x - chassis.pose.x);
             double dy = positionTargetValue(waypoint.y - chassis.pose.y);
-            double dr = -rotationTargetValue(waypoint.r, chassis.yawDeg);
+            double dr = rotationTargetValue(waypoint.r, chassis.yawDeg);
 
             telemetry.addLine("mx: " + dx);
             telemetry.addLine("my: " + dy);

@@ -41,10 +41,10 @@ public class AtlasChassis {
     private DcMotor.ZeroPowerBehavior zeroPowerBehavior;
     public AtlasChassis(HardwareMap hardwareMap) {
         zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE;
-        backLeft = getDcMotorEx(hardwareMap, "rearLeft");
-        backRight = getDcMotorEx(hardwareMap, "rearRight", false);
-        frontLeft = getDcMotorEx(hardwareMap, "frontLeft", true);
-        frontRight = getDcMotorEx(hardwareMap, "frontRight", true);
+        backLeft = getDcMotorEx(hardwareMap, "rearLeft", true);
+        backRight = getDcMotorEx(hardwareMap, "rearRight", true);
+        frontLeft = getDcMotorEx(hardwareMap, "frontLeft", false);
+        frontRight = getDcMotorEx(hardwareMap, "frontRight", false);
         // Make sure imu exists in hardware map
         imu = hardwareMap.get(IMU.class, "imu");
 
@@ -76,7 +76,7 @@ public class AtlasChassis {
         double yaw = yawRads + fieldRelativeOffset;
         double rotatedX = x * Math.cos(-yaw) - y * Math.sin(-yaw);
         double rotatedY = x * Math.sin(-yaw) + y * Math.cos(-yaw);
-        movePower(-rotatedX, rotatedY, rx);
+        movePower(rotatedX, rotatedY, rx);
     }
 
     public void movePower(double x, double y, double r) {
@@ -85,6 +85,22 @@ public class AtlasChassis {
         backLeft.setPower((y - x + r) / denominator);
         frontRight.setPower((y - x - r) / denominator);
         backRight.setPower((y + x - r) / denominator);
+    }
+
+    public void runToPosition(int x, int y) {
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setTargetPosition(y + x);
+        frontLeft.setTargetPosition(y + x);
+        backLeft.setTargetPosition(y - x);
+        frontRight.setTargetPosition(y - x);
+        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        movePower(x, y, 0);
     }
 
     public double update(Telemetry telemetry) {

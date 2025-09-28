@@ -1,9 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.testing;
 
 import android.annotation.SuppressLint;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.Chassis;
 
 @TeleOp(name="MecanumTester")
 public class MecanumChassisTester extends LinearOpMode {
@@ -49,7 +51,7 @@ public class MecanumChassisTester extends LinearOpMode {
             telemetry.addLine(String.format("Test results:"));
             telemetry.addLine(String.format("Acceleration time: %dms (Max encoder vel: %s/sec)", lastMaxSpeedTime - startTime, lastVelocity));
             telemetry.addLine(String.format("Stopping time: %dms", stopTime));
-            telemetry.addLine(String.format("Revolution time: %dms", 0));
+            telemetry.addLine(String.format("Yaw: %f", chassis.yawDeg));
             telemetry.update();
         }
         while (opModeIsActive()) {}
