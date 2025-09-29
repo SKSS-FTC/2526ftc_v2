@@ -5,6 +5,7 @@ Quick links:
 Connect command:
 adb connect 192.168.43.1:5555
 Robot Control When Connected: <http://192.168.43.1:8001>
+Limelight: <http://192.168.43.1:5801>
 
 GitHub:
 <https://github.com/24358-ragnarok/Decode/>
@@ -16,7 +17,10 @@ Website:
 
 Pedro:
 <https://pedropathing.com/>
-<https://pedro-path-generator.vercel.app>
+<https://visualizer.pedropathing.com>
+
+Panels:
+<https://panels.bylazar.com>
 
 INSTALL THIS:
 <https://unofficialrevport.org/>

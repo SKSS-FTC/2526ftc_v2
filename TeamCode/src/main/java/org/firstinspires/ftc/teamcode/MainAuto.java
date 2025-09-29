@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.teamcode.hardware.Intake;
 import org.firstinspires.ftc.teamcode.hardware.Launcher;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
+import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
 
 @Autonomous(name = "Main Auto", group = ".Competition Modes")
 public class MainAuto extends OpMode {
@@ -483,6 +485,7 @@ public class MainAuto extends OpMode {
 		follower.update();
 		autonomousPathUpdate();
 		
+		Drawing.drawDebug(follower);
 		telemetry.addData("Path State", pathState);
 		telemetry.addData("X", follower.getPose().getX());
 		telemetry.addData("Y", follower.getPose().getY());
@@ -500,12 +503,15 @@ public class MainAuto extends OpMode {
 		matchSettings = new MatchSettings(blackboard);
 		wizard = new MatchConfigurationWizard(matchSettings, gamepad1, telemetry);
 		mechanisms = new MechanismManager(hardwareMap, matchSettings);
+		mechanisms.follower.setStartingPose(getStartingPose());
 	}
 	
 	@Override
 	public void init_loop() {
 		// Allow driver to select match settings using the wizard
 		wizard.refresh();
+		Drawing.drawRobot(follower.getPose());
+		Drawing.sendPacket();
 	}
 	
 	@Override
@@ -522,6 +528,22 @@ public class MainAuto extends OpMode {
 	public void stop() {
 		mechanisms.stop();
 	}
+	
+	private Pose getStartingPose() {
+		switch (matchSettings.getAllianceColor()) {
+			case RED:
+				return matchSettings.getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
+						? Settings.Autonomous.RedClose.PARK
+						: Settings.Autonomous.RedFar.PARK;
+			case BLUE:
+				return matchSettings.getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
+						? Settings.Autonomous.BlueClose.PARK
+						: Settings.Autonomous.BlueFar.PARK;
+			default:
+				return new Pose(); // fallback
+		}
+	}
+	
 	
 	private <T> void ifMechanismValid(T mechanism, java.util.function.Consumer<T> action) {
 		if (mechanism != null) action.accept(mechanism);

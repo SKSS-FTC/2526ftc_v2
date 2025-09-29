@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.hardware.Intake;
 import org.firstinspires.ftc.teamcode.hardware.Launcher;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
+import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
 import org.firstinspires.ftc.teamcode.software.AlignmentEngine;
 import org.firstinspires.ftc.teamcode.software.Drivetrain;
 
@@ -55,6 +56,12 @@ public class MainOp extends OpMode {
 	}
 	
 	@Override
+	public final void init_loop() {
+		Drawing.drawRobot(follower.getPose());
+		Drawing.sendPacket();
+	}
+	
+	@Override
 	public final void start() {
 		ifMechanismValid(mechanisms, m -> m.init());
 	}
@@ -76,6 +83,7 @@ public class MainOp extends OpMode {
 		} else {
 			subController.setLedColor(0, 0, 0, 0);
 		}
+		Drawing.drawDebug(mechanisms.follower);
 	}
 	
 	@Override
