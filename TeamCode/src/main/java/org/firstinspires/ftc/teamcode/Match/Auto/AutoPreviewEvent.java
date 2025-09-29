@@ -187,15 +187,17 @@ public class AutoPreviewEvent extends LinearOpMode {
         while (!isStarted() && !isStopRequested()) {
             // 1. Alliance Selection (X/B)
             if (!allianceSelected) {
-                telemetry.addData("Status", "SELECT ALLIANCE (X/B)");
+                telemetry.addData("Status", "SELECT Alliance color from gamepad:)");
+                telemetry.addData("Select", "for Red: X □, for Blue: B ○)");
                 if (gamepad1.x) { alliance = Alliance.RED; allianceSelected = true; }
                 if (gamepad1.b) { alliance = Alliance.BLUE; allianceSelected = true; }
             }
 
             // 2. Position Selection (D-pad)
             else if (!positionSelected) {
-                telemetry.addData("Status", "SELECT START POSITION (D-Pad)");
                 telemetry.addData("Current Alliance", alliance.toString());
+                telemetry.addData("Position", "SELECT START position with D-Pad:");
+                telemetry.addData("Position", "Left =  1,  Up = 2, Right = 3");
                 if (gamepad1.dpad_left) { position = Position.POS1; positionSelected = true; }
                 if (gamepad1.dpad_up) { position = Position.POS2; positionSelected = true; }
                 if (gamepad1.dpad_right) { position = Position.POS3; positionSelected = true; }
@@ -203,9 +205,9 @@ public class AutoPreviewEvent extends LinearOpMode {
 
             // 3. Mode Selection (Safety Interlock)
             else {
-                telemetry.addData("Status", "CONFIRM MODE (Y/RB)");
                 telemetry.addData("Alliance/Position", alliance.toString() + " | " + position.toString());
-
+                telemetry.addData("Mode", "Partial Auto: Y △");
+                telemetry.addData("Mode", "Full Auto: RB - right bumper");
                 // Safety Interlock: Press RB to force Match Mode (full sequence)
                 if (gamepad1.right_bumper) {
                     matchModeActive = true;
@@ -288,7 +290,7 @@ public class AutoPreviewEvent extends LinearOpMode {
 
         } catch (Exception e) {
             // Catch any unexpected runtime errors during the autonomous period
-            telemetry.addData("CRITICAL AUTO ERROR", e.getMessage());
+            telemetry.addData("CRITICAL Autonomous OpMode ERROR", e.getMessage());
             telemetry.update();
             sleep(3000); // Display error before final cleanup
         } finally {
