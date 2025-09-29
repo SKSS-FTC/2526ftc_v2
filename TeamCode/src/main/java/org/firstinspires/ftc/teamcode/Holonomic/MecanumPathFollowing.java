@@ -42,7 +42,7 @@ import org.firstinspires.ftc.teamcode.Utility.Datalogger;
 
 import java.util.List;
 
-@Autonomous(name = "Mecanum: Dynamic Path Following", group = "Test")
+@Autonomous(name = "Mecanum: Dynamic Path Following", group = "Holonomic")
 @Disabled
 public class MecanumPathFollowing extends LinearOpMode {
 

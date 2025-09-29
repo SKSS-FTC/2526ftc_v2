@@ -116,7 +116,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import org.firstinspires.ftc.teamcode.Utility.Datalogger;
 
-@TeleOp(name = "Mecanum: Centric Robot", group = "Test")
+@TeleOp(name = "Mecanum: Centric Robot", group = "Holonomic")
 @Disabled
 
 public class MecanumCentricRobot extends LinearOpMode {

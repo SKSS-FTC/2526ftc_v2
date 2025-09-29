@@ -116,7 +116,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  * @link https://ftc-docs.firstinspires.org/en/latest/programming_resources/imu/imu.html#sample-opmodes
  */
 
-@TeleOp(name = "Strafe: Driver Controlled test", group = "Test")
+@TeleOp(name = "Strafe: Driver Controlled test", group = "Holonomic")
 @Disabled
 
 public class TestDriveStrafe extends LinearOpMode {

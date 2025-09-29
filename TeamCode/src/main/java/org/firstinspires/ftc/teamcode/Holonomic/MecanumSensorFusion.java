@@ -44,7 +44,7 @@ import org.firstinspires.ftc.teamcode.Holonomic.KalmanFilter;
  * PID control and a Kalman filter for robust sensor fusion from motor
  * encoders and an IMU.
  */
-@Autonomous(name="Advanced Path Following with Kalman Filter", group="Test")
+@Autonomous(name="Advanced Path Following with Kalman Filter", group="Holonomic")
 @Disabled
 public class MecanumSensorFusion extends LinearOpMode {
 

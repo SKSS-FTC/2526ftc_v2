@@ -113,7 +113,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-@TeleOp(name = "Mecanum: Robot Power", group = "Test")
+@TeleOp(name = "Mecanum: Robot Power", group = "Holonomic")
 @Disabled
 
 public class MecanumRobotPower extends LinearOpMode

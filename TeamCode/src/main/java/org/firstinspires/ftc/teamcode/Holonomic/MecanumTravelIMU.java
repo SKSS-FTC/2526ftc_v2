@@ -128,7 +128,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import org.firstinspires.ftc.teamcode.Utility.Datalogger;
 
-@TeleOp(name = "Mecanum: Travel IMU", group = "Test")
+@TeleOp(name = "Mecanum: Travel IMU", group = "Holonomic")
 // @Disabled
 public class MecanumTravelIMU extends LinearOpMode {
     private static final String TAG = MecanumTravelIMU.class.getSimpleName(); // for use in logging

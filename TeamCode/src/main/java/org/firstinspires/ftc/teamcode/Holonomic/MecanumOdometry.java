@@ -31,7 +31,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-@Autonomous(name = "Mecanum Odometry", group = "Autonomous")
+@Autonomous(name = "Mecanum Odometry", group = "Holonomic")
 @Disabled
 public class MecanumOdometry extends LinearOpMode {
 

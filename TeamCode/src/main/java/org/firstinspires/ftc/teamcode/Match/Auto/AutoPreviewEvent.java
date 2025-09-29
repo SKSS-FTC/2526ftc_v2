@@ -39,11 +39,19 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * AutoPreviewEvent is a flexible autonomous OpMode utilizing an FSM for complex
+ * navigation and a combined AprilTag/IMU system for reliable localization.
+ *
+ * FIX: The runOpMode structure has been updated with a try-finally block
+ * to safely close the VisionPortal and prevent NullPointerExceptions during OpMode termination.
+ */
 @Autonomous(name="Preview Event Auto", group="Match", preselectTeleOp="TeleOpPreviewEvent")
 //@Disabled
 public class AutoPreviewEvent extends LinearOpMode {
@@ -54,44 +62,40 @@ public class AutoPreviewEvent extends LinearOpMode {
     // AprilTag IDs for the Red and Blue Alliance goals
     private static final int RED_GOAL_TAG_ID = 24;
     private static final int BLUE_GOAL_TAG_ID = 20;
-    private static final double LAUNCH_DISTANCE_INCHES = 6.0;
+    private static final double LAUNCH_DISTANCE_INCHES = 30.0;
 
-    // --- WAYPOINT CONSTANTS ---
-    // Waypoints for Red Alliance starting positions and post-obelisk positions
+    // --- WAYPOINT CONSTANTS (Field Coordinates in Inches) ---
+    // Note: These are example field coordinates.
     private final Map<Position, Waypoint> redStartWaypoints = new HashMap<Position, Waypoint>() {{
         put(Position.POS1, new Waypoint(12, 12, 0));
-        put(Position.POS2, new Waypoint(12, 36, 0));
-        put(Position.POS3, new Waypoint(12, 60, 0));
+        put(Position.POS2, new Waypoint(36, 36, 45));
+        put(Position.POS3, new Waypoint(30, 30, 35));
     }};
     private final Map<Position, Waypoint> redGoalWaypoints = new HashMap<Position, Waypoint>() {{
-        put(Position.POS1, new Waypoint(12, 12, 90));
-        put(Position.POS2, new Waypoint(12, 36, 90));
-        put(Position.POS3, new Waypoint(12, 60, 90));
+        put(Position.POS1, new Waypoint(36, 36, 45));
+        put(Position.POS2, new Waypoint(36, 36, 45));
+        put(Position.POS3, new Waypoint(36, 36, 35));
     }};
 
-    // Waypoints for Blue Alliance starting positions and post-obelisk positions
     private final Map<Position, Waypoint> blueStartWaypoints = new HashMap<Position, Waypoint>() {{
-        put(Position.POS1, new Waypoint(-12, 12, 180));
-        put(Position.POS2, new Waypoint(-12, 36, 180));
-        put(Position.POS3, new Waypoint(-12, 60, 180));
+        put(Position.POS1, new Waypoint(-12, 12, 0));
+        put(Position.POS2, new Waypoint(-36, 36, 45));
+        put(Position.POS3, new Waypoint(-30, 60, 35));
     }};
     private final Map<Position, Waypoint> blueGoalWaypoints = new HashMap<Position, Waypoint>() {{
-        put(Position.POS1, new Waypoint(-12, 12, 270));
-        put(Position.POS2, new Waypoint(-12, 36, 270));
-        put(Position.POS3, new Waypoint(-12, 60, 270));
+        put(Position.POS1, new Waypoint(-36, 36, 45));
+        put(Position.POS2, new Waypoint(-36, 36, 45));
+        put(Position.POS3, new Waypoint(-36, 36, 45));
     }};
     private static final Waypoint LEAVE_WAYPOINT = new Waypoint(0, 0, 0); // Placeholder values
 
-    // --- CAMERA OFFSETS ---
-    private static final double X_CAMERA_OFFSET_INCHES = 0.0;
-    private static final double Y_CAMERA_OFFSET_INCHES = 0.0;
+    // --- CAMERA OFFSETS (MUST BE TUNED) ---
+    private static final double X_CAMERA_OFFSET_INCHES = 0.0; // Horizontal offset from robot center
+    private static final double Y_CAMERA_OFFSET_INCHES = 0.0; // Forward/Backward offset from robot center
 
     // --- CONTROL CONSTANTS ---
-    // Proportional constant for position correction. Higher values mean more aggressive correction.
     static final double POSITION_KP = 0.1;
-    // Proportional constant for heading correction. Higher values mean more aggressive turning.
     static final double HEADING_KP = 0.05;
-    // The amount of heading error (in degrees) that is tolerated before initiating a turn-in-place.
     static final double HEADING_TURN_TOLERANCE_DEG = 5.0;
     static final double POSITION_TOLERANCE_IN = 1.0;
     static final double HEADING_TOLERANCE_DEG = 2.0;
@@ -120,8 +124,14 @@ public class AutoPreviewEvent extends LinearOpMode {
         LAUNCH,
         WAIT_FOR_LAUNCH,
         LEAVE,
-        COMPLETE
+        COMPLETE // Must be the final state
     }
+
+    // --- FLEXIBLE FSM VARIABLES ---
+    private List<RobotState> autoSequence;
+    private int currentStepIndex = 0;
+    private boolean debugMode = false;
+    private boolean matchModeActive = false;
 
     // Hardware for Mecanum Drivetrain
     private DcMotorEx motorLeftFront = null;
@@ -136,7 +146,6 @@ public class AutoPreviewEvent extends LinearOpMode {
     private int goalTagId;
 
     // State Machine variables
-    private RobotState currentState = RobotState.SCAN_OBELISK;
     private Alliance alliance = Alliance.RED;
     private Position position = Position.POS1;
 
@@ -164,10 +173,6 @@ public class AutoPreviewEvent extends LinearOpMode {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
         )));
         imu.resetYaw();
-        // --- Advise on IMU orientation on robot ---
-        telemetry.addData("IMU", "Logo UP");
-        telemetry.addData("IMU", "USB FORWARD");
-        telemetry.update();
 
         // --- Vision Initialization ---
         initAprilTag();
@@ -175,66 +180,156 @@ public class AutoPreviewEvent extends LinearOpMode {
         telemetry.addData("Status", "Ready for Selections");
         telemetry.update();
 
-        // --- Driver Hub Pre-Match Selection ---
-        // Pause and wait for Alliance selection
+        // --- Driver Hub Pre-Match Selection Loop (Combined) ---
         boolean allianceSelected = false;
-        while (!isStarted() && !isStopRequested() && !allianceSelected) {
-            telemetry.addData("Status", "SELECT ALLIANCE");
-            telemetry.addData("Alliance", "Press X for Red, B for Blue");
-            telemetry.update();
+        boolean positionSelected = false;
 
-            if (gamepad1.x) {
-                alliance = Alliance.RED;
-                allianceSelected = true;
-            } else if (gamepad1.b) {
-                alliance = Alliance.BLUE;
-                allianceSelected = true;
+        while (!isStarted() && !isStopRequested()) {
+            // 1. Alliance Selection (X/B)
+            if (!allianceSelected) {
+                telemetry.addData("Status", "SELECT ALLIANCE (X/B)");
+                if (gamepad1.x) { alliance = Alliance.RED; allianceSelected = true; }
+                if (gamepad1.b) { alliance = Alliance.BLUE; allianceSelected = true; }
             }
+
+            // 2. Position Selection (D-pad)
+            else if (!positionSelected) {
+                telemetry.addData("Status", "SELECT START POSITION (D-Pad)");
+                telemetry.addData("Current Alliance", alliance.toString());
+                if (gamepad1.dpad_left) { position = Position.POS1; positionSelected = true; }
+                if (gamepad1.dpad_up) { position = Position.POS2; positionSelected = true; }
+                if (gamepad1.dpad_right) { position = Position.POS3; positionSelected = true; }
+            }
+
+            // 3. Mode Selection (Safety Interlock)
+            else {
+                telemetry.addData("Status", "CONFIRM MODE (Y/RB)");
+                telemetry.addData("Alliance/Position", alliance.toString() + " | " + position.toString());
+
+                // Safety Interlock: Press RB to force Match Mode (full sequence)
+                if (gamepad1.right_bumper) {
+                    matchModeActive = true;
+                    debugMode = false; // Match Mode overrides Debug Mode
+                }
+
+                // Debug Toggle: Press Y to toggle debug mode (only if Match Mode is NOT active)
+                if (gamepad1.y && !matchModeActive) {
+                    // Simple debounce for the toggle
+                    long buttonPressTime = System.currentTimeMillis();
+                    while (gamepad1.y && opModeInInit()) {
+                        sleep(10);
+                    }
+                    if (System.currentTimeMillis() - buttonPressTime > 50) {
+                        debugMode = !debugMode;
+                    }
+                }
+
+                // Display Current Configuration
+                if (matchModeActive) {
+                    telemetry.addData(">> MODE <<", ">> MATCH MODE ACTIVE (FULL) <<");
+                } else {
+                    telemetry.addData(">> MODE <<", "DEBUG Mode Toggled (Y): " + (debugMode ? "SKIP LAUNCH" : "FULL SEQUENCE"));
+                    telemetry.addData("WARNING", "Press RB to LOCK Match Mode");
+                }
+            }
+
+            telemetry.update();
+            sleep(50);
         }
 
-        // Pause and wait for Position selection
-        boolean positionSelected = false;
-        while (!isStarted() && !isStopRequested() && !positionSelected) {
-            telemetry.addData("Status", "SELECT STARTING POSITION");
-            telemetry.addData("Current Alliance", alliance.toString());
-            telemetry.addData("Position", "D-pad Left (POS1), Up (POS2), Right (POS3)");
-            telemetry.update();
-
-            if (gamepad1.dpad_left) {
-                position = Position.POS1;
-                positionSelected = true;
-            } else if (gamepad1.dpad_up) {
-                position = Position.POS2;
-                positionSelected = true;
-            } else if (gamepad1.dpad_right) {
-                position = Position.POS3;
-                positionSelected = true;
-            }
+        // --- Apply Final Mode Selection and Set Sequence ---
+        if (matchModeActive || !debugMode) {
+            autoSequence = Arrays.asList(
+                    RobotState.SCAN_OBELISK,
+                    RobotState.POSITION_FOR_GOAL,
+                    RobotState.SCAN_GOAL,
+                    RobotState.DRIVE_TO_GOAL,
+                    RobotState.LAUNCH,
+                    RobotState.WAIT_FOR_LAUNCH,
+                    RobotState.LEAVE,
+                    RobotState.COMPLETE
+            );
+        } else {
+            autoSequence = Arrays.asList(
+                    RobotState.LAUNCH,
+                    RobotState.WAIT_FOR_LAUNCH,
+                    RobotState.LEAVE,
+                    RobotState.COMPLETE
+            );
         }
 
         // Display final selections for user confirmation
         while (!isStarted() && !isStopRequested()) {
-            telemetry.addData("Status", "Selections Confirmed. Press INIT");
+            telemetry.addData("Status", "Selections Confirmed. Awaiting Start.");
             telemetry.addData("Alliance", alliance.toString());
             telemetry.addData("Position", position.toString());
+            telemetry.addData("Sequence Length", autoSequence.size());
+            telemetry.addData("Start State", autoSequence.get(0).toString());
+            telemetry.addData("Final Mode", matchModeActive ? "MATCH LOCK" : (debugMode ? "DEBUG (Short)" : "FULL (Default)"));
             telemetry.update();
         }
 
         // Set the correct GOAL tag based on the selected alliance
         goalTagId = (alliance == Alliance.RED) ? RED_GOAL_TAG_ID : BLUE_GOAL_TAG_ID;
 
-        waitForStart();
+        // --- CRITICAL FIX: Use try-finally for robust cleanup ---
+        try {
+            waitForStart();
 
-        // Stop vision portal to save CPU resources
-        visionPortal.stopStreaming();
+            // Stop streaming only when starting autonomous (optional, can be moved to finally block)
+            if (visionPortal != null) {
+                visionPortal.stopStreaming();
+            }
 
-        // --- Autonomous Execution ---
-        if (opModeIsActive()) {
-            runAutonomousRoutine();
+            // --- Autonomous Execution ---
+            if (opModeIsActive()) {
+                runAutonomousRoutine();
+            }
+
+        } catch (Exception e) {
+            // Catch any unexpected runtime errors during the autonomous period
+            telemetry.addData("CRITICAL AUTO ERROR", e.getMessage());
+            telemetry.update();
+            sleep(3000); // Display error before final cleanup
+        } finally {
+            // Final cleanup is GUARANTEED to run, even if exceptions occur.
+            stopRobot();
+
+            // Use close() instead of stopStreaming() for definitive cleanup.
+            // Null check prevents the initial NullPointerException if initialization failed.
+            if (visionPortal != null) {
+                visionPortal.close();
+            }
+        }
+    }
+
+    /**
+     * Estimates the robot's current pose (X, Y, Heading) relative to the field origin.
+     * Uses the Alliance Goal Tag for position and IMU for heading fallback.
+     * @return A Waypoint object representing the robot's current pose.
+     */
+    private Waypoint getRobotPose() {
+        // Fallback to IMU for heading, set initial position to (0,0) if no tag is found
+        double currentX = 0.0;
+        double currentY = 0.0;
+        double currentHeading = getImuHeading(); // Always use IMU for raw heading
+
+        // Look for the Alliance Goal Tag (the most important for localization)
+        AprilTagDetection detection = getFirstDetectedTag(goalTagId);
+
+        if (detection != null) {
+            // Use the existing function to correct the pose based on the detection
+            Waypoint correctedPose = getRobotPoseFromAprilTagDetection(detection);
+            currentX = correctedPose.x;
+            currentY = correctedPose.y;
+            // Heading remains IMU based for stability, but we use the tag's reliable X/Y position
+
+            telemetry.addData("Pose Source", "AprilTag %d (X/Y)", detection.id);
+        } else {
+            telemetry.addData("Pose Source", "IMU (X/Y Unknown)");
         }
 
-        // Final cleanup
-        stopRobot();
+        return new Waypoint(currentX, currentY, currentHeading);
     }
 
     /**
@@ -258,10 +353,14 @@ public class AutoPreviewEvent extends LinearOpMode {
     }
 
     /**
-     * Main Autonomous Routine with FSM
+     * Main Autonomous Routine with FSM (Uses the flexible state list)
      */
     private void runAutonomousRoutine() {
-        while (opModeIsActive() && currentState != RobotState.COMPLETE) {
+        while (opModeIsActive() && currentStepIndex < autoSequence.size()) {
+
+            RobotState currentState = autoSequence.get(currentStepIndex);
+
+            telemetry.addData("FSM Step", String.format(Locale.US, "%d/%d", currentStepIndex + 1, autoSequence.size()));
             telemetry.addData("Current State", currentState.toString());
             telemetry.update();
 
@@ -273,15 +372,17 @@ public class AutoPreviewEvent extends LinearOpMode {
                     if (obeliskDetection != null) {
                         telemetry.addData("Obelisk Found", "ID: %d", obeliskDetection.id);
                         driveToAprilTag(obeliskDetection, LAUNCH_DISTANCE_INCHES); // Drive to obelisk
-                        currentState = RobotState.POSITION_FOR_GOAL;
+                    } else {
+                        telemetry.addData("Warning", "Obelisk Not Found. Proceeding...");
                     }
+                    currentStepIndex++; // Move to next state (regardless of success, to avoid getting stuck)
                     break;
 
                 case POSITION_FOR_GOAL:
                     telemetry.addData("Status", "Positioning for Goal");
                     Waypoint goalWaypoint = (alliance == Alliance.RED) ? redGoalWaypoints.get(position) : blueGoalWaypoints.get(position);
                     driveToWaypoint(goalWaypoint);
-                    currentState = RobotState.SCAN_GOAL;
+                    currentStepIndex++;
                     break;
 
                 case SCAN_GOAL:
@@ -289,11 +390,12 @@ public class AutoPreviewEvent extends LinearOpMode {
                     AprilTagDetection goalDetection = getFirstDetectedTag(goalTagId);
                     if (goalDetection != null) {
                         telemetry.addData("Goal Found", "ID: %d", goalDetection.id);
-                        telemetry.addData("Range", "%.2f", goalDetection.ftcPose.range);
-                        telemetry.addData("Bearing", "%.2f", goalDetection.ftcPose.bearing);
-                        telemetry.addData("Elevation", "%.2f", goalDetection.ftcPose.elevation);
                         telemetry.update();
-                        currentState = RobotState.DRIVE_TO_GOAL;
+                        // If goal is found, we can proceed to the next step
+                        currentStepIndex++;
+                    } else {
+                        telemetry.addData("Warning", "Goal Tag Not Found. Retrying...");
+                        sleep(500); // Wait a bit before retrying scan
                     }
                     break;
 
@@ -302,8 +404,13 @@ public class AutoPreviewEvent extends LinearOpMode {
                     AprilTagDetection latestGoalDetection = getFirstDetectedTag(goalTagId);
                     if (latestGoalDetection != null) {
                         driveToAprilTag(latestGoalDetection, LAUNCH_DISTANCE_INCHES);
-                        currentState = RobotState.LAUNCH;
+                    } else {
+                        // If tag is lost, try driving to the last known fixed goal waypoint instead
+                        telemetry.addData("Warning", "Goal Tag Lost. Driving to fixed position.");
+                        Waypoint fixedGoalWaypoint = (alliance == Alliance.RED) ? redGoalWaypoints.get(position) : blueGoalWaypoints.get(position);
+                        driveToWaypoint(fixedGoalWaypoint);
                     }
+                    currentStepIndex++;
                     break;
 
                 case LAUNCH:
@@ -314,25 +421,25 @@ public class AutoPreviewEvent extends LinearOpMode {
                         telemetry.update();
                         sleep(LAUNCH_DELAY_MS);
                     }
-                    currentState = RobotState.WAIT_FOR_LAUNCH;
+                    currentStepIndex++;
                     break;
 
                 case WAIT_FOR_LAUNCH:
                     telemetry.addData("Status", "Waiting for Launch Sequence to Complete");
                     sleep(1000);
-                    currentState = RobotState.LEAVE;
+                    currentStepIndex++;
                     break;
 
                 case LEAVE:
                     telemetry.addData("Status", "Leaving Launch Zone");
-                    driveToWaypoint(LEAVE_WAYPOINT); // Drive to a pre-defined safe location
-                    currentState = RobotState.COMPLETE;
+                    driveToWaypoint(LEAVE_WAYPOINT);
+                    currentStepIndex++;
                     break;
 
                 case COMPLETE:
                     telemetry.addData("Status", "Autonomous Routine Complete");
                     telemetry.update();
-                    stopRobot();
+                    currentStepIndex++;
                     break;
             }
         }
@@ -374,15 +481,17 @@ public class AutoPreviewEvent extends LinearOpMode {
      * Corrects the AprilTag-detected robot pose to account for the camera's
      * mounting offset from the robot's center.
      * @param detection The raw AprilTag detection.
-     * @return A new Pose2d object with the corrected robot position and heading.
+     * @return A new Waypoint object with the corrected robot position and heading.
      */
     private Waypoint getRobotPoseFromAprilTagDetection(AprilTagDetection detection) {
+        // These values are the robot's pose relative to the field origin, as estimated by the SDK.
         double tagX = detection.ftcPose.x;
         double tagY = detection.ftcPose.y;
-        double tagHeading = detection.ftcPose.yaw;
+        double tagHeading = detection.ftcPose.yaw; // SDK provides yaw in degrees
 
         double headingRad = Math.toRadians(tagHeading);
 
+        // Apply camera offset correction
         double cameraXInRobotFrame = Y_CAMERA_OFFSET_INCHES * Math.cos(headingRad) - X_CAMERA_OFFSET_INCHES * Math.sin(headingRad);
         double cameraYInRobotFrame = Y_CAMERA_OFFSET_INCHES * Math.sin(headingRad) + X_CAMERA_OFFSET_INCHES * Math.cos(headingRad);
 
@@ -395,67 +504,74 @@ public class AutoPreviewEvent extends LinearOpMode {
 
     /**
      * Drives the robot to a waypoint relative to a detected AprilTag.
-     * The target waypoint is created by reducing the range to the tag by LAUNCH_DISTANCE.
+     * The target waypoint is created by calculating a fixed field coordinate in front of the tag.
      * @param targetTag The AprilTag to navigate towards.
-     * @param travelDelta The distance in inches to stop before the tag's location.
+     * @param travelDelta The distance in inches to stop before the tag's location (along the line of sight).
      */
     private void driveToAprilTag(AprilTagDetection targetTag, double travelDelta) {
         telemetry.addData("Driving to Tag", targetTag.id);
         telemetry.update();
 
         double startTime = getRuntime();
-        Waypoint targetWaypoint = null;
-
         while (opModeIsActive() && getRuntime() - startTime < TIMEOUT_S) {
             AprilTagDetection latestDetection = getFirstDetectedTag(targetTag.id);
 
             if (latestDetection != null) {
-                Waypoint correctedPose = getRobotPoseFromAprilTagDetection(latestDetection);
-                // Assume a simpler world where the corrected pose is our current pose
-                double currentX = correctedPose.x;
-                double currentY = correctedPose.y;
-                double currentHeading = correctedPose.heading;
+                // Calculate the target position relative to the tag's pose
+                // We want to drive *towards* the tag, stopping at travelDelta range
+                double remainingDistance = latestDetection.ftcPose.range - travelDelta;
+                double bearingRad = Math.toRadians(latestDetection.ftcPose.bearing);
 
-                double targetRange = latestDetection.ftcPose.range - travelDelta;
-                double targetBearingRad = Math.toRadians(latestDetection.ftcPose.bearing);
+                Waypoint currentPose = getRobotPose();
 
-                double targetX = currentX + targetRange * Math.cos(targetBearingRad);
-                double targetY = currentY + targetRange * Math.sin(targetBearingRad);
+                double targetX = currentPose.x + remainingDistance * Math.cos(bearingRad + Math.toRadians(currentPose.heading));
+                double targetY = currentPose.y + remainingDistance * Math.sin(bearingRad + Math.toRadians(currentPose.heading));
                 double targetHeading = latestDetection.ftcPose.yaw;
 
-                targetWaypoint = new Waypoint(targetX, targetY, targetHeading);
+                Waypoint targetWaypoint = new Waypoint(targetX, targetY, targetHeading);
                 driveToWaypoint(targetWaypoint);
 
-                if (Math.abs(targetX - currentX) < POSITION_TOLERANCE_IN &&
-                        Math.abs(targetY - currentY) < POSITION_TOLERANCE_IN &&
-                        Math.abs(getHeadingError(targetHeading)) < HEADING_TOLERANCE_DEG) {
+                // Check for completion using the detection range (simpler)
+                if (latestDetection.ftcPose.range <= travelDelta + POSITION_TOLERANCE_IN && Math.abs(getHeadingError(targetHeading)) < HEADING_TOLERANCE_DEG) {
                     break;
                 }
             } else {
                 telemetry.addData("Warning", "Lost sight of target tag %d", targetTag.id);
                 telemetry.update();
-                if (targetWaypoint != null) {
-                    driveToWaypoint(targetWaypoint);
-                }
+                // We break here if the tag is lost, moving to the next state,
+                // as tag-relative driving is impossible without the tag.
+                break;
             }
         }
+        stopRobot();
     }
 
     /**
      * Drives the robot to a specific waypoint using a proportional control loop.
-     * This function now prioritizes turning to face the target before driving.
+     * Uses the continuous pose estimation from {@link #getRobotPose()}.
      * @param target The target waypoint (x, y, heading) to navigate to.
      */
     private void driveToWaypoint(Waypoint target) {
-        double xError = target.x - target.x; // Use a better pose estimation later
-        double yError = target.y - target.y; // Use a better pose estimation later
-        double headingError = getHeadingError(target.heading);
+        double startTime = getRuntime();
 
-        while (opModeIsActive() && (Math.abs(xError) > POSITION_TOLERANCE_IN || Math.abs(yError) > POSITION_TOLERANCE_IN || Math.abs(headingError) > HEADING_TOLERANCE_DEG)) {
-            xError = target.x - target.x; // Re-evaluate pose here
-            yError = target.y - target.y; // Re-evaluate pose here
-            headingError = getHeadingError(target.heading);
+        while (opModeIsActive() && getRuntime() - startTime < TIMEOUT_S) {
+            // 1. Get current pose
+            Waypoint currentPose = getRobotPose();
+            double currentX = currentPose.x;
+            double currentY = currentPose.y;
+            double currentHeading = currentPose.heading;
 
+            // 2. Calculate errors
+            double xError = target.x - currentX;
+            double yError = target.y - currentY;
+            double headingError = getHeadingError(target.heading);
+
+            // 3. Check for completion
+            if (Math.abs(xError) < POSITION_TOLERANCE_IN && Math.abs(yError) < POSITION_TOLERANCE_IN && Math.abs(headingError) < HEADING_TOLERANCE_DEG) {
+                break; // Target reached
+            }
+
+            // 4. Proportional Drive Logic
             while (headingError > 180) headingError -= 360;
             while (headingError < -180) headingError += 360;
 
@@ -463,16 +579,21 @@ public class AutoPreviewEvent extends LinearOpMode {
             double lateralPower;
             double yawPower;
 
+            // Strategy: Turn in place if heading error is too large, otherwise drive and correct heading simultaneously.
             if (Math.abs(headingError) > HEADING_TURN_TOLERANCE_DEG) {
+                // Large error, only turn in place
                 axialPower = 0;
                 lateralPower = 0;
-                yawPower = -headingError * HEADING_KP;
             } else {
+                // Calculate power based on position error
                 axialPower = yError * POSITION_KP;
                 lateralPower = xError * POSITION_KP;
-                yawPower = -headingError * HEADING_KP;
             }
+            // Add proportional yaw correction
+            yawPower = -headingError * HEADING_KP;
 
+
+            // 5. Normalize powers to prevent over-powering
             double max = Math.max(Math.abs(axialPower + lateralPower + yawPower),
                     Math.abs(axialPower - lateralPower - yawPower));
             max = Math.max(max, Math.abs(axialPower - lateralPower + yawPower));
@@ -484,14 +605,17 @@ public class AutoPreviewEvent extends LinearOpMode {
                 yawPower /= max;
             }
 
+            // 6. Apply motor power (Mecanum Field-Centric)
             motorLeftFront.setPower(axialPower + lateralPower + yawPower);
             motorRightFront.setPower(axialPower - lateralPower - yawPower);
             motorLeftBack.setPower(axialPower - lateralPower + yawPower);
             motorRightBack.setPower(axialPower + lateralPower - yawPower);
 
-            telemetry.addData("Current State", currentState.toString());
-            telemetry.addData("Target Waypoint", "X=%.1f, Y=%.1f, Heading=%.1f", target.x, target.y, target.heading);
-            telemetry.addData("Error", "X=%.1f, Y=%.1f, Heading=%.1f", xError, yError, headingError);
+            // 7. Telemetry Update
+            telemetry.addData("Waypoint Status", "Driving");
+            telemetry.addData("Target Waypoint", "X=%.1f, Y=%.1f, H=%.1f", target.x, target.y, target.heading);
+            telemetry.addData("Current Pose", "X=%.1f, Y=%.1f, H=%.1f", currentX, currentY, currentHeading);
+            telemetry.addData("Error", "X=%.1f, Y=%.1f, H=%.1f", xError, yError, headingError);
             telemetry.update();
         }
         stopRobot();
@@ -523,8 +647,7 @@ public class AutoPreviewEvent extends LinearOpMode {
      * Helper method to simulate launching an artifact.
      */
     private void launch() {
-        // Placeholder for launching logic
-        // This is where you would activate your launcher motor or servo
+        // Placeholder for launching logic (e.g., set launcher motor to velocity, flip trigger servo)
     }
 
     /**

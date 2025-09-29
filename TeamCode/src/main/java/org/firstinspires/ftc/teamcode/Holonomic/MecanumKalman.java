@@ -31,7 +31,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 
-@Autonomous(name = "Mecanum Kalman", group = "Autonomous")
+@Autonomous(name = "Mecanum Kalman", group = "Holonomic")
 @Disabled
 public class MecanumKalman extends LinearOpMode {
 

@@ -116,7 +116,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import org.firstinspires.ftc.teamcode.Utility.Datalogger;
 
-@TeleOp(name = "Mecanum: Travel Strafe", group = "Test")
+@TeleOp(name = "Mecanum: Travel Strafe", group = "Holonomic")
 @Disabled
 
 public class MecanumTravelStrafe extends LinearOpMode
