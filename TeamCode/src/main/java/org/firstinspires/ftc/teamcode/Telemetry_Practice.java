@@ -5,39 +5,34 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "Telemetry Practice")
+@TeleOp(name = "Telemetry")
 public class Telemetry_Practice extends LinearOpMode {
 
+    private final DcMotor Motor = hardwareMap.dcMotor.get("Motor 1");
 
-private final DcMotor Motor = hardwareMap.dcMotor.get("Motor 1");
+    private double counter = 0.1;
 
+    @Override
+    public void runOpMode() throws InterruptedException {
 
-private double counter = 0.1;
+        Motor.setDirection(DcMotorSimple.Direction.FORWARD);
 
+        waitForStart();
+        if (isStopRequested()) return;
+        mainTeleOpLoop();
+    }
 
-@Override
-public void runOpMode() throws InterruptedException {
+    private void mainTeleOpLoop() throws InterruptedException {
+        while (opModeIsActive()) {
+            if (counter <= 1) {
+                Motor.setPower(counter);
+            }
 
-    Motor.setDirection(DcMotorSimple.Direction.FORWARD);
+            telemetry.addData("Hello World!", "g");
 
+            telemetry.update();
 
-    waitForStart();
-    if (isStopRequested()) return;
-    mainTeleOpLoop();
-}
-
-
-private void mainTeleOpLoop() throws InterruptedException {
-    while (opModeIsActive()) {
-        if (counter <=1) {
-            Motor.setPower(counter);
+            counter += 0.1;
         }
-        telemetry.addData("Status", "Running");
-        telemetry.addData("Hello World!", "Game");
-        telemetry.update();
-        counter += 0.1;
-
-        }
-
     }
 }
