@@ -1,5 +1,8 @@
     package org.firstinspires.ftc.teamcode;
 
+    import static org.firstinspires.ftc.teamcode.AutoConstants.CLASSIFIER_X;
+    import static org.firstinspires.ftc.teamcode.AutoConstants.CLASSIFIER_Y;
+
     import com.qualcomm.hardware.bosch.BNO055IMU;
     import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
     import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -26,7 +29,7 @@ public class DecodeLM1Auto extends LinearOpMode {
 
         initAuto();
 
-            driveToPos(16, 23);
+            driveToPos(CLASSIFIER_X, CLASSIFIER_Y);
             gyroTurnToAngle(110);
         //TODO: When the robot classes get built we need to add actions for outake to score the pre-load
 //      Example  Code:

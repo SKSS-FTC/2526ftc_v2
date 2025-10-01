@@ -5,5 +5,8 @@ public class AutoConstants {
     static final double TURN_SPEED = 0.5;
     static final double STRAFE_SPEED = 0.5;
     static final double LAUNCH_EXIT_SPEED = 0.8;
+    static final double CLASSIFIER_X = 23;
+    static final double CLASSIFIER_Y = 16;
+
 
 }
