@@ -27,6 +27,7 @@ public class MainMecanumTeleOpBlue extends LinearOpMode {
             controls.updateControls();
 
             artifactHandlingSystem.shootArtifact(controls.shootArtifact);
+            artifactHandlingSystem.intakeArtifact(controls.intakeArtifact);
 
             displayTelemetry();
         }
