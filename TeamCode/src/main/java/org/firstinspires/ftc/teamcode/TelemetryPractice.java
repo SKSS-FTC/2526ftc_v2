@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp(name = "Telemetry")
-public class Telemetry_Practice extends LinearOpMode {
+public class TelemetryPractice extends LinearOpMode {
 
     private final DcMotor Motor = hardwareMap.dcMotor.get("Motor 1");
 
