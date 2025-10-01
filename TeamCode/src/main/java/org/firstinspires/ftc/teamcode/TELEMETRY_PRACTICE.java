@@ -1,43 +1,38 @@
 package org.firstinspires.ftc.teamcode;
 
-/*
-Uncomment this and you'll face an error 😉😟00 01 02 03 04 05 06 07 08 09 07 05 03 01parabolic asymmetric asymmetrical symmetric symmetrical
-conduit discombobulate periastron Buffalo buffalo Buffalo buffalo buffalo Buffalo Buffalo
-IP = In****e****l Pr****t*
-IP = In*****y P****s
-IP = In*****t P**t****
-*/
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "relemerey")
+@TeleOp(name = "Telemetry")
+public class Telemetry_Practice extends LinearOpMode {
 
+    private final DcMotor Motor = hardwareMap.dcMotor.get("Motor 1");
 
-public class TELEMETRY_PRACTICE extends LinearOpMode {
+    private double counter = 0.1;
 
-    public final DcMotor Motor = hardwareMap.dcMotor.get("Motor 1");
     @Override
     public void runOpMode() throws InterruptedException {
+
+        Motor.setDirection(DcMotorSimple.Direction.FORWARD);
+
         waitForStart();
         if (isStopRequested()) return;
-        while (opModeIsActive()) {
-            // hur hur hur hur hur hur hur hur hur hur
-            telemetry.addData("caption", "raption");
-
-            // y** **e** **k* *o* **rt**
-
-
-
-            telemetry.update();
-        }
+        mainTeleOpLoop();
     }
 
-//    private void forsomereasonloopisntallowed() throws InterruptedException {
-//        while (opModeIsActive()) {
-//            // dodo bird vs lepidodendron tree ultimate showdown
-//            telemetry.addData("caption", "raption");
-//        }
-//    }
+    private void mainTeleOpLoop() throws InterruptedException {
+        while (opModeIsActive()) {
+            if (counter <= 1) {
+                Motor.setPower(counter);
+            }
+
+            telemetry.addData("Hello World!", "g");
+
+            telemetry.update();
+
+            counter += 0.1;
+        }
+    }
 }
