@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -28,7 +27,6 @@ public class MainOp extends OpMode {
 	private MechanismManager mechanisms;
 	private Controller mainController;
 	private Controller subController;
-	private Follower follower;
 	
 	/**
 	 * Null-safe mechanism execution helper
@@ -57,7 +55,7 @@ public class MainOp extends OpMode {
 	
 	@Override
 	public final void init_loop() {
-		Drawing.drawRobot(follower.getPose());
+		Drawing.drawRobot(mechanisms.follower.getPose());
 		Drawing.sendPacket();
 	}
 	
