@@ -1,21 +1,24 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp
-public class NicksFIRSTJavaOpMode extends LinearOpMode {
-    public void runOpMode() {
-        telemetry.addData("Status", "Initialized");
+@TeleOp(name="Nick's OpMode", group="Example OpMode")
+public class NicksFIRSTJavaOpMode extends OpMode {
+    @Override
+    public void init() {
+        telemetry.addData("Status", "Initialised");
         telemetry.update();
+    }
 
-        waitForStart();
+    @Override
+    public void loop() {
+        telemetry.addData("Status", "Running");
+        telemetry.update();
+    }
 
-        while (opModeIsActive()) {
-            telemetry.addData("Status", "Running");
-            telemetry.update();
-        }
-
+    @Override
+    public  void stop() {
         telemetry.addData("Status", "Stopped");
         telemetry.update();
     }
