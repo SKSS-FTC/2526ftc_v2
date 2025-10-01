@@ -214,7 +214,7 @@ public class MainAuto extends OpMode {
 				.build();
 		
 		closePreset3Prep = follower.pathBuilder()
-				.addPath(new BezierLine(Settings.Autonomous.RedClose.LAUNCH_2, Settings.Autonomous.RedClose.PRESET_3_PREP))
+				.addPath(new BezierLine(follower::getPose, Settings.Autonomous.RedClose.PRESET_3_PREP))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedClose.LAUNCH_2.getHeading(), Settings.Autonomous.RedClose.PRESET_3_PREP.getHeading())
 				.build();
 		
