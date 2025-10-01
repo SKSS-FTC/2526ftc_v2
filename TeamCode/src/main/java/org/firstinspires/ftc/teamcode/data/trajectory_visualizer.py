@@ -14,9 +14,8 @@ Expected record fields in DB:
 import argparse
 import datetime
 import os
-import sys
-
 import pandas as pd
+import sys
 from tinydb import TinyDB
 
 
@@ -116,7 +115,7 @@ def plot_matplotlib(df, out_png, show):
 
 def main():
     p = argparse.ArgumentParser(prog="trajectory_visualizer.py")
-    p.add_argument("--db", default="trajectories.json", help="TinyDB JSON path")
+    p.add_argument("--db", default="trajectory_db.json", help="TinyDB JSON path")
     p.add_argument(
         "--out",
         default=None,
