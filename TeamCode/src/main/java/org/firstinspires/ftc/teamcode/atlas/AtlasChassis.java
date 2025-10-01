@@ -103,6 +103,9 @@ public class AtlasChassis {
         movePower(x, y, 0);
     }
 
+    public double update() {
+        return update(null);
+    }
     public double update(Telemetry telemetry) {
         long currentTime = System.currentTimeMillis();
         double deltaTimeMS = currentTime - lastUpdateTime;
