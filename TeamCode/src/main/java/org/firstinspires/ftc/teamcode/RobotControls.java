@@ -1,11 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad2;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
+
 public class RobotControls {
     private final LinearOpMode linearOpMode;
 
@@ -13,12 +9,24 @@ public class RobotControls {
         this.linearOpMode = linearOpMode;
     }
 
-    boolean shootArtifact;
     boolean intakeArtifact;
-
-
+    float shootArtifact;
+    boolean resetYaw;
+    float leftStickX;
+    float leftStickY;
+    float rightStickX;
+    boolean fastMode;
+    boolean slowMode;
+    boolean strafeToClassifier;
     public void updateControls() {
-        shootArtifact = linearOpMode.gamepad2.a;
-        intakeArtifact = linearOpMode.gamepad2.b;
+        shootArtifact = linearOpMode.gamepad2.right_trigger;
+        intakeArtifact = linearOpMode.gamepad2.a;
+        resetYaw = linearOpMode.gamepad1.start;
+        leftStickX = -linearOpMode.gamepad1.left_stick_x;
+        leftStickY = linearOpMode.gamepad1.left_stick_y;
+        rightStickX = -linearOpMode.gamepad1.right_stick_x;
+        fastMode = linearOpMode.gamepad1.left_bumper;
+        slowMode = linearOpMode.gamepad1.right_bumper;
+        strafeToClassifier = linearOpMode.gamepad1.back;
     }
 }

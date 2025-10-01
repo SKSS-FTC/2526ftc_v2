@@ -9,7 +9,7 @@ public class ArtifactHandlingSystem {
     private final DcMotor leftOuttakeMotor;
     private final DcMotor rightOuttakeMotor;
     private final LinearOpMode linearOpMode;
-    private DcMotor intakeMotor;
+    private final DcMotor intakeMotor;
 
     public ArtifactHandlingSystem(LinearOpMode linearOpMode) {
         this.leftOuttakeMotor = linearOpMode.hardwareMap.dcMotor.get("leftOuttakeMotor");
@@ -29,17 +29,9 @@ public class ArtifactHandlingSystem {
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
-    public void shootArtifact(boolean shootArtifact) {
-        if (shootArtifact) {
-            leftOuttakeMotor.setPower(1);
-            rightOuttakeMotor.setPower(1);
-
-
-        } else {
-            leftOuttakeMotor.setPower(0);
-            rightOuttakeMotor.setPower(0);
-
-        }
+    public void shootArtifact(float shootArtifact) {
+        leftOuttakeMotor.setPower(shootArtifact);
+        rightOuttakeMotor.setPower(shootArtifact);
     }
 
     public void intakeArtifact(boolean intakeArtifact) {
