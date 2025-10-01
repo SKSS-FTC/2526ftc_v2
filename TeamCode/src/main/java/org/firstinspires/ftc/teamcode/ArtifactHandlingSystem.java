@@ -25,19 +25,13 @@ public class ArtifactHandlingSystem {
         rightOuttakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    public void shootArtifact(boolean shootArtifact) {
-        if (shootArtifact) {
-            leftOuttakeMotor.setPower(1);
-            rightOuttakeMotor.setPower(1);
-
-        } else {
-             leftOuttakeMotor.setPower(0);
-             rightOuttakeMotor.setPower(0);
-        }
+    public void shootArtifact(float shootArtifact) {
+        leftOuttakeMotor.setPower(shootArtifact);
+        rightOuttakeMotor.setPower(shootArtifact);
     }
 
     public void displayTelemetry() {
-        linearOpMode.telemetry.addData("Left Outtake Motor Power", leftOuttakeMotor.getPower());
-        linearOpMode.telemetry.addData("Right Outtake Motor Power", rightOuttakeMotor.getPower());
+        linearOpMode.telemetry.addData("Left Outtake Motor Power", ".2f", leftOuttakeMotor.getPower());
+        linearOpMode.telemetry.addData("Right Outtake Motor Power", ".2f", rightOuttakeMotor.getPower());
     }
 }

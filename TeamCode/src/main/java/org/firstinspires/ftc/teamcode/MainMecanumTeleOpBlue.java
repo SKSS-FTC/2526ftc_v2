@@ -8,12 +8,14 @@ public class MainMecanumTeleOpBlue extends LinearOpMode {
 
     private ArtifactHandlingSystem artifactHandlingSystem;
 
-    private RobotControls controls;
+    private RobotControls robotControls;
+    private DriveTrain driveTrain;
 
     @Override
     public void runOpMode() throws InterruptedException {
         artifactHandlingSystem = new ArtifactHandlingSystem(this);
-        controls = new RobotControls(this);
+        robotControls = new RobotControls(this);
+        driveTrain = new DriveTrain(this);
 
         configureMotorModes();
 
@@ -24,9 +26,12 @@ public class MainMecanumTeleOpBlue extends LinearOpMode {
 
     private void mainTeleOpLoop() throws InterruptedException {
         while (opModeIsActive()) {
-            controls.updateControls();
+            robotControls.updateControls();
 
-            artifactHandlingSystem.shootArtifact(controls.shootArtifact);
+            artifactHandlingSystem.shootArtifact(robotControls.shootArtifact);
+            driveTrain.adjustTurnSpeed();
+            driveTrain.setMotorPowers();
+            driveTrain.resetYaw();
 
             displayTelemetry();
         }
@@ -34,9 +39,11 @@ public class MainMecanumTeleOpBlue extends LinearOpMode {
 
     private void configureMotorModes() {
         artifactHandlingSystem.configureMotorModes();
+        driveTrain.configureMotorModes();
     }
 
     private void displayTelemetry() {
+        driveTrain.displayTelemetry();
         artifactHandlingSystem.displayTelemetry();
 
         telemetry.update();
