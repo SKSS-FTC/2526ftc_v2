@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -21,7 +20,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
 @Autonomous(name = "Main Auto", group = ".Competition Modes")
 public class MainAuto extends OpMode {
 	
-	private Follower follower;
 	private Timer pathTimer, opmodeTimer;
 	private int pathState;
 	private MatchConfigurationWizard wizard;
@@ -65,114 +63,114 @@ public class MainAuto extends OpMode {
 		if (startPos == MatchSettings.AutoStartingPosition.FAR) {
 			if (alliance == MatchSettings.AllianceColor.RED) {
 				buildRedFarPaths();
-				follower.setStartingPose(Settings.Autonomous.RedFar.START);
+				mechanisms.follower.setStartingPose(Settings.Autonomous.RedFar.START);
 			} else { // BLUE
 				buildBlueFarPaths();
-				follower.setStartingPose(Settings.Autonomous.BlueFar.START);
+				mechanisms.follower.setStartingPose(Settings.Autonomous.BlueFar.START);
 			}
 		} else { // CLOSE
 			if (alliance == MatchSettings.AllianceColor.RED) {
 				buildRedClosePaths();
-				follower.setStartingPose(Settings.Autonomous.RedClose.START);
+				mechanisms.follower.setStartingPose(Settings.Autonomous.RedClose.START);
 			} else { // BLUE
 				buildBlueClosePaths();
-				follower.setStartingPose(Settings.Autonomous.BlueClose.START);
+				mechanisms.follower.setStartingPose(Settings.Autonomous.BlueClose.START);
 			}
 		}
 	}
 	
 	// NOTE: Far paths are retained from the original code but assigned to new variables for clarity.
 	public void buildRedFarPaths() {
-		farPreset1Prep = follower.pathBuilder()
+		farPreset1Prep = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedFar.START, Settings.Autonomous.RedFar.PRESET_1_PREP))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedFar.START.getHeading(), Settings.Autonomous.RedFar.PRESET_1_PREP.getHeading())
 				.build();
 		
-		farPreset1End = follower.pathBuilder()
+		farPreset1End = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedFar.PRESET_1_PREP, Settings.Autonomous.RedFar.PRESET_1_END))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedFar.PRESET_1_PREP.getHeading(), Settings.Autonomous.RedFar.PRESET_1_END.getHeading())
 				.build();
 		
-		farLaunch1 = follower.pathBuilder()
+		farLaunch1 = mechanisms.follower.pathBuilder()
 				.addPath(Settings.Autonomous.RedFar.BEZIER_LAUNCH_1)
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedFar.PRESET_1_END.getHeading(), Settings.Autonomous.RedFar.ENDING_LAUNCH_1.getHeading())
 				.build();
 		
-		farPreset2Prep = follower.pathBuilder()
+		farPreset2Prep = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedFar.ENDING_LAUNCH_1, Settings.Autonomous.RedFar.PRESET_2_PREP))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedFar.ENDING_LAUNCH_1.getHeading(), Settings.Autonomous.RedFar.PRESET_2_PREP.getHeading())
 				.build();
 		
-		farPreset2End = follower.pathBuilder()
+		farPreset2End = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedFar.PRESET_2_PREP, Settings.Autonomous.RedFar.PRESET_2_END))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedFar.PRESET_2_PREP
 						.getHeading(), Settings.Autonomous.RedFar.PRESET_2_END.getHeading())
 				.build();
 		
-		farLaunch2 = follower.pathBuilder()
+		farLaunch2 = mechanisms.follower.pathBuilder()
 				.addPath(new BezierCurve(Settings.Autonomous.RedFar.PRESET_2_END, Settings.Autonomous.RedFar.LAUNCH_2))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedFar.PRESET_2_END.getHeading(), Settings.Autonomous.RedFar.LAUNCH_2.getHeading())
 				.build();
 		
-		farPreset3Prep = follower.pathBuilder()
+		farPreset3Prep = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedFar.LAUNCH_2, Settings.Autonomous.RedFar.PRESET_3_END))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedFar.LAUNCH_2.getHeading(), Settings.Autonomous.RedFar.PRESET_3_END.getHeading())
 				.build();
 		
-		farLaunch3 = follower.pathBuilder()
+		farLaunch3 = mechanisms.follower.pathBuilder()
 				.addPath(new BezierCurve(Settings.Autonomous.RedFar.PRESET_3_END, Settings.Autonomous.RedFar.PARK))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedFar.PRESET_3_END.getHeading(), Settings.Autonomous.RedFar.PARK.getHeading())
 				.build();
 		
-		farPark = follower.pathBuilder()
+		farPark = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedFar.PARK, Settings.Autonomous.RedFar.PARK))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedFar.PARK.getHeading(), Settings.Autonomous.RedFar.PARK.getHeading())
 				.build();
 	}
 	
 	public void buildBlueFarPaths() {
-		farPreset1Prep = follower.pathBuilder()
+		farPreset1Prep = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueFar.START, Settings.Autonomous.BlueFar.PRESET_1_PREP))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueFar.START.getHeading(), Settings.Autonomous.BlueFar.PRESET_1_PREP.getHeading())
 				.build();
 		
-		farPreset1End = follower.pathBuilder()
+		farPreset1End = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueFar.PRESET_1_PREP, Settings.Autonomous.BlueFar.PRESET_1_END))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueFar.PRESET_1_PREP.getHeading(), Settings.Autonomous.BlueFar.PRESET_1_END.getHeading())
 				.build();
 		
-		farLaunch1 = follower.pathBuilder()
+		farLaunch1 = mechanisms.follower.pathBuilder()
 				.addPath(Settings.Autonomous.BlueFar.BEZIER_LAUNCH_1)
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueFar.PRESET_1_END.getHeading(), Settings.Autonomous.BlueFar.ENDING_LAUNCH_1.getHeading())
 				.build();
 		
-		farPreset2Prep = follower.pathBuilder()
+		farPreset2Prep = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueFar.ENDING_LAUNCH_1, Settings.Autonomous.BlueFar.PRESET_2_PREP))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueFar.ENDING_LAUNCH_1.getHeading(), Settings.Autonomous.BlueFar.PRESET_2_PREP.getHeading())
 				.build();
 		
-		farPreset2End = follower.pathBuilder()
+		farPreset2End = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueFar.PRESET_2_PREP, Settings.Autonomous.BlueFar.PRESET_2_END))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueFar.PRESET_2_PREP
 						.getHeading(), Settings.Autonomous.BlueFar.PRESET_2_END.getHeading())
 				.build();
 		
-		farLaunch2 = follower.pathBuilder()
+		farLaunch2 = mechanisms.follower.pathBuilder()
 				.addPath(new BezierCurve(Settings.Autonomous.BlueFar.PRESET_2_END, Settings.Autonomous.BlueFar.LAUNCH_2))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueFar.PRESET_2_END.getHeading(), Settings.Autonomous.BlueFar.LAUNCH_2.getHeading())
 				.build();
 		
-		farPreset3Prep = follower.pathBuilder()
+		farPreset3Prep = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueFar.LAUNCH_2, Settings.Autonomous.BlueFar.PRESET_3_END))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueFar.LAUNCH_2.getHeading(), Settings.Autonomous.BlueFar.PRESET_3_END.getHeading())
 				.build();
 		
-		farLaunch3 = follower.pathBuilder()
+		farLaunch3 = mechanisms.follower.pathBuilder()
 				.addPath(new BezierCurve(Settings.Autonomous.BlueFar.PRESET_3_END, Settings.Autonomous.BlueFar.PARK))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueFar.PRESET_3_END.getHeading(), Settings.Autonomous.BlueFar.PARK.getHeading())
 				.build();
 		
-		farPark = follower.pathBuilder()
+		farPark = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueFar.PARK, Settings.Autonomous.BlueFar.PARK))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueFar.PARK.getHeading(), Settings.Autonomous.BlueFar.PARK.getHeading())
 				.build();
@@ -182,53 +180,53 @@ public class MainAuto extends OpMode {
 	 * OVERHAULED: Builds the paths for the RED CLOSE starting position.
 	 */
 	public void buildRedClosePaths() {
-		closePreset1Prep = follower.pathBuilder()
+		closePreset1Prep = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedClose.START, Settings.Autonomous.RedClose.PRESET_1_PREP))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedClose.START.getHeading(), Settings.Autonomous.RedClose.PRESET_1_PREP.getHeading())
 				.build();
 		
-		closePreset1End = follower.pathBuilder()
+		closePreset1End = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedClose.PRESET_1_PREP, Settings.Autonomous.RedClose.PRESET_1_END))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedClose.PRESET_1_PREP.getHeading(), Settings.Autonomous.RedClose.PRESET_1_END.getHeading())
 				.build();
 		
-		closeLaunch1 = follower.pathBuilder()
+		closeLaunch1 = mechanisms.follower.pathBuilder()
 				.addPath(new BezierCurve(Settings.Autonomous.RedClose.PRESET_1_END, Settings.Autonomous.RedClose.LAUNCH_1, Settings.Autonomous.RedClose.LAUNCH_1))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedClose.PRESET_1_END.getHeading(), Settings.Autonomous.RedClose.LAUNCH_1.getHeading())
 				.build();
 		
-		closePreset2Prep = follower.pathBuilder()
+		closePreset2Prep = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedClose.LAUNCH_1, Settings.Autonomous.RedClose.PRESET_2_PREP))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedClose.LAUNCH_1.getHeading(), Settings.Autonomous.RedClose.PRESET_2_PREP.getHeading())
 				.build();
 		
-		closePreset2End = follower.pathBuilder()
+		closePreset2End = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedClose.PRESET_2_PREP, Settings.Autonomous.RedClose.PRESET_2_END))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedClose.PRESET_2_PREP
 						.getHeading(), Settings.Autonomous.RedClose.PRESET_2_END.getHeading())
 				.build();
 		
-		closeLaunch2 = follower.pathBuilder()
+		closeLaunch2 = mechanisms.follower.pathBuilder()
 				.addPath(new BezierCurve(Settings.Autonomous.RedClose.PRESET_2_END, Settings.Autonomous.RedClose.LAUNCH_2))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedClose.PRESET_2_END.getHeading(), Settings.Autonomous.RedClose.LAUNCH_2.getHeading())
 				.build();
 		
-		closePreset3Prep = follower.pathBuilder()
+		closePreset3Prep = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedClose.LAUNCH_2, Settings.Autonomous.RedClose.PRESET_3_PREP))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedClose.LAUNCH_2.getHeading(), Settings.Autonomous.RedClose.PRESET_3_PREP.getHeading())
 				.build();
 		
-		closePreset3End = follower.pathBuilder()
+		closePreset3End = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedClose.PRESET_3_PREP, Settings.Autonomous.RedClose.PRESET_3_END))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedClose.PRESET_3_PREP.getHeading(), Settings.Autonomous.RedClose.PRESET_3_END.getHeading())
 				.build();
 		
-		closeLaunch3 = follower.pathBuilder()
+		closeLaunch3 = mechanisms.follower.pathBuilder()
 				.addPath(new BezierCurve(Settings.Autonomous.RedClose.PRESET_3_END, Settings.Autonomous.RedClose.LAUNCH_3))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedClose.PRESET_3_END.getHeading(), Settings.Autonomous.RedClose.LAUNCH_3.getHeading())
 				.build();
 		
-		closePark = follower.pathBuilder()
+		closePark = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.RedClose.LAUNCH_3, Settings.Autonomous.RedClose.PARK))
 				.setLinearHeadingInterpolation(Settings.Autonomous.RedClose.LAUNCH_3.getHeading(), Settings.Autonomous.RedClose.PARK.getHeading())
 				.build();
@@ -238,53 +236,53 @@ public class MainAuto extends OpMode {
 	 * OVERHAULED: Builds the paths for the BLUE CLOSE starting position using mirrored values.
 	 */
 	public void buildBlueClosePaths() {
-		closePreset1Prep = follower.pathBuilder()
+		closePreset1Prep = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueClose.START, Settings.Autonomous.BlueClose.PRESET_1_PREP))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueClose.START.getHeading(), Settings.Autonomous.BlueClose.PRESET_1_PREP.getHeading())
 				.build();
 		
-		closePreset1End = follower.pathBuilder()
+		closePreset1End = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueClose.PRESET_1_PREP, Settings.Autonomous.BlueClose.PRESET_1_END))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueClose.PRESET_1_PREP.getHeading(), Settings.Autonomous.BlueClose.PRESET_1_END.getHeading())
 				.build();
 		
-		closeLaunch1 = follower.pathBuilder()
+		closeLaunch1 = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueClose.PRESET_1_END, Settings.Autonomous.BlueClose.LAUNCH_1))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueClose.PRESET_1_END.getHeading(), Settings.Autonomous.BlueClose.LAUNCH_1.getHeading())
 				.build();
 		
-		closePreset2Prep = follower.pathBuilder()
+		closePreset2Prep = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueClose.LAUNCH_1, Settings.Autonomous.BlueClose.PRESET_2_PREP))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueClose.LAUNCH_1.getHeading(), Settings.Autonomous.BlueClose.PRESET_2_PREP.getHeading())
 				.build();
 		
-		closePreset2End = follower.pathBuilder()
+		closePreset2End = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueClose.PRESET_2_PREP, Settings.Autonomous.BlueClose.PRESET_2_END))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueClose.PRESET_2_PREP
 						.getHeading(), Settings.Autonomous.BlueClose.PRESET_2_END.getHeading())
 				.build();
 		
-		closeLaunch2 = follower.pathBuilder()
+		closeLaunch2 = mechanisms.follower.pathBuilder()
 				.addPath(new BezierCurve(Settings.Autonomous.BlueClose.PRESET_2_END, Settings.Autonomous.BlueClose.LAUNCH_2))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueClose.PRESET_2_END.getHeading(), Settings.Autonomous.BlueClose.LAUNCH_2.getHeading())
 				.build();
 		
-		closePreset3Prep = follower.pathBuilder()
+		closePreset3Prep = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueClose.LAUNCH_2, Settings.Autonomous.BlueClose.PRESET_3_PREP))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueClose.LAUNCH_2.getHeading(), Settings.Autonomous.BlueClose.PRESET_3_PREP.getHeading())
 				.build();
 		
-		closePreset3End = follower.pathBuilder()
+		closePreset3End = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueClose.PRESET_3_PREP, Settings.Autonomous.BlueClose.PRESET_3_END))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueClose.PRESET_3_PREP.getHeading(), Settings.Autonomous.BlueClose.PRESET_3_END.getHeading())
 				.build();
 		
-		closeLaunch3 = follower.pathBuilder()
+		closeLaunch3 = mechanisms.follower.pathBuilder()
 				.addPath(new BezierCurve(Settings.Autonomous.BlueClose.PRESET_3_END, Settings.Autonomous.BlueClose.LAUNCH_3))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueClose.PRESET_3_END.getHeading(), Settings.Autonomous.BlueClose.LAUNCH_3.getHeading())
 				.build();
 		
-		closePark = follower.pathBuilder()
+		closePark = mechanisms.follower.pathBuilder()
 				.addPath(new BezierLine(Settings.Autonomous.BlueClose.LAUNCH_3, Settings.Autonomous.BlueClose.PARK))
 				.setLinearHeadingInterpolation(Settings.Autonomous.BlueClose.LAUNCH_3.getHeading(), Settings.Autonomous.BlueClose.PARK.getHeading())
 				.build();
@@ -313,49 +311,49 @@ public class MainAuto extends OpMode {
 				});
 				ifMechanismValid(mechanisms.get(Spindex.class), s -> {
 					if (s.isEmpty()) {
-						follower.followPath(closePreset1Prep);
+						mechanisms.follower.followPath(closePreset1Prep);
 						setPathState(1);
 					}
 				});
 				break;
 			case 1:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Intake.class), Intake::in);
-					follower.followPath(closePreset1End);
+					mechanisms.follower.followPath(closePreset1End);
 					setPathState(2);
 				}
 				break;
 			case 2:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Intake.class), Intake::stop);
-					follower.followPath(closeLaunch1);
+					mechanisms.follower.followPath(closeLaunch1);
 					setPathState(3);
 				}
 				break;
 			case 3:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Launcher.class), l -> {
 						if (l.okayToLaunch()) l.launch();
 					});
 					ifMechanismValid(mechanisms.get(Spindex.class), s -> {
 						if (s.isEmpty()) {
-							follower.followPath(closePreset2Prep);
+							mechanisms.follower.followPath(closePreset2Prep);
 							setPathState(4);
 						}
 					});
 				}
 				break;
 			case 4:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Intake.class), Intake::in);
-					follower.followPath(closePreset2End);
+					mechanisms.follower.followPath(closePreset2End);
 					setPathState(5);
 				}
 				break;
 			case 5:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Intake.class), Intake::stop);
-					follower.followPath(closeLaunch2);
+					mechanisms.follower.followPath(closeLaunch2);
 					setPathState(6);
 				}
 				break;
@@ -364,21 +362,21 @@ public class MainAuto extends OpMode {
 					if (l.okayToLaunch()) l.launch();
 				});
 				ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-					if (s.isEmpty()) follower.followPath(closePreset3Prep);
+					if (s.isEmpty()) mechanisms.follower.followPath(closePreset3Prep);
 					setPathState(7);
 				});
 				break;
 			case 7:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Intake.class), Intake::in);
-					follower.followPath(closePreset3End);
+					mechanisms.follower.followPath(closePreset3End);
 					setPathState(8);
 				}
 				break;
 			case 8:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Intake.class), Intake::stop);
-					follower.followPath(closeLaunch3);
+					mechanisms.follower.followPath(closeLaunch3);
 					setPathState(9);
 				}
 				break;
@@ -387,7 +385,7 @@ public class MainAuto extends OpMode {
 					if (l.okayToLaunch()) l.launch();
 				});
 				ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-					if (s.isEmpty()) follower.followPath(closePark);
+					if (s.isEmpty()) mechanisms.follower.followPath(closePark);
 					setPathState(10);
 				});
 				break;
@@ -403,21 +401,21 @@ public class MainAuto extends OpMode {
 					if (l.okayToLaunch()) l.launch();
 				});
 				ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-					if (s.isEmpty()) follower.followPath(farPreset1Prep);
+					if (s.isEmpty()) mechanisms.follower.followPath(farPreset1Prep);
 					setPathState(1);
 				});
 				break;
 			case 1:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Intake.class), Intake::in);
-					follower.followPath(farPreset1End);
+					mechanisms.follower.followPath(farPreset1End);
 					setPathState(2);
 				}
 				break;
 			case 2:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Intake.class), Intake::stop);
-					follower.followPath(farLaunch1);
+					mechanisms.follower.followPath(farLaunch1);
 					setPathState(3);
 				}
 				break;
@@ -426,21 +424,21 @@ public class MainAuto extends OpMode {
 					if (l.okayToLaunch()) l.launch();
 				});
 				ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-					if (s.isEmpty()) follower.followPath(farPreset2Prep);
+					if (s.isEmpty()) mechanisms.follower.followPath(farPreset2Prep);
 					setPathState(4);
 				});
 				break;
 			case 4:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Intake.class), Intake::in);
-					follower.followPath(farPreset2End);
+					mechanisms.follower.followPath(farPreset2End);
 					setPathState(5);
 				}
 				break;
 			case 5:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Intake.class), Intake::stop);
-					follower.followPath(farLaunch2);
+					mechanisms.follower.followPath(farLaunch2);
 					setPathState(6);
 				}
 				break;
@@ -449,21 +447,21 @@ public class MainAuto extends OpMode {
 					if (l.okayToLaunch()) l.launch();
 				});
 				ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-					if (s.isEmpty()) follower.followPath(farPreset3Prep);
+					if (s.isEmpty()) mechanisms.follower.followPath(farPreset3Prep);
 					setPathState(7);
 				});
 				break;
 			case 7:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Intake.class), Intake::in);
-					follower.followPath(farPreset3End);
+					mechanisms.follower.followPath(farPreset3End);
 					setPathState(8);
 				}
 				break;
 			case 8:
-				if (!follower.isBusy()) {
+				if (!mechanisms.follower.isBusy()) {
 					ifMechanismValid(mechanisms.get(Intake.class), Intake::stop);
-					follower.followPath(farLaunch3);
+					mechanisms.follower.followPath(farLaunch3);
 					setPathState(9);
 				}
 				break;
@@ -472,7 +470,7 @@ public class MainAuto extends OpMode {
 					if (l.okayToLaunch()) l.launch();
 				});
 				ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-					if (s.isEmpty()) follower.followPath(farPark);
+					if (s.isEmpty()) mechanisms.follower.followPath(farPark);
 					setPathState(10);
 				});
 				break;
@@ -488,14 +486,14 @@ public class MainAuto extends OpMode {
 	
 	@Override
 	public void loop() {
-		follower.update();
+		mechanisms.follower.update();
 		autonomousPathUpdate();
 		
-		Drawing.drawDebug(follower);
+		Drawing.drawDebug(mechanisms.follower);
 		telemetry.addData("Path State", pathState);
-		telemetry.addData("X", follower.getPose().getX());
-		telemetry.addData("Y", follower.getPose().getY());
-		telemetry.addData("Heading", Math.toDegrees(follower.getPose().getHeading()));
+		telemetry.addData("X", mechanisms.follower.getPose().getX());
+		telemetry.addData("Y", mechanisms.follower.getPose().getY());
+		telemetry.addData("Heading", Math.toDegrees(mechanisms.follower.getPose().getHeading()));
 		telemetry.addData("Opmode Timer", opmodeTimer.getElapsedTimeSeconds());
 		telemetry.update();
 	}
@@ -516,7 +514,7 @@ public class MainAuto extends OpMode {
 	public void init_loop() {
 		// Allow driver to select match settings using the wizard
 		wizard.refresh();
-		Drawing.drawRobot(follower.getPose());
+		Drawing.drawRobot(mechanisms.follower.getPose());
 		Drawing.sendPacket();
 	}
 	

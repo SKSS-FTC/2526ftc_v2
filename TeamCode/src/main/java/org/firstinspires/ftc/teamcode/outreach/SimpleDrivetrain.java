@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
 /**
  * Main TeleOp class for driver-controlled period.
  * Handles controller profile selection and robot operation during matches.
@@ -25,9 +27,10 @@ public class SimpleDrivetrain extends OpMode {
 		backLeftMotor = hardwareMap.get(DcMotor.class, "rearLeft");
 		backRightMotor = hardwareMap.get(DcMotor.class, "rearRight");
 		
-		frontRightMotor.setDirection(DcMotor.Direction.REVERSE);
-		backRightMotor.setDirection(DcMotor.Direction.REVERSE);
-		frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+		frontRightMotor.setDirection(Constants.driveConstants.rightFrontMotorDirection);
+		backRightMotor.setDirection(Constants.driveConstants.rightRearMotorDirection);
+		frontLeftMotor.setDirection(Constants.driveConstants.leftFrontMotorDirection);
+		backLeftMotor.setDirection(Constants.driveConstants.leftRearMotorDirection);
 	}
 	
 	
