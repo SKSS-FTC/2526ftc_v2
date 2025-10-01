@@ -312,8 +312,10 @@ public class MainAuto extends OpMode {
 					if (l.okayToLaunch()) l.launch();
 				});
 				ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-					if (s.isEmpty()) follower.followPath(closePreset1Prep);
-					setPathState(1);
+					if (s.isEmpty()) {
+						follower.followPath(closePreset1Prep);
+						setPathState(1);
+					}
 				});
 				break;
 			case 1:
@@ -331,13 +333,17 @@ public class MainAuto extends OpMode {
 				}
 				break;
 			case 3:
-				ifMechanismValid(mechanisms.get(Launcher.class), l -> {
-					if (l.okayToLaunch()) l.launch();
-				});
-				ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-					if (s.isEmpty()) follower.followPath(closePreset2Prep);
-					setPathState(4);
-				});
+				if (!follower.isBusy()) {
+					ifMechanismValid(mechanisms.get(Launcher.class), l -> {
+						if (l.okayToLaunch()) l.launch();
+					});
+					ifMechanismValid(mechanisms.get(Spindex.class), s -> {
+						if (s.isEmpty()) {
+							follower.followPath(closePreset2Prep);
+							setPathState(4);
+						}
+					});
+				}
 				break;
 			case 4:
 				if (!follower.isBusy()) {
