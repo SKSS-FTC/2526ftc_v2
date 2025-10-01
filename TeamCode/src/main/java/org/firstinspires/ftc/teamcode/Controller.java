@@ -70,7 +70,7 @@ public class Controller extends Gamepad {
 	}
 	
 	public final double getProcessedDrive() {
-		double headingRadians = follower.getHeading();
+		double headingRadians = Math.abs(follower.getHeading());
 		
 		// Get DPad input for absolute directions
 		double dpadNorth = getProcessedValue(Action.ABS_NORTH);
@@ -89,7 +89,7 @@ public class Controller extends Gamepad {
 		// Drive is along the robot's Y-axis
 		double robotCentricDrive = fieldCentricY * Math.cos(headingRadians) + fieldCentricX * Math.sin(headingRadians);
 		
-		return Math.min(Math.max(getProcessedValue(Action.MOVE_Y) + robotCentricDrive, 1), -1);
+		return Math.max(Math.min(getProcessedValue(Action.MOVE_Y) + robotCentricDrive, 1), -1);
 	}
 	
 	public final double getProcessedStrafe() {
@@ -106,7 +106,7 @@ public class Controller extends Gamepad {
 		
 		double robotCentricStrafe = fieldCentricX * Math.cos(headingRadians) - fieldCentricY * Math.sin(headingRadians);
 		
-		return getProcessedValue(Action.MOVE_X) + robotCentricStrafe;
+		return getProcessedValue(Action.MOVE_X) - robotCentricStrafe;
 	}
 	
 	/**

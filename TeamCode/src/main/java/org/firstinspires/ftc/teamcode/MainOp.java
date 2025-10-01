@@ -62,14 +62,16 @@ public class MainOp extends OpMode {
 	@Override
 	public final void start() {
 		ifMechanismValid(mechanisms, m -> m.init());
+		mechanisms.follower.startTeleopDrive();
 	}
 	
 	@Override
 	public final void loop() {
+		mechanisms.drivetrain.update();
+		
 		ifMechanismValid(mechanisms, m -> m.update());
 		
 		processControllerInputs();
-		logging.update();
 		
 		mainController.saveLastState();
 		subController.saveLastState();
@@ -82,6 +84,10 @@ public class MainOp extends OpMode {
 			subController.setLedColor(0, 0, 0, 0);
 		}
 		Drawing.drawDebug(mechanisms.follower);
+		telemetry.addData("Heading", mechanisms.follower.getHeading());
+		telemetry.addData("X", mechanisms.follower.getPose().getX());
+		telemetry.addData("Y", mechanisms.follower.getPose().getY());
+		logging.update();
 	}
 	
 	@Override

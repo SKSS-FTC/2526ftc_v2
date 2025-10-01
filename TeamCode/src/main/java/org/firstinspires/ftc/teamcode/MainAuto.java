@@ -495,6 +495,7 @@ public class MainAuto extends OpMode {
 		telemetry.addData("Y", mechanisms.follower.getPose().getY());
 		telemetry.addData("Heading", Math.toDegrees(mechanisms.follower.getPose().getHeading()));
 		telemetry.addData("Opmode Timer", opmodeTimer.getElapsedTimeSeconds());
+		telemetry.addData("Path", pathState);
 		telemetry.update();
 	}
 	
@@ -502,6 +503,7 @@ public class MainAuto extends OpMode {
 	public void init() {
 		pathTimer = new Timer();
 		opmodeTimer = new Timer();
+		buildPaths();
 		
 		// These settings will be configured by the driver during the init_loop
 		matchSettings = new MatchSettings(blackboard);
@@ -523,7 +525,6 @@ public class MainAuto extends OpMode {
 		mechanisms.init();
 		opmodeTimer.resetTimer();
 		// Now that settings are finalized, build the correct paths
-		buildPaths();
 		// Start the autonomous sequence
 		setPathState(0);
 	}
