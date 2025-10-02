@@ -14,11 +14,11 @@ public class Drawing {
 	public static final double ROBOT_RADIUS = 7.5;
 	private static final FieldManager panelsField = PanelsField.INSTANCE.getField();
 	
-	private static final Style robotLook = new Style(
-			"", "#FE3907", 0.75
+	private static final Style targetLook = new Style(
+			"", "#FDF1FA", 0.75
 	);
-	private static final Style historyLook = new Style(
-			"", "#FDF1FA", 0.5
+	private static final Style realLook = new Style(
+			"", "#4FFF2B", 0.5
 	);
 	
 	/**
@@ -36,12 +36,12 @@ public class Drawing {
 	 */
 	public static void drawDebug(Follower follower) {
 		if (follower.getCurrentPath() != null) {
-			drawPath(follower.getCurrentPath(), robotLook);
+			drawPath(follower.getCurrentPath(), targetLook);
 			Pose closestPoint = follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
-			drawRobot(new Pose(closestPoint.getX(), closestPoint.getY(), follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue())), robotLook);
+			drawRobot(new Pose(closestPoint.getX(), closestPoint.getY(), follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue())), targetLook);
 		}
-		drawPoseHistory(follower.getPoseHistory(), historyLook);
-		drawRobot(follower.getPose(), historyLook);
+		drawPoseHistory(follower.getPoseHistory(), realLook);
+		drawRobot(follower.getPose(), realLook);
 		
 		sendPacket();
 	}
@@ -78,7 +78,7 @@ public class Drawing {
 	 * @param pose the Pose to draw the robot at
 	 */
 	public static void drawRobot(Pose pose) {
-		drawRobot(pose, robotLook);
+		drawRobot(pose, targetLook);
 	}
 	
 	/**
@@ -139,7 +139,7 @@ public class Drawing {
 	 * @param poseTracker the PoseHistory to get the pose history from
 	 */
 	public static void drawPoseHistory(PoseHistory poseTracker) {
-		drawPoseHistory(poseTracker, historyLook);
+		drawPoseHistory(poseTracker, realLook);
 	}
 	
 	/**

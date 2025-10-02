@@ -19,7 +19,6 @@ import org.firstinspires.ftc.teamcode.software.TrajectoryEngine;
 
 public class MechanismManager {
 	public final Drivetrain drivetrain;
-	public final Follower follower;
 	public final Mechanism[] mechanisms;
 	
 	// Optional non-mechanism helpers
@@ -28,15 +27,14 @@ public class MechanismManager {
 	public final AlignmentEngine alignmentEngine;
 	
 	public MechanismManager(HardwareMap hw, MatchSettings match) {
-		follower = Constants.createFollower(hw);
-		drivetrain = new Drivetrain(hw, follower);
+		drivetrain = new Drivetrain(hw, Constants.createFollower(hw));
 		
 		// Build mechanisms safely
 		Intake intake = createIntake(hw);
 		Spindex spindex = createSpindex(hw, match);
 		LimelightManager ll = createLimelight(hw, match);
-		TrajectoryEngine traj = createTrajectory(ll, follower, match);
-		AlignmentEngine align = createAlignment(match, drivetrain, ll, follower);
+		TrajectoryEngine traj = createTrajectory(ll, drivetrain.follower, match);
+		AlignmentEngine align = createAlignment(match, drivetrain, ll, drivetrain.follower);
 		Launcher launcher = createLauncher(hw, spindex, traj);
 		
 		mechanisms = new Mechanism[]{intake, spindex, launcher};
@@ -131,6 +129,7 @@ public class MechanismManager {
 	
 	public void update() {
 		for (Mechanism m : mechanisms) if (m != null) m.update();
+		drivetrain.update();
 	}
 	
 	public void stop() {

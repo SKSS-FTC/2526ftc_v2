@@ -27,14 +27,6 @@ public class Controller extends Gamepad {
 		saveLastState();
 	}
 	
-	public final double getProcessedRotation() {
-		double rotationValue = getProcessedValue(Action.ROTATE_AXIS) + getProcessedValue(Action.ROTATE_LEFT) - getProcessedValue(Action.ROTATE_RIGHT);
-		// clamp wont work for me on this sdk version lol
-		if (rotationValue < -1) return -1;
-		if (rotationValue > 1) return 1;
-		return rotationValue;
-	}
-	
 	public final void saveLastState() {
 		for (Control control : Control.values()) {
 			previousControlState.put(control, getRawValue(control));
@@ -69,45 +61,51 @@ public class Controller extends Gamepad {
 		return getProcessedValue(getControlForAction(action));
 	}
 	
-	public final double getProcessedDrive() {
-		double headingRadians = Math.abs(follower.getHeading());
+	/**
+	 * Compute robot-centric DPad contribution.
+	 * Robot Y = forward/back, Robot X = strafe
+	 * TODO this is still very buggy
+	 */
+	private double[] getRobotCentricDpad() {
+		double headingRadians = follower.getHeading();
 		
-		// Get DPad input for absolute directions
 		double dpadNorth = getProcessedValue(Action.ABS_NORTH);
 		double dpadSouth = getProcessedValue(Action.ABS_SOUTH);
 		double dpadEast = getProcessedValue(Action.ABS_EAST);
 		double dpadWest = getProcessedValue(Action.ABS_WEST);
-		matchSettings.getAllianceColor();
 		
-		// Calculate the desired movement vector in field-centric coordinates
-		// Positive Y is North, Positive X is East
-		double fieldCentricY = dpadNorth - dpadSouth;
-		double fieldCentricX = dpadEast - dpadWest;
+		double fieldY = dpadNorth - dpadSouth; // North positive
+		double fieldX = dpadEast - dpadWest;   // East positive
 		
+		double cos = Math.cos(headingRadians);
+		double sin = Math.sin(headingRadians);
 		
-		// Rotate the field-centric vector to robot-centric coordinates
-		// Drive is along the robot's Y-axis
-		double robotCentricDrive = fieldCentricY * Math.cos(headingRadians) + fieldCentricX * Math.sin(headingRadians);
+		double robotY = fieldY * cos + fieldX * sin;
+		double robotX = fieldX * cos - fieldY * sin;
 		
-		return Math.max(Math.min(getProcessedValue(Action.MOVE_Y) + robotCentricDrive, 1), -1);
+		return new double[]{robotX, robotY};
+	}
+	
+	public final double getProcessedDrive() {
+		double[] robotVec = getRobotCentricDpad();
+		double drive = getProcessedValue(Action.MOVE_Y) + robotVec[1];
+		return Math.max(-1, Math.min(1, drive));
 	}
 	
 	public final double getProcessedStrafe() {
-		double headingRadians = follower.getHeading();
-		double dpadEast = getProcessedValue(Action.ABS_EAST);
-		double dpadWest = getProcessedValue(Action.ABS_WEST);
-		double fieldCentricX = dpadEast - dpadWest;
-		// Strafe is along the robot's X-axis. A positive fieldCentricX (East) when robot heading is 0 (North) should result in positive strafe.
-		// A positive fieldCentricX (East) when robot heading is 90 (East) should result in negative drive, not strafe.
-		// A positive fieldCentricY (North) when robot heading is 90 (East) should result in positive strafe.
-		double dpadNorth = getProcessedValue(Action.ABS_NORTH);
-		double dpadSouth = getProcessedValue(Action.ABS_SOUTH);
-		double fieldCentricY = dpadNorth - dpadSouth;
-		
-		double robotCentricStrafe = fieldCentricX * Math.cos(headingRadians) - fieldCentricY * Math.sin(headingRadians);
-		
-		return getProcessedValue(Action.MOVE_X) - robotCentricStrafe;
+		double[] robotVec = getRobotCentricDpad();
+		return getProcessedValue(Action.MOVE_X) + robotVec[0];
 	}
+	
+	
+	public final double getProcessedRotation() {
+		double rotationValue = getProcessedValue(Action.ROTATE_AXIS) - getProcessedValue(Action.ROTATE_LEFT) + getProcessedValue(Action.ROTATE_RIGHT);
+		// clamp wont work for me on this sdk version lol
+		if (rotationValue < -1) return -1;
+		if (rotationValue > 1) return 1;
+		return rotationValue;
+	}
+	
 	
 	/**
 	 * @noinspection OverlyComplexMethod, OverlyLongMethod - Never edit this

@@ -48,26 +48,26 @@ public class MainOp extends OpMode {
 		
 		// Initialize robot systems
 		mechanisms = new MechanismManager(hardwareMap, matchSettings);
-		mainController = new Controller(gamepad1, mechanisms.follower, matchSettings);
-		subController = new Controller(gamepad2, mechanisms.follower, matchSettings);
+		mainController = new Controller(gamepad1, mechanisms.drivetrain.follower, matchSettings);
+		subController = new Controller(gamepad2, mechanisms.drivetrain.follower, matchSettings);
 		logging = PanelsTelemetry.INSTANCE.getTelemetry();
 	}
 	
 	@Override
 	public final void init_loop() {
-		Drawing.drawRobot(mechanisms.follower.getPose());
+		Drawing.drawRobot(mechanisms.drivetrain.follower.getPose());
 		Drawing.sendPacket();
 	}
 	
 	@Override
 	public final void start() {
 		ifMechanismValid(mechanisms, m -> m.init());
-		mechanisms.follower.startTeleopDrive();
+		mechanisms.drivetrain.follower.startTeleopDrive();
 	}
 	
 	@Override
 	public final void loop() {
-		mechanisms.drivetrain.update();
+		mechanisms.update();
 		
 		ifMechanismValid(mechanisms, m -> m.update());
 		
@@ -83,10 +83,10 @@ public class MainOp extends OpMode {
 		} else {
 			subController.setLedColor(0, 0, 0, 0);
 		}
-		Drawing.drawDebug(mechanisms.follower);
-		telemetry.addData("Heading", mechanisms.follower.getHeading());
-		telemetry.addData("X", mechanisms.follower.getPose().getX());
-		telemetry.addData("Y", mechanisms.follower.getPose().getY());
+		Drawing.drawDebug(mechanisms.drivetrain.follower);
+		telemetry.addData("Heading", mechanisms.drivetrain.follower.getHeading());
+		telemetry.addData("X", mechanisms.drivetrain.follower.getPose().getX());
+		telemetry.addData("Y", mechanisms.drivetrain.follower.getPose().getY());
 		logging.update();
 	}
 	

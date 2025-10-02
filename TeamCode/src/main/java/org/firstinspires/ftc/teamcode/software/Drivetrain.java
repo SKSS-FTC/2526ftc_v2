@@ -79,9 +79,9 @@ public class Drivetrain extends Mechanism {
 		if (state != State.MANUAL) {
 			return; // Automation is handling driving, so ignore manual input.
 		}
-		// Gamepad inputs are typically inverted (up on stick is negative).
+		// Gamepad inputs are typically vertically inverted (up on stick is negative).
 		// The Follower expects a standard coordinate system (forward is positive).
-		follower.setTeleOpDrive(-drivePower, -strafePower, -rotation, robotCentric);
+		follower.setTeleOpDrive(-drivePower, strafePower, -rotation, robotCentric);
 	}
 	
 	/**
