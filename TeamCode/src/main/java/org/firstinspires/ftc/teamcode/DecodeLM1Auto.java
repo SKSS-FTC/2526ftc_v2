@@ -32,7 +32,7 @@ public class DecodeLM1Auto extends LinearOpMode {
             gyroTurnToAngle(110);
         //TODO: When the robot classes get built we need to add actions for outake to score the pre-load
 //      Example  Code:
-//      DecodeAutoArtifactLaunch;
+//      ArtifactHandlingSystem.shootAutoArtifact();
 //      driveToPos(40, 23);
 /*
         while (counter < 2) {

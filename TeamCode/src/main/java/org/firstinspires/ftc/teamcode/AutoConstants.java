@@ -7,6 +7,6 @@ public class AutoConstants {
     static final double LAUNCH_EXIT_SPEED = 0.8;
     static final double CLASSIFIER_X = 23;
     static final double CLASSIFIER_Y = 16;
-
+    static final double AUTO_ARTIFACT_SHOOT_POWER = 0.8;
 
 }

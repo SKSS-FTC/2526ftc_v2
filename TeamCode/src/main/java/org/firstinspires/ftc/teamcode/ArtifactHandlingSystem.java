@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.AutoConstants.AUTO_ARTIFACT_SHOOT_POWER;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -32,6 +34,11 @@ public class ArtifactHandlingSystem {
     public void shootArtifact(float shootArtifact) {
         leftOuttakeMotor.setPower(shootArtifact);
         rightOuttakeMotor.setPower(shootArtifact);
+    }
+
+    public void shootAutoArtifact() {
+        leftOuttakeMotor.setPower(AUTO_ARTIFACT_SHOOT_POWER);
+        rightOuttakeMotor.setPower(AUTO_ARTIFACT_SHOOT_POWER);
     }
 
     public void intakeArtifact(boolean intakeArtifact) {
