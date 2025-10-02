@@ -1,28 +1,28 @@
-    package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode;
 
-    import static org.firstinspires.ftc.teamcode.AutoConstants.CLASSIFIER_X;
-    import static org.firstinspires.ftc.teamcode.AutoConstants.CLASSIFIER_Y;
+import static org.firstinspires.ftc.teamcode.AutoConstants.CLASSIFIER_X;
+import static org.firstinspires.ftc.teamcode.AutoConstants.CLASSIFIER_Y;
 
-    import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-    import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-    import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-    import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-    import com.qualcomm.robotcore.hardware.DcMotor;
-    import com.qualcomm.robotcore.hardware.DcMotorSimple;
-    import com.qualcomm.robotcore.hardware.IMU;
-    import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-    import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-    import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-    @Autonomous(name = "Test")
+@Autonomous(name = "Test")
 public class DecodeLM1Auto extends LinearOpMode {
 
     GoBildaPinpointDriver odo;
     DcMotor frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
-        int counter = 0;
+    int counter = 0;
 
-        IMU imu;
+    IMU imu;
     @Override
     public void runOpMode() {
 
