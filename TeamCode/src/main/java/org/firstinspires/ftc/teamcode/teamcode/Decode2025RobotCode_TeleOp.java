@@ -50,7 +50,24 @@ public class Decode2025RobotCode_TeleOp extends OpMode {
         double rearLeftDrive = forward - strafe + rotate;
         double frontRightDrive = forward - strafe - rotate;
         double rearRightDrive = forward + strafe - rotate;
+
+        double maxPower = 1.0;
+        double maxSpeed = 1.0;
+
+        maxPower = Math.max(maxPower, Math.abs(frontLeftDrive));
+        maxPower = Math.max(maxPower, Math.abs(rearLeftDrive));
+        maxPower = Math.max(maxPower, Math.abs(frontRightDrive));
+        maxPower = Math.max(maxPower, Math.abs(rearRightDrive));
+
+        this.frontLeftDrive.setPower(maxSpeed * (frontLeftDrive/ maxPower));
+        this.rearRightDrive.setPower(maxSpeed * (rearRightDrive/ maxPower));
+        this.rearLeftDrive.setPower(maxSpeed * (rearLeftDrive/ maxPower));
+        this.frontRightDrive.setPower(maxSpeed * (frontRightDrive/ maxPower));
+
     }
+
+
+
     @Override
     public void loop() {
 
