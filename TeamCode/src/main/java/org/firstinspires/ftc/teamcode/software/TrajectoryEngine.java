@@ -1,155 +1,79 @@
 package org.firstinspires.ftc.teamcode.software;
 
-import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 
-import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
 
+/**
+ * The Trajectory Engine uses a launcher-mounted Limelight to find the direct angular offsets
+ * required to aim at a target.
+ */
 public class TrajectoryEngine {
 	
-	private final Follower follower;
-	private final MatchSettings matchSettings;
 	private final LimelightManager limelightManager;
 	
-	public TrajectoryEngine(LimelightManager limelightManager, Follower follower, MatchSettings matchSettings) {
+	public TrajectoryEngine(LimelightManager limelightManager) {
 		this.limelightManager = limelightManager;
-		this.follower = follower;
-		this.matchSettings = matchSettings;
 	}
 	
 	/**
-	 * Normalizes an angle to be within the range [-PI, PI].
+	 * Gets the current aiming offsets from the Limelight camera.
 	 *
-	 * @param angle The angle in radians.
-	 * @return The normalized angle in radians.
+	 * @return An {@link AimingOffsets} object containing the targeting data.
 	 */
-	private static double normalizeAngle(double angle) {
-		return angle - 2 * Math.PI * Math.floor((angle + Math.PI) / (2 * Math.PI));
-	}
-	
-	/**
-	 * Performs all calculations to find a valid aiming solution.
-	 * This private method is the single source of truth for all aiming logic.
-	 *
-	 * @return An {@link AimingSolution} object containing the results.
-	 */
-	private AimingSolution calculateSolution() {
-		// 1. Get all sensor data ONCE
-		Pose robotPose = follower.getPose();
+	public AimingOffsets getAimingOffsets() {
 		LLResult limelightResult = limelightManager.detectGoal();
 		
-		// 2. Robustly check for a valid target
+		// If no valid targets are found, return an object indicating no target.
 		if (limelightResult.getFiducialResults().isEmpty()) {
-			return new AimingSolution(); // Return invalid solution if no target is seen
+			return AimingOffsets.invalid();
 		}
 		
-		// 3. Define the TARGET's fixed world coordinates from a settings file.
-		// This is a much more reliable approach than calculating from camera depth.
-		double targetX = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.RED)
-				? Settings.Field.RED_GOAL_POSE.getX()
-				: Settings.Field.BLUE_GOAL_POSE.getX();
-		double targetY = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.RED)
-				? Settings.Field.RED_GOAL_POSE.getY()
-				: Settings.Field.BLUE_GOAL_POSE.getY();
+		double horizontal = limelightResult.getFiducialResults().get(0).getTargetXDegrees();
+		double vertical = limelightResult.getFiducialResults().get(0).getTargetYDegrees();
 		
-		// 4. Calculate the vector from the robot to the target in the world frame
-		double dx = targetX - robotPose.getX();
-		double dy = targetY - robotPose.getY();
-		double d = Math.hypot(dx, dy);
-		
-		// 5. Calculate the required launcher yaw
-		double yawWorld = Math.atan2(dy, dx);
-		double yawRelative = normalizeAngle(yawWorld - robotPose.getHeading());
-		
-		// 6. Calculate the required launcher pitch using ballistic equations
-		double h = Settings.Aiming.GOAL_HEIGHT - Settings.Aiming.MUZZLE_HEIGHT;
-		double v = Settings.Aiming.MUZZLE_TANGENTIAL_MAX_SPEED;
-		double g = Settings.Aiming.GRAVITY;
-		
-		double discriminant = (v * v * v * v) - g * (g * d * d + 2 * h * v * v);
-		
-		// If the discriminant is negative, the target is out of range
-		if (discriminant < 0) {
-			return new AimingSolution(); // No ballistic solution, return invalid
+		return new AimingOffsets(horizontal, vertical, true);
+	}
+	
+	/**
+	 * Determines if the launcher is currently aimed at the target within acceptable tolerance.
+	 *
+	 * @return True if aimed correctly, false otherwise.
+	 */
+	public boolean isAimed() {
+		AimingOffsets offsets = getAimingOffsets();
+		if (!offsets.hasTarget) {
+			return false;
 		}
 		
-		// We choose the lower angle for a flatter, faster trajectory
-		double sqrtDiscriminant = Math.sqrt(discriminant);
-		double pitch = Math.atan((v * v - sqrtDiscriminant) / (g * d));
+		boolean yawAligned = Math.abs(offsets.horizontalOffsetDegrees) < Settings.Aiming.MAX_YAW_ERROR;
+		boolean pitchAligned = Math.abs(offsets.verticalOffsetDegrees) < Settings.Aiming.MAX_PITCH_ERROR;
 		
-		// 7. Return the complete, valid solution
-		return new AimingSolution(yawRelative, pitch, d);
+		return yawAligned && pitchAligned;
 	}
 	
 	/**
-	 * Computes launcher yaw (relative to robot) and pitch to aim at the target.
-	 *
-	 * @return A double array containing {yawRadians, pitchRadians}. Values will be NaN if no solution exists.
+	 * A simple data class to hold the aiming offsets from the Limelight.
 	 */
-	public double[] getAimingAngles() {
-		AimingSolution solution = calculateSolution();
-		return new double[]{solution.yawRadians, solution.pitchRadians};
-	}
-	
-	/**
-	 * Determines if all conditions are met to launch the projectile.
-	 * This method should be called right before launching.
-	 *
-	 * @return True if it's safe and logical to launch, false otherwise.
-	 */
-	public boolean isOkayToLaunch() {
-		AimingSolution solution = calculateSolution();
-		
-		// Check 1: A valid ballistic path must exist.
-		return solution.hasSolution;
-		
-		// Check 2: The launcher must be aimed correctly.
-		// You would get the launcher's CURRENT angles from your hardware control loops.
-		// double currentLauncherYaw = launcher.getCurrentYaw();
-		// double currentLauncherPitch = launcher.getCurrentPitch();
-		//
-		// boolean isYawAligned = Math.abs(normalizeAngle(solution.yawRadians - currentLauncherYaw)) < Settings.Aiming.maxYawError;
-		// boolean isPitchAligned = Math.abs(solution.pitchRadians - currentLauncherPitch) < Settings.Aiming.maxPitchError;
-		//
-		// if (!isYawAligned || !isPitchAligned) {
-		//    return false;
-		// }
-	}
-	
-	/**
-	 * A simple data class to hold the results of a trajectory calculation.
-	 * An "invalid" solution is one where no target was found or no ballistic path exists.
-	 */
-	public static class AimingSolution {
-		public final boolean hasSolution;
-		public final double yawRadians; // Launcher yaw relative to the robot's heading
-		public final double pitchRadians; // Launcher pitch relative to the horizontal plane
-		public final double distance; // Horizontal distance to the target
+	public static class AimingOffsets {
+		public final boolean hasTarget;
+		public final double horizontalOffsetDegrees;
+		public final double verticalOffsetDegrees;
 		
 		/**
-		 * Constructor for a valid, successful aiming solution.
-		 *
-		 * @param yaw   The calculated yaw in radians.
-		 * @param pitch The calculated pitch in radians.
-		 * @param dist  The horizontal distance to the target in inches.
+		 * Constructor for a valid offset measurement.
 		 */
-		public AimingSolution(double yaw, double pitch, double dist) {
-			this.hasSolution = true;
-			this.yawRadians = yaw;
-			this.pitchRadians = pitch;
-			this.distance = dist;
+		public AimingOffsets(double horizontalOffset, double verticalOffset, boolean hasTarget) {
+			this.hasTarget = hasTarget;
+			this.horizontalOffsetDegrees = horizontalOffset;
+			this.verticalOffsetDegrees = verticalOffset;
 		}
 		
 		/**
-		 * Constructor for an invalid solution, used when no target is found or no solution exists.
+		 * Constructor for an invalid solution, used when no target is found.
 		 */
-		public AimingSolution() {
-			this.hasSolution = false;
-			this.yawRadians = Double.NaN;
-			this.pitchRadians = Double.NaN;
-			this.distance = Double.NaN;
+		public static AimingOffsets invalid() {
+			return new AimingOffsets(Double.NaN, Double.NaN, false);
 		}
 	}
 }

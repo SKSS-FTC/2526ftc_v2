@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * A persistent object that stores everything we know about the current match state.
+ *
  * @noinspection unchecked, we know what the blackboard is storing
  */
 public class MatchSettings {

@@ -149,6 +149,9 @@ public class Settings {
 		public static double MAX_PITCH = 30; // degrees from horizontal when vert servo is max
 		public static double MIN_YAW = -20; // degrees left when horizontal servo is min
 		public static double MAX_YAW = 20; // degrees right when horizontal servo is max
+		
+		public static double AIM_YAW_KP = 0.05; // Proportional gain for yaw correction
+		public static double AIM_PITCH_KP = 0.05; // TODO tune; set up limelight launcher and increase these until oscillation occurs
 	}
 	
 	@Configurable
@@ -169,8 +172,14 @@ public class Settings {
 		public static double MUZZLE_TANGENTIAL_MAX_SPEED; // m/s, TODO: tune
 		public static double MUZZLE_HEIGHT = 5; // inches, TODO: tune
 		public static double GOAL_HEIGHT = 37.5; // inches
-		public static double MAX_YAW_ERROR = 1;   // rad
-		public static double MAX_PITCH_ERROR = 0.2; // rad
+		/**
+		 * Note that ROTATIONAL error refers to the chassis rotation relative to the goal.
+		 * YAW refers to the launcher horizontal angle
+		 * PITCH refers to the launcher vertical angle
+		 */
+		public static double MAX_ROTATIONAL_ERROR = Math.toRadians(10);
+		public static double MAX_YAW_ERROR = Math.toRadians(5);
+		public static double MAX_PITCH_ERROR = Math.toRadians(2);
 	}
 	
 	/**

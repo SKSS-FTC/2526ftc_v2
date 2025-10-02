@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
@@ -10,6 +11,9 @@ import java.util.HashMap;
 
 /**
  * @noinspection CyclicClassDependency, DataFlowIssue
+ * The Controller class wraps around the FTC-provided {@link Gamepad}.
+ * It provides versatility and does complex calculations to allow us to have a cleanly controlled
+ * TeleOp.
  */
 public class Controller extends Gamepad {
 	private final Gamepad gamepad;
@@ -27,29 +31,61 @@ public class Controller extends Gamepad {
 		saveLastState();
 	}
 	
+	/**
+	 * Stores the previous state of the controller.
+	 * This is useful for figuring out if we just started pressing a button or if it has been held.
+	 */
 	public final void saveLastState() {
 		for (Control control : Control.values()) {
 			previousControlState.put(control, getRawValue(control));
 		}
 	}
 	
+	/**
+	 * Checks if an control was just pressed.
+	 *
+	 * @param control The control to check
+	 * @return True if that control was pressed this frame and not last frame, False otherwise
+	 */
 	public final boolean wasJustPressed(Control control) {
 		return getRawValue(control) != 0.0 && previousControlState.getOrDefault(control, 0.0) == 0;
 	}
 	
+	/**
+	 * Checks if an action was just pressed.
+	 *
+	 * @param action The action to check
+	 * @return True if that action was pressed this frame and not last frame, False otherwise
+	 */
 	public final boolean wasJustPressed(Action action) {
 		return wasJustPressed(getControlForAction(action));
 	}
 	
+	/**
+	 * Maps each action to a control. This allows us to ask if the action "Spin" was pressed instead
+	 * of hard-coding what control makes it spin.
+	 *
+	 * @param action The action to get the control for
+	 * @return What control on the controller corresponds to a given Action
+	 */
 	public final Control getControlForAction(Action action) {
 		return Settings.Controls.actionControlMap.getOrDefault(action, Control.UNKNOWN);
 	}
 	
+	/**
+	 * Applies normalization to raw values. For example, the left stick Y is automatically inverted.
+	 * This should be used to normalize controls, not to modify them.
+	 * In this example, the left stick Y is inverted so that it follows the normalized Y-axis of the robot.
+	 * This does not cause a change in function of the how the value operates, which should be done in postprocessing.
+	 *
+	 * @param control The control to get the value for
+	 * @return The processed value for that control
+	 */
 	public final double getProcessedValue(Control control) {
 		// add value modifiers here
 		double val = getRawValue(control);
 		
-		if (control == Control.LEFT_STICK_X) {
+		if (control == Control.LEFT_STICK_Y) {
 			val = -val;
 		}
 		// add more here
@@ -62,44 +98,54 @@ public class Controller extends Gamepad {
 	}
 	
 	/**
-	 * Compute robot-centric DPad contribution.
-	 * Robot Y = forward/back, Robot X = strafe
-	 * TODO this is still very buggy
+	 * Makes the Dpad of the controller move the robot absolutely on the field by translating the
+	 * inputs to the robot's coordinate system.
+	 *
+	 * @return The processed robot-centric movement vector
 	 */
-	private double[] getRobotCentricDpad() {
-		double headingRadians = follower.getHeading();
+	private Vector getRobotCentricDpad() {
+		// Calculate the field-centric vector components from d-pad inputs.
+		// North/East are positive.
+		double fieldY = getProcessedValue(Action.ABS_NORTH) - getProcessedValue(Action.ABS_SOUTH);
+		double fieldX = getProcessedValue(Action.ABS_EAST) - getProcessedValue(Action.ABS_WEST);
 		
-		double dpadNorth = getProcessedValue(Action.ABS_NORTH);
-		double dpadSouth = getProcessedValue(Action.ABS_SOUTH);
-		double dpadEast = getProcessedValue(Action.ABS_EAST);
-		double dpadWest = getProcessedValue(Action.ABS_WEST);
+		Vector dpadVector = new Vector(fieldX, fieldY);
 		
-		double fieldY = dpadNorth - dpadSouth; // North positive
-		double fieldX = dpadEast - dpadWest;   // East positive
+		// To convert a field-centric vector to a robot-centric one, rotate it opposite the robot's current heading.
+		dpadVector.rotateVector(-follower.getHeading());
 		
-		double cos = Math.cos(headingRadians);
-		double sin = Math.sin(headingRadians);
-		
-		double robotY = fieldY * cos + fieldX * sin;
-		double robotX = fieldX * cos - fieldY * sin;
-		
-		return new double[]{robotX, robotY};
+		return dpadVector;
 	}
 	
+	/**
+	 * Processes inputs related to the robot's forward movement.
+	 *
+	 * @return The processed forward movement value (positive = forward, negative = backward)
+	 */
 	public final double getProcessedDrive() {
-		double[] robotVec = getRobotCentricDpad();
-		double drive = getProcessedValue(Action.MOVE_Y) + robotVec[1];
+		Vector robotVec = getRobotCentricDpad();
+		double drive = getProcessedValue(Action.MOVE_Y) + robotVec.getYComponent();
 		return Math.max(-1, Math.min(1, drive));
 	}
 	
+	/**
+	 * Processes inputs related to the robot's strafe movement.
+	 *
+	 * @return The processed strafe movement value (negative = left, positive = right)
+	 */
 	public final double getProcessedStrafe() {
-		double[] robotVec = getRobotCentricDpad();
-		return getProcessedValue(Action.MOVE_X) + robotVec[0];
+		Vector robotVec = getRobotCentricDpad();
+		double strafe = getProcessedValue(Action.MOVE_X) + robotVec.getXComponent();
+		return Math.max(-1, Math.min(1, strafe));
 	}
 	
-	
+	/**
+	 * Processes inputs related to the robot's rotation.
+	 *
+	 * @return The processed rotation value (positive = clockwise, negative = counterclockwise)
+	 */
 	public final double getProcessedRotation() {
-		double rotationValue = getProcessedValue(Action.ROTATE_AXIS) - getProcessedValue(Action.ROTATE_LEFT) + getProcessedValue(Action.ROTATE_RIGHT);
+		double rotationValue = getProcessedValue(Action.ROTATE_AXIS) + getProcessedValue(Action.ROTATE_RIGHT) - getProcessedValue(Action.ROTATE_LEFT);
 		// clamp wont work for me on this sdk version lol
 		if (rotationValue < -1) return -1;
 		if (rotationValue > 1) return 1;
@@ -108,7 +154,11 @@ public class Controller extends Gamepad {
 	
 	
 	/**
-	 * @noinspection OverlyComplexMethod, OverlyLongMethod - Never edit this
+	 * @param control The control to get the value for
+	 * @return The value of the control
+	 * @noinspection OverlyComplexMethod, OverlyLongMethod
+	 * Never edit this.
+	 * Returns the raw value of a control by interfacing with the FTC {@link Gamepad}.
 	 */
 	private double getRawValue(Control control) {
 		switch (control) {
@@ -168,7 +218,11 @@ public class Controller extends Gamepad {
 	}
 	
 	
-	// Define your Action enum
+	/**
+	 * Actions are representations of what the driver WANTS the robot to do when they press a button.
+	 * For example, if we've mapped Cross to Shoot, the driver wants the robot to Action.SHOOT when cross is pressed.
+	 * This is useful to decouple because we can easily remap controls while keeping the code clean.
+	 */
 	public enum Action {
 		MOVE_Y,
 		MOVE_X,
@@ -198,6 +252,11 @@ public class Controller extends Gamepad {
 		UNSET,
 	}
 	
+	/**
+	 * Controls are the counterparts to {@link Action}s. They represent the actual buttons that will be pressed
+	 * to make an action happen. These are mapped in settings, and should be accessed through Actions
+	 * instead of directly.
+	 */
 	public enum Control {
 		TRIANGLE, CIRCLE, CROSS, SQUARE,
 		DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT,

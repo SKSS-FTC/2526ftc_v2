@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.software.Drivetrain;
 import java.util.function.Consumer;
 
 /**
- * Main TeleOp class for driver-controlled period.
+ * This is our main TeleOp class for the driver-controlled period, which occurs after Auto.
  * Handles controller profile selection and robot operation during matches.
  */
 @TeleOp(name = "MainOp", group = ".Competition Modes")
@@ -29,7 +29,8 @@ public class MainOp extends OpMode {
 	private Controller subController;
 	
 	/**
-	 * Null-safe mechanism execution helper
+	 * This allows us to run commands only if the related mechanism works.
+	 * For example I could run "if launcher exists, shoot it" using this.
 	 */
 	private static <T> void ifMechanismValid(T obj, Consumer<T> action) {
 		if (obj != null) {
@@ -41,9 +42,12 @@ public class MainOp extends OpMode {
 		}
 	}
 	
+	/**
+	 * Runs when "init" is pressed on the Driver Station.
+	 */
 	@Override
 	public final void init() {
-		// Pull stored settings from auto
+		// Pull the stored match state and settings from when they were set during auto
 		matchSettings = new MatchSettings(blackboard);
 		
 		// Initialize robot systems
@@ -53,36 +57,36 @@ public class MainOp extends OpMode {
 		logging = PanelsTelemetry.INSTANCE.getTelemetry();
 	}
 	
+	/**
+	 * Runs after "init" and before "start" repeatedly.
+	 */
 	@Override
 	public final void init_loop() {
+		// draw the robot at its starting position
 		Drawing.drawRobot(mechanisms.drivetrain.follower.getPose());
 		Drawing.sendPacket();
 	}
 	
+	/**
+	 * Runs when "start" is pressed on the Driver Station.
+	 */
 	@Override
 	public final void start() {
 		ifMechanismValid(mechanisms, m -> m.init());
 		mechanisms.drivetrain.follower.startTeleopDrive();
 	}
 	
+	/**
+	 * Runs repeatedly after "start" is pressed on the Driver Station, during the actual game.
+	 */
 	@Override
 	public final void loop() {
 		mechanisms.update();
 		
-		ifMechanismValid(mechanisms, m -> m.update());
-		
 		processControllerInputs();
+		setControllerLEDs();
 		
-		mainController.saveLastState();
-		subController.saveLastState();
-		
-		if (matchSettings.nextArtifactNeeded() == MatchSettings.ArtifactColor.GREEN) {
-			subController.setLedColor(0, 255, 0, 100);
-		} else if (matchSettings.nextArtifactNeeded() == MatchSettings.ArtifactColor.PURPLE) {
-			subController.setLedColor(255, 0, 255, 100);
-		} else {
-			subController.setLedColor(0, 0, 0, 0);
-		}
+		// Log everything that happened
 		Drawing.drawDebug(mechanisms.drivetrain.follower);
 		telemetry.addData("Heading", mechanisms.drivetrain.follower.getHeading());
 		telemetry.addData("X", mechanisms.drivetrain.follower.getPose().getX());
@@ -90,9 +94,13 @@ public class MainOp extends OpMode {
 		logging.update();
 	}
 	
+	/**
+	 * Runs when "stop" is pressed on the Driver Station.
+	 * Cleanup and shutdown should occur instantaneously and be non-blocking.
+	 */
 	@Override
 	public final void stop() {
-		ifMechanismValid(mechanisms, m -> m.stop());
+		mechanisms.stop();
 	}
 	
 	/**
@@ -134,7 +142,9 @@ public class MainOp extends OpMode {
 		}
 		
 		if (subController.wasJustPressed(Controller.Action.LAUNCH)) {
-			ifMechanismValid(mechanisms.get(Launcher.class), Launcher::launch);
+			if (mechanisms.alignmentEngine.isInLaunchZone(mechanisms.drivetrain.getPose())) {
+				ifMechanismValid(mechanisms.get(Launcher.class), Launcher::launch);
+			}
 		}
 		
 		// Intake & Spindex
@@ -145,15 +155,15 @@ public class MainOp extends OpMode {
 			ifMechanismValid(mechanisms.get(Intake.class), Intake::stop);
 		}
 
-    /*
-    Optional extra loads (commented out)
-    if (subController.getProcessedValue(Controller.Action.RELEASE_EXTRAS) > 0)
-        ifMechanismValid(mechanisms.get(Spindex.class), Spindex::loadExtra);
-    if (subController.getProcessedValue(Controller.Action.RELEASE_PURPLE) > 0)
-        ifMechanismValid(mechanisms.get(Spindex.class), Spindex::loadPurple);
-    if (subController.getProcessedValue(Controller.Action.RELEASE_GREEN) > 0)
-        ifMechanismValid(mechanisms.get(Spindex.class), Spindex::loadGreen);
-    */
+	    /*
+	    Optional extra loads (commented out)
+	    if (subController.getProcessedValue(Controller.Action.RELEASE_EXTRAS) > 0)
+	        ifMechanismValid(mechanisms.get(Spindex.class), Spindex::loadExtra);
+	    if (subController.getProcessedValue(Controller.Action.RELEASE_PURPLE) > 0)
+	        ifMechanismValid(mechanisms.get(Spindex.class), Spindex::loadPurple);
+	    if (subController.getProcessedValue(Controller.Action.RELEASE_GREEN) > 0)
+	        ifMechanismValid(mechanisms.get(Spindex.class), Spindex::loadGreen);
+	    */
 		
 		// Classifier controls
 		if (subController.getProcessedValue(Controller.Action.EMPTY_CLASSIFIER_STATE) > 0)
@@ -161,6 +171,21 @@ public class MainOp extends OpMode {
 		
 		if (subController.getProcessedValue(Controller.Action.INCREMENT_CLASSIFIER_STATE) > 0)
 			matchSettings.incrementClassifier();
+		
+		mainController.saveLastState();
+		subController.saveLastState();
 	}
 	
+	/**
+	 * Set the LEDs on the controller based on the match state.
+	 */
+	private void setControllerLEDs() {
+		if (matchSettings.nextArtifactNeeded() == MatchSettings.ArtifactColor.GREEN) {
+			subController.setLedColor(0, 255, 0, 100);
+		} else if (matchSettings.nextArtifactNeeded() == MatchSettings.ArtifactColor.PURPLE) {
+			subController.setLedColor(255, 0, 255, 100);
+		} else {
+			subController.setLedColor(0, 0, 0, 0);
+		}
+	}
 }

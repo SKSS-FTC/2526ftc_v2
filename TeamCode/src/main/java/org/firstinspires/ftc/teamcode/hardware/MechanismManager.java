@@ -85,7 +85,7 @@ public class MechanismManager {
 	private TrajectoryEngine createTrajectory(LimelightManager ll, Follower follower, MatchSettings match) {
 		if (ll == null || !Settings.Deploy.TRAJECTORY_ENGINE) return null;
 		try {
-			return new TrajectoryEngine(ll, follower, match);
+			return new TrajectoryEngine(ll);
 		} catch (Exception e) {
 			return null;
 		}
