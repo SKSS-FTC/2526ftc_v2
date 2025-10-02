@@ -53,11 +53,17 @@ public class MainOp extends OpMode {
 		logging = PanelsTelemetry.INSTANCE.getTelemetry();
 	}
 	
+	/**
+	 * Drawing robot on the visualizer
+	 */
+	
 	@Override
 	public final void init_loop() {
 		Drawing.drawRobot(mechanisms.follower.getPose());
 		Drawing.sendPacket();
 	}
+	
+	
 	
 	@Override
 	public final void start() {
