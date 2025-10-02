@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-interactive_trajectory_counter.py
+trajectory_interactive.py
 
-Fully interactive session-based shot analyzer.
-- Reads TinyDB (default: trajectory_db.json)
-- Prompts user for session gap threshold, weighting scheme
-- Computes weighted hit/miss stats
+Fully interactive prototype-based shot analyzer.
+- Reads TinyDB with 'prototype_name' and 'iteration' fields
+- Prompts user for weighting scheme
+- Computes weighted hit/miss stats per prototype
 - Generates interactive visualizations with Plotly
 
 Requirements:
@@ -14,11 +14,14 @@ pip install tinydb pandas plotly
 
 import os
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 import sys
 from tinydb import TinyDB
 
 
 def load_db(db_path: str) -> pd.DataFrame:
+    """Loads and cleans data from the TinyDB file."""
     if not os.path.exists(db_path):
         print(f"[ERROR] DB file not found: {db_path}")
         sys.exit(1)
@@ -27,28 +30,33 @@ def load_db(db_path: str) -> pd.DataFrame:
     if not recs:
         print("[WARN] DB is empty.")
     df = pd.DataFrame(recs)
-    if "hit" not in df.columns or "timestamp" not in df.columns:
-        print("[ERROR] DB missing required fields: hit, timestamp")
+
+    required_cols = ["hit", "timestamp", "prototype_name", "iteration"]
+    if not all(col in df.columns for col in required_cols):
+        print(f"[ERROR] DB missing required fields. Expected: {required_cols}")
+        print("Please run the migration script first to update your database.")
         sys.exit(1)
+
     df = df.dropna(subset=["hit", "timestamp"])
     df["hit"] = df["hit"].astype(bool)
+
+    # NEW LINE: Standardize timestamp by replacing the space separator with a 'T'
+    df["timestamp"] = df["timestamp"].str.replace(" ", "T", n=1)
+
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
     df = df.dropna(subset=["timestamp"])
     df = df.sort_values("timestamp").reset_index(drop=True)
     return df
 
 
-def group_sessions(df: pd.DataFrame, gap_minutes: float) -> pd.DataFrame:
-    gap = pd.Timedelta(minutes=gap_minutes)
-    df["prev_time"] = df["timestamp"].shift(1)
-    df["gap"] = df["timestamp"] - df["prev_time"]
-    df["new_session"] = (df["gap"] > gap) | (df["gap"].isna())
-    df["session_id"] = df["new_session"].cumsum()
+def group_by_prototype(df: pd.DataFrame) -> pd.DataFrame:
+    """Creates a unique group ID from prototype_name and iteration."""
+    df["prototype_id"] = df["prototype_name"] + " v" + df["iteration"].astype(str)
     return df
 
 
 def apply_weights(df: pd.DataFrame, max_weight: float) -> pd.DataFrame:
-    """Assign linear weights from 1 to max_weight per session."""
+    """Assigns linear weights to shots within each prototype group."""
 
     def weight_series(subdf: pd.DataFrame) -> pd.Series:
         n = len(subdf)
@@ -59,12 +67,15 @@ def apply_weights(df: pd.DataFrame, max_weight: float) -> pd.DataFrame:
             index=subdf.index,
         )
 
-    df["weight"] = df.groupby("session_id", group_keys=False).apply(weight_series)
+    df["weight"] = df.groupby("prototype_id", group_keys=False).apply(
+        weight_series, include_groups=False
+    )
     return df
 
 
 def summarize(df: pd.DataFrame) -> pd.DataFrame:
-    weighted = df.groupby("session_id").apply(
+    """Calculates weighted statistics for each prototype group."""
+    weighted = df.groupby("prototype_id").apply(
         lambda g: pd.Series(
             {
                 "total_weight": g["weight"].sum(),
@@ -75,25 +86,22 @@ def summarize(df: pd.DataFrame) -> pd.DataFrame:
     )
     weighted["misses_weighted"] = weighted["total_weight"] - weighted["hits_weighted"]
     weighted["hit_pct"] = 100 * weighted["hits_weighted"] / weighted["total_weight"]
-    weighted["miss_pct"] = 100 * weighted["misses_weighted"] / weighted["total_weight"]
     weighted = weighted.reset_index()
     return weighted
 
 
-import pandas as pd
-import plotly.graph_objects as go
-import plotly.express as px
-
-
 def interactive_plot(df: pd.DataFrame, summary: pd.DataFrame):
+    """Generates and displays the interactive Plotly figure."""
     fig = go.Figure()
 
-    # Compute session rank for color scaling
-    session_acc = df.groupby("session_id")["hit"].mean().reset_index()
-    session_acc["rank"] = session_acc["hit"].rank(method="dense", ascending=False)
-    session_acc["rank_norm"] = (
-        (session_acc["rank"] - 1) / (session_acc["rank"].max() - 1)
-        if session_acc["rank"].max() > 1
+    summary = summary.sort_values("prototype_id").reset_index(drop=True)
+    prototype_order = summary["prototype_id"].tolist()
+
+    prototype_acc = df.groupby("prototype_id")["hit"].mean().reset_index()
+    prototype_acc["rank"] = prototype_acc["hit"].rank(method="dense", ascending=False)
+    prototype_acc["rank_norm"] = (
+        (prototype_acc["rank"] - 1) / (prototype_acc["rank"].max() - 1)
+        if prototype_acc["rank"].max() > 1
         else 0
     )
 
@@ -104,34 +112,47 @@ def interactive_plot(df: pd.DataFrame, summary: pd.DataFrame):
         return colorscale[idx]
 
     rank_color_map = {
-        row["session_id"]: rank_to_color(row["rank_norm"])
-        for _, row in session_acc.iterrows()
+        row["prototype_id"]: rank_to_color(row["rank_norm"])
+        for _, row in prototype_acc.iterrows()
     }
 
-    # Bars: color-scaled by session rank
     for _, row in summary.iterrows():
+        prototype_id = row["prototype_id"]
+        hit_pct = row["hit_pct"]
+        error_pct = row.get("hit_pct_error", 0)
+
+        hover_text = f"<b>{prototype_id}</b><br>Avg Hit Rate: {hit_pct:.1f}%"
+        if error_pct > 0:
+            hover_text += f"<br>Error: +/- {error_pct:.1f}%"
+
         fig.add_trace(
             go.Bar(
-                x=[row["session_id"]],
-                y=[row["hit_pct"]],
+                x=[prototype_id],
+                y=[hit_pct],
                 width=0.4,
-                name=f"Session {int(row['session_id'])} Hit %",
-                opacity=0.6,
-                marker_color=rank_color_map.get(row["session_id"], "gray"),
+                name=f"{prototype_id} Hit %",
+                opacity=0.7,
+                marker_color=rank_color_map.get(prototype_id, "gray"),
+                error_y=dict(
+                    type="data",
+                    array=[error_pct],
+                    visible=True if error_pct > 0 else False,
+                ),
+                hovertext=hover_text,
+                hoverinfo="text",
             )
         )
 
-    # Scatter: red/green by hit
     df["color"] = df["hit"].map({True: "green", False: "red"})
-    df["shot_idx"] = df.groupby("session_id").cumcount() + 1
+    df["shot_idx"] = df.groupby("prototype_id").cumcount() + 1
 
     fig.add_trace(
         go.Scatter(
-            x=df["session_id"],
+            x=df["prototype_id"],
             y=df["shot_idx"],
             mode="markers",
             marker=dict(
-                color=df["color"],  # red/green hit/miss
+                color=df["color"],
                 size=df["weight"] * 5,
                 line=dict(width=1, color="black"),
             ),
@@ -144,36 +165,91 @@ def interactive_plot(df: pd.DataFrame, summary: pd.DataFrame):
     )
 
     fig.update_layout(
-        xaxis_title="Prototype",
-        yaxis_title="Accuracy / Shot Index",
-        title="Per-Prototype Accuracy with Hit/Miss Scatter",
+        xaxis_title="Prototype/Iteration",
+        yaxis_title="Accuracy and Shots",
+        title="Per-Prototype Weighted Accuracy with Hit/Miss Scatter",
         showlegend=True,
+        legend_title_text="Trace Type",
+        xaxis={"categoryorder": "array", "categoryarray": prototype_order},
     )
-
     fig.show()
 
 
 def main():
+    """Main function to drive the interactive analysis."""
     db_path = (
         input("Enter TinyDB path (default: trajectory_db.json): ").strip()
         or "trajectory_db.json"
     )
-    gap_min = input("Enter session gap in minutes (default: 3): ").strip()
-    gap_min = float(gap_min) if gap_min else 3.0
-    max_weight = input("Enter max weight for last shot (default: 2.0): ").strip()
-    max_weight = float(max_weight) if max_weight else 2.0
+    weight_input = (
+        input("Enter max weight for last shot (e.g., 1.0 or 1.0/5.0): ").strip()
+        or "1.0/5.0"
+    )
+
+    midpoint_weight, low_weight, high_weight, has_error = 0.0, 0.0, 0.0, False
+
+    if "/" in weight_input:
+        try:
+            w1, w2 = sorted([float(x) for x in weight_input.split("/")])
+            low_weight, high_weight = w1, w2
+            midpoint_weight = (low_weight + high_weight) / 2
+            has_error = True
+        except (ValueError, IndexError):
+            print("[ERROR] Invalid weight range. Use 'low/high'. Exiting.")
+            return
+    else:
+        try:
+            midpoint_weight = float(weight_input)
+        except ValueError:
+            print("[ERROR] Invalid weight. Use a number. Exiting.")
+            return
 
     df = load_db(db_path)
     if df.empty:
         print("[EXIT] No usable records.")
         return
 
-    df = group_sessions(df, gap_min)
-    df = apply_weights(df, max_weight)
-    summary = summarize(df)
-    print(summary.to_string(index=False))
+    df_grouped = group_by_prototype(df)
+    df_weighted = apply_weights(df_grouped.copy(), midpoint_weight)
+    summary = summarize(df_weighted)
+    summary["hit_pct_error"] = 0.0
 
-    interactive_plot(df, summary)
+    if has_error:
+        summary_low = summarize(apply_weights(df_grouped.copy(), low_weight))
+        summary_high = summarize(apply_weights(df_grouped.copy(), high_weight))
+        summary = summary.merge(
+            summary_low[["prototype_id", "hit_pct"]],
+            on="prototype_id",
+            suffixes=("", "_low"),
+        )
+        summary = summary.merge(
+            summary_high[["prototype_id", "hit_pct"]],
+            on="prototype_id",
+            suffixes=("", "_high"),
+        )
+        summary["hit_pct_error"] = (
+            summary["hit_pct_high"] - summary["hit_pct_low"]
+        ) / 2.0
+
+    print("\n--- Prototype Summary ---")
+    for _, row in summary.iterrows():
+        prototype_id, hit_pct, shots, error = (
+            row["prototype_id"],
+            row["hit_pct"],
+            int(row["shots"]),
+            row["hit_pct_error"],
+        )
+        if error > 0.01:
+            print(
+                f"Prototype '{prototype_id}': {hit_pct:.1f} [+/- {error:.1f}]% hit rate over {shots} launches"
+            )
+        else:
+            print(
+                f"Prototype '{prototype_id}': {hit_pct:.1f}% hit rate over {shots} launches"
+            )
+    print("-------------------------\n")
+
+    interactive_plot(df_weighted, summary)
 
 
 if __name__ == "__main__":
