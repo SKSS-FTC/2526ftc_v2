@@ -79,7 +79,7 @@ public class Tuning extends SelectableOpMode {
 	public static void drawOnlyCurrent() {
 		try {
 			Drawing.drawRobot(follower.getPose());
-			Drawing.sendPacket();
+			Drawing.update();
 		} catch (Exception e) {
 			throw new RuntimeException("Drawing failed " + e);
 		}
@@ -111,6 +111,8 @@ public class Tuning extends SelectableOpMode {
 		poseHistory = follower.getPoseHistory();
 		
 		telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+		
+		Drawing.init();
 	}
 	
 	@Override

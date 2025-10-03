@@ -21,12 +21,13 @@ public class Constants {
 			.forwardZeroPowerAcceleration(-33.78)
 			.lateralZeroPowerAcceleration(-58.36)
 			
-			.translationalPIDFCoefficients(new PIDFCoefficients(0.07, 0, 0.01, 0.048))
-			.secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.15, 0, 0.01, 0.02))
-			.headingPIDFCoefficients(new PIDFCoefficients(0.6, 0, 0.02, 0.043))
-			.secondaryHeadingPIDFCoefficients(new PIDFCoefficients(1.5, 0, 0.01, 0.025))
-			.drivePIDFCoefficients(new FilteredPIDFCoefficients(0.7, 0, 0.001, 0.6, 0.03))
-			.useSecondaryDrivePIDF(false) // for now
+			.translationalPIDFCoefficients(new PIDFCoefficients(0.045, 0, 0.005, 0.04))
+			.secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.12, 0, 0.01, 0.02))
+			.headingPIDFCoefficients(new PIDFCoefficients(0.65, 0, 0.03, 0.043))
+			.secondaryHeadingPIDFCoefficients(new PIDFCoefficients(2.8, 0, 0.05, 0.025))
+			.drivePIDFCoefficients(new FilteredPIDFCoefficients(0.04, 0, 0.001, 0.6, 0.03))
+			.secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.01, 0, 0.003, 0.6, 0.025))
+			.useSecondaryDrivePIDF(true)
 			.useSecondaryHeadingPIDF(true)
 			.useSecondaryTranslationalPIDF(true);
 	
@@ -39,13 +40,12 @@ public class Constants {
 			.leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
 			.leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
 			.rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-			.rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-			
+			.rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
 			.xVelocity(65.46).yVelocity(56.47);
 	
 	public static PinpointConstants localizerConstants = new PinpointConstants()
 			.forwardPodY(6)
-			.strafePodX(6)
+			.strafePodX(-5.5)
 			.distanceUnit(DistanceUnit.INCH)
 			.hardwareMapName(Settings.HardwareIDs.PINPOINT)
 			.encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)

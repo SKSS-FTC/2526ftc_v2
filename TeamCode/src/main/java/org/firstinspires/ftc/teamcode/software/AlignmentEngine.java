@@ -7,26 +7,40 @@ import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LA
 import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LAUNCH_ZONE_LEFT_CORNER;
 import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LAUNCH_ZONE_RIGHT_CORNER;
 
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
 import org.firstinspires.ftc.teamcode.hardware.Mechanism;
 
+/**
+ * The AlignmentEngine aligns the robot chassis during aiming. This is fully decoupled from the
+ * {@link TrajectoryEngine} such that they move independently of each other; this means if we get
+ * pushed by another robot, the launcher will maintain the angle of the shot by rotating the launcher component,
+ * while the alignment engine realigns the chassis; both try to point in the direction of the goal.
+ * This allows the AE to fix large yaw errors while the TE fixes small yaw and pitch errors
+ * with both systems working in decoupled realtime tandem.
+ */
 public class AlignmentEngine extends Mechanism {
 	private final Drivetrain drivetrain;
-	private final Follower follower;
 	private final MatchSettings matchSettings;
 	private final LimelightManager limelightManager;
 	
-	public AlignmentEngine(MatchSettings matchSettings, Drivetrain drivetrain, LimelightManager limelightManager, Follower follower) {
+	public AlignmentEngine(MatchSettings matchSettings, Drivetrain drivetrain, LimelightManager limelightManager) {
 		this.drivetrain = drivetrain;
-		this.follower = follower;
 		this.matchSettings = matchSettings;
 		this.limelightManager = limelightManager;
 	}
 	
+	/**
+	 * Checks if a point is inside a triangle.
+	 *
+	 * @param pose The point to check
+	 * @param A    The first vertex of the triangle
+	 * @param B    The second vertex of the triangle
+	 * @param C    The third vertex of the triangle
+	 * @return True if the point is inside the triangle, false otherwise
+	 */
 	public static boolean isInsideTriangle(Pose pose, Pose A, Pose B, Pose C) {
 		// Create new Point objects for the pose's x and y
 		Pose P = new Pose(pose.getX(), pose.getY());
@@ -42,26 +56,33 @@ public class AlignmentEngine extends Mechanism {
 		return !(has_neg && has_pos);
 	}
 	
+	// dont worry about it lol
+	// https://stackoverflow.com/questions/2049582
 	public static double crossProduct(Pose A, Pose B, Pose C) {
 		return (B.getX() - A.getX()) * (C.getY() - A.getY()) - (B.getY() - A.getY()) * (C.getX() - A.getX());
 	}
 	
 	public void init() {
-	
+		// luigi wins by doing absolutely nothing
 	}
 	
+	/**
+	 * Checks if the robot is aligned with the goal.
+	 *
+	 * @return True if the robot is aligned with the goal, false otherwise
+	 */
 	public boolean isAligned() {
-		Pose currentPose = follower.getPose();
+		Pose currentPose = drivetrain.follower.getPose();
 		Pose targetPose = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.BLUE)
 				? Settings.Field.BLUE_GOAL_POSE
 				: Settings.Field.RED_GOAL_POSE;
 		
 		double angleError = angleToTarget(currentPose, targetPose);
-		return Math.abs(angleError) < Settings.Aiming.MAX_YAW_ERROR;
+		return Math.abs(angleError) < Settings.Aiming.MAX_ROTATIONAL_ERROR;
 	}
 	
 	public void run() {
-		Pose currentPose = follower.getPose();
+		Pose currentPose = drivetrain.follower.getPose();
 		
 		Pose targetPose = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.BLUE)
 				? Settings.Field.BLUE_GOAL_POSE
@@ -69,8 +90,7 @@ public class AlignmentEngine extends Mechanism {
 		
 		double angleError = angleToTarget(currentPose, targetPose);
 		
-		
-		drivetrain.interpolateToOffset(0, 0, angleError);
+		drivetrain.rotate(angleError);
 	}
 	
 	public void update() {
@@ -103,7 +123,7 @@ public class AlignmentEngine extends Mechanism {
 	}
 	
 	// returns signed smallest angle (radians) the robot must rotate to face target
-	private double angleToTarget(Pose currentPose, Pose targetPose) {
+	public double angleToTarget(Pose currentPose, Pose targetPose) {
 		double dx = targetPose.getX() - currentPose.getX();
 		double dy = targetPose.getY() - currentPose.getY();
 		

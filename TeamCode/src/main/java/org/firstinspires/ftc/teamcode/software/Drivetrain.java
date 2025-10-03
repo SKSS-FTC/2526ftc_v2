@@ -7,6 +7,7 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.hardware.Mechanism;
 
 import java.util.HashMap;
@@ -23,6 +24,7 @@ public class Drivetrain extends Mechanism {
 	// Define field-centric poses for autonomous targets.
 	// TODO: Tune these coordinates for your actual field and alliance.
 	private final Map<Position, Pose> positionPoses = new HashMap<>();
+	public boolean robotCentric = true;
 	private State state;
 	
 	/**
@@ -30,22 +32,26 @@ public class Drivetrain extends Mechanism {
 	 *
 	 * @param hardwareMap The robot's hardware map.
 	 */
-	public Drivetrain(HardwareMap hardwareMap, Follower follower) {
+	public Drivetrain(HardwareMap hardwareMap, Follower follower, MatchSettings matchSettings) {
 		// The Constants class now holds all hardware and tuning configurations.
 		this.follower = follower;
-		follower.setStartingPose(new Pose()); // Set a default starting pose at (0,0,0)
+		follower.setStartingPose(matchSettings.getTeleOpStartingPosition());
 		switchToManual(); // Start in manual control mode.
 		
 		// Initialize the poses for each predefined position
-		positionPoses.put(Position.CLOSE_SHOOT, new Pose(24, 48, Math.toRadians(45)));
-		positionPoses.put(Position.FAR_SHOOT, new Pose(72, 48, Math.toRadians(135)));
-		positionPoses.put(Position.HUMAN_PLAYER, new Pose(0, 72, Math.toRadians(90)));
-		positionPoses.put(Position.SECRET_TUNNEL, new Pose(120, 24, Math.toRadians(0)));
+		positionPoses.put(Position.CLOSE_SHOOT, new Pose(60, 89, Math.toRadians(115)));
+		positionPoses.put(Position.FAR_SHOOT, new Pose(60, 15, Math.toRadians(115)));
+		positionPoses.put(Position.HUMAN_PLAYER, new Pose(30, 30, Math.toRadians(225)));
+		positionPoses.put(Position.GATE, new Pose(25, 68, Math.toRadians(0)));
 	}
 	
 	@Override
 	public void init() {
 	
+	}
+	
+	public void toggleCentricity() {
+		robotCentric = !robotCentric;
 	}
 	
 	/**
@@ -55,9 +61,9 @@ public class Drivetrain extends Mechanism {
 	public void update() {
 		follower.update();
 		
-		// When an automated movement (GOTO or AIMING) is finished,
+		// When an automated movement (GOTO) is finished,
 		// automatically switch back to manual control.
-		if ((state == State.GOTO || state == State.AIMING) && !follower.isBusy()) {
+		if ((state == State.PATHING) && !follower.isBusy()) {
 			switchToManual();
 		}
 	}
@@ -70,25 +76,16 @@ public class Drivetrain extends Mechanism {
 	/**
 	 * Implements mecanum drive using the PedroPathing Follower.
 	 *
-	 * @param drivePower   Forward/backward power (-1.0 to 1.0).
-	 * @param strafePower  Left/right strafe power (-1.0 to 1.0).
-	 * @param rotation     Rotational power (-1.0 to 1.0).
-	 * @param robotCentric True for robot-centric, false for field-centric.
+	 * @param drivePower  Forward/backward power (-1.0 to 1.0).
+	 * @param strafePower Left/right strafe power (-1.0 to 1.0).
+	 * @param rotation    Rotational power (-1.0 to 1.0).
 	 */
-	public void mecanumDrive(double drivePower, double strafePower, double rotation, boolean robotCentric) {
+	public void mecanumDrive(double drivePower, double strafePower, double rotation) {
 		if (state != State.MANUAL) {
 			return; // Automation is handling driving, so ignore manual input.
 		}
-		// Gamepad inputs are typically inverted (up on stick is negative).
 		// The Follower expects a standard coordinate system (forward is positive).
-		follower.setTeleOpDrive(-drivePower, -strafePower, -rotation, robotCentric);
-	}
-	
-	/**
-	 * Overloaded mecanumDrive for robot-centric control by default.
-	 */
-	public void mecanumDrive(double drivePower, double strafePower, double rotation) {
-		mecanumDrive(drivePower, strafePower, rotation, true);
+		follower.setTeleOpDrive(drivePower, strafePower, -rotation, robotCentric);
 	}
 	
 	/**
@@ -101,22 +98,13 @@ public class Drivetrain extends Mechanism {
 	 * @param offsetHeading The robot's heading offset from the target. Positive is clockwise.
 	 */
 	public void interpolateToOffset(double offsetX, double offsetY, double offsetHeading) {
-		this.state = State.AIMING;
 		Pose currentPose = follower.getPose();
 		double currentHeading = currentPose.getHeading();
 		
-		// We want to move by (-offsetX, -offsetY) in the robot's reference frame.
-		// Convert this robot-centric displacement into the field-centric frame.
-		double robotFrameDx = -offsetX;
-		double robotFrameDy = -offsetY;
-		
-		double fieldFrameDx = robotFrameDx * Math.cos(currentHeading) - robotFrameDy * Math.sin(currentHeading);
-		double fieldFrameDy = robotFrameDx * Math.sin(currentHeading) + robotFrameDy * Math.cos(currentHeading);
-		
 		// Calculate the absolute target pose in the field frame.
 		Pose targetPose = new Pose(
-				currentPose.getX() + fieldFrameDx,
-				currentPose.getY() + fieldFrameDy,
+				currentPose.getX() + offsetX,
+				currentPose.getY() + offsetY,
 				currentHeading - offsetHeading
 		);
 		
@@ -130,13 +118,7 @@ public class Drivetrain extends Mechanism {
 	 */
 	public void goTo(Position position) {
 		Pose targetPose = positionPoses.get(position);
-		
-		if (targetPose == follower.getCurrentPath().endPose()) {
-			switchToManual();
-		}
-		if (targetPose != null) {
-			goTo(targetPose);
-		}
+		goTo(targetPose);
 	}
 	
 	/**
@@ -145,12 +127,24 @@ public class Drivetrain extends Mechanism {
 	 * @param targetPose The absolute target pose.
 	 */
 	public void goTo(Pose targetPose) {
-		this.state = State.GOTO;
+		this.state = State.PATHING;
 		PathChain path = follower.pathBuilder()
 				.addPath(new Path(new BezierLine(follower::getPose, targetPose)))
+				.setLinearHeadingInterpolation(follower.getHeading(), targetPose.getHeading())
 				.build();
 		follower.followPath(path);
 	}
+	
+	/**
+	 * Commands the robot to rotate a given amount of radians.
+	 *
+	 * @param radians the amount to rotate
+	 */
+	public void rotate(double radians) {
+		this.state = State.PATHING;
+		follower.turn(radians, false);
+	}
+	
 	
 	/**
 	 * Switches the drivetrain to manual (tele-op) control mode.
@@ -162,7 +156,7 @@ public class Drivetrain extends Mechanism {
 	}
 	
 	/**
-	 * @return The current state of the drivetrain (MANUAL, AIMING, GOTO).
+	 * @return The current state of the drivetrain (MANUAL, GOTO).
 	 */
 	public State getState() {
 		return state;
@@ -186,12 +180,11 @@ public class Drivetrain extends Mechanism {
 		CLOSE_SHOOT,
 		FAR_SHOOT,
 		HUMAN_PLAYER,
-		SECRET_TUNNEL,
+		GATE,
 	}
 	
 	public enum State {
 		MANUAL,
-		AIMING,
-		GOTO,
+		PATHING,
 	}
 }

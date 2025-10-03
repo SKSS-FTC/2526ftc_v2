@@ -5,23 +5,21 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 import org.firstinspires.ftc.teamcode.configuration.Settings;
+import org.firstinspires.ftc.teamcode.hardware.Mechanism;
 
 /**
- * Incoming Yap Session:
- * Limelight returns Tx and Ty values, which return angles for where a detected
- * object is,
- * and trig is required to get pixel or distance values.
- * IMPORTANT: Tx and Ty are zero when no desired object is detected.
+ * Interface between the Limelight camera and the robot, allowing us to get specific data smoothly.
  */
-public class LimelightManager {
+public class LimelightManager extends Mechanism {
 	public final Limelight3A limelight;
 	public final MatchSettings matchSettings;
 	LLResult currentResult;
-	Pipeline currentPipeline = Pipeline.APRILTAG; // to detect the obelisk april tag
+	Pipeline currentPipeline = Pipeline.APRILTAG; // to detect the obelisk april tag during start of auto
 	
 	public LimelightManager(Limelight3A limelight, MatchSettings matchSettings) {
 		this.limelight = limelight;
 		this.matchSettings = matchSettings;
+		init(); // limelight is a non-physical system and thus can be initialized at any time
 	}
 	
 	/**
@@ -31,6 +29,17 @@ public class LimelightManager {
 		setCurrentPipeline(currentPipeline);
 		limelight.start();
 		limelight.setPollRateHz(100);
+	}
+	
+	/**
+	 * This causes significant overhead and should be avoided.
+	 */
+	public void update() {
+		limelight.getLatestResult();
+	}
+	
+	public void stop() {
+		limelight.stop();
 	}
 	
 	/**

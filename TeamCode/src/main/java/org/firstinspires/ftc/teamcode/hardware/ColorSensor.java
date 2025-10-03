@@ -8,11 +8,12 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
 
-// TODO tune color thresholds and confidence
+/**
+ * A Decode-specific Color Sensor wrapper to accurately determine what artifact type is in front
+ * of the sensor. // TODO tune color thresholds and confidence
+ */
 public class ColorSensor {
 	final double[] rgbValues = {0, 0, 0};
-	// Target "center" colors for confidence-based matching
-	// These should be tuned to approximate measured values
 	final RevColorSensorV3 colorSensor;
 	
 	public ColorSensor(RevColorSensorV3 colorSensorV3) {

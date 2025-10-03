@@ -8,15 +8,10 @@ import org.firstinspires.ftc.teamcode.software.TrajectoryEngine;
 
 public class Launcher extends Mechanism {
 	private final TrajectoryEngine trajectoryEngine;
-	
 	private final Servo horizontalServo;
 	private final Servo verticalServo;
 	private final Spindex spindex;
 	private final SyncBelt belt;
-	
-	// Cached commanded orientation (radians or degrees depending on Settings)
-	private double commandedYaw;
-	private double commandedPitch;
 	
 	public Launcher(Spindex spindex,
 	                DcMotor beltRight,
@@ -29,32 +24,70 @@ public class Launcher extends Mechanism {
 		this.horizontalServo = horizontalServo;
 		this.verticalServo = verticalServo;
 		this.belt = new SyncBelt(beltRight, beltLeft);
+	}
+	
+	/**
+	 * Aims the launcher at the target using feedback from the TrajectoryEngine.
+	 * This is invoked by the {@link Launcher#ready()} method which should be called repeatedly in the main robot loop when aiming.
+	 */
+	private void aim() {
+		TrajectoryEngine.AimingOffsets offsets = trajectoryEngine.getAimingOffsets();
 		
-		// Initialize commanded orientation from hardware
-		commandedYaw = servoToYaw(horizontalServo.getPosition());
-		commandedPitch = servoToPitch(verticalServo.getPosition());
-	}
-	
-	// Call to zero the launcher at init
-	public final void init() {
-		commandedYaw = 0;
-		commandedPitch = 0;
-		setYaw(0);
-		setPitch(0);
-	}
-	
-	public final void update() {
-		belt.update();
-	}
-	
-	public void launch() {
-		if (okayToLaunch()) {
-			spindex.eject();
+		// If we don't have a target, do not adjust.
+		if (!offsets.hasTarget) {
+			return;
+		}
+		
+		// 1. Read the current physical orientation from the servos
+		double currentYaw = servoToYaw(horizontalServo.getPosition());
+		double currentPitch = servoToPitch(verticalServo.getPosition());
+		
+		// 2. Calculate the correction needed. The error is the offset from the camera.
+		// We add the error multiplied by a gain (Kp) to the current position.
+		// For yaw, a positive offset (tx) means the target is to the right, so we increase yaw.
+		// For pitch, a positive offset (ty) means the target is up, so we increase pitch.
+		double yawCorrection = offsets.horizontalOffsetDegrees * Settings.Launcher.AIM_YAW_KP;
+		double pitchCorrection = offsets.verticalOffsetDegrees * Settings.Launcher.AIM_PITCH_KP;
+		
+		// 3. Calculate the new target orientation and adjust
+		// If the amount of correction is outside the acceptable range, adjust.
+		if (Math.abs(yawCorrection) > Settings.Aiming.MAX_YAW_ERROR) {
+			double targetYaw = Math.max(Settings.Launcher.MIN_YAW, Math.min(Settings.Launcher.MAX_YAW, currentYaw + yawCorrection));
+			setYaw(targetYaw);
+		}
+		
+		if (Math.abs(pitchCorrection) > Settings.Aiming.MAX_PITCH_ERROR) {
+			double targetPitch = Math.max(Settings.Launcher.MIN_PITCH, Math.min(Settings.Launcher.MAX_PITCH, currentPitch + pitchCorrection));
+			setPitch(targetPitch);
 		}
 	}
 	
+	/**
+	 * Checks if all conditions are met for a successful launch.
+	 *
+	 * @return True if the launcher is aimed, up to speed, and a game piece is ready.
+	 */
+	public boolean okayToLaunch() {
+		return trajectoryEngine.isAimed() &&
+				belt.atSpeed() &&
+				spindex.isNextArtifactAtExit();
+	}
+	
+	/**
+	 * Launches the artifact if possible.
+	 */
+	public void launch() {
+		if (!okayToLaunch()) return;
+		
+		spindex.eject();
+	}
+	
+	/**
+	 * Readies the launcher to fire.
+	 */
 	public void ready() {
 		belt.spinUp();
+		aim();
 		spindex.rotateNextArtifactToExit();
 	}
 	
@@ -62,38 +95,20 @@ public class Launcher extends Mechanism {
 		belt.spinDown();
 	}
 	
-	public boolean okayToLaunch() {
-		return trajectoryEngine.isOkayToLaunch() &&
-				belt.atSpeed() &&
-				spindex.isNextArtifactAtExit();
-	}
-	
-	// ---- Orientation handling ----
-	
-	public double getYaw() {
-		return commandedYaw;
-	}
-	
 	public void setYaw(double yaw) {
-		commandedYaw = yaw;
 		horizontalServo.setPosition(yawToServo(yaw));
 	}
 	
-	public double getPitch() {
-		return commandedPitch;
-	}
-	
 	public void setPitch(double pitch) {
-		commandedPitch = pitch;
 		verticalServo.setPosition(pitchToServo(pitch));
 	}
 	
-	private double yawToServo(double yaw) {
-		return (yaw - Settings.Launcher.MIN_YAW) / (Settings.Launcher.MAX_YAW - Settings.Launcher.MIN_YAW);
+	private double yawToServo(double yawDegrees) {
+		return (yawDegrees - Settings.Launcher.MIN_YAW) / (Settings.Launcher.MAX_YAW - Settings.Launcher.MIN_YAW);
 	}
 	
-	private double pitchToServo(double pitch) {
-		return (pitch - Settings.Launcher.MIN_PITCH) / (Settings.Launcher.MAX_PITCH - Settings.Launcher.MIN_PITCH);
+	private double pitchToServo(double pitchDegrees) {
+		return (pitchDegrees - Settings.Launcher.MIN_PITCH) / (Settings.Launcher.MAX_PITCH - Settings.Launcher.MIN_PITCH);
 	}
 	
 	private double servoToYaw(double servoPos) {
@@ -104,7 +119,19 @@ public class Launcher extends Mechanism {
 		return Settings.Launcher.MIN_PITCH + servoPos * (Settings.Launcher.MAX_PITCH - Settings.Launcher.MIN_PITCH);
 	}
 	
-	// ---- SyncBelt ----
+	public final void init() {
+		setYaw(0);
+		setPitch(0);
+	}
+	
+	public final void update() {
+		belt.update();
+	}
+	
+	/**
+	 * A synchronous combination of two motors such that they spin at the exact same speed.
+	 * TODO: sync with different speeds to control topspin
+	 */
 	public static class SyncBelt {
 		private final DcMotor beltRight;
 		private final DcMotor beltLeft;
@@ -149,6 +176,10 @@ public class Launcher extends Mechanism {
 					System.currentTimeMillis() - spinupTimestamp > Settings.Launcher.BELT_SPINUP_TIME_MS;
 		}
 		
+		/**
+		 * Continuously try to match the actual speeds of the motors so they have the same
+		 * tangential speed.
+		 */
 		public void update() {
 			if (!active) return;
 			

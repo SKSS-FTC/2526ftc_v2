@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import androidx.annotation.Nullable;
 
-import com.pedropathing.follower.Follower;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -19,7 +18,6 @@ import org.firstinspires.ftc.teamcode.software.TrajectoryEngine;
 
 public class MechanismManager {
 	public final Drivetrain drivetrain;
-	public final Follower follower;
 	public final Mechanism[] mechanisms;
 	
 	// Optional non-mechanism helpers
@@ -28,15 +26,14 @@ public class MechanismManager {
 	public final AlignmentEngine alignmentEngine;
 	
 	public MechanismManager(HardwareMap hw, MatchSettings match) {
-		follower = Constants.createFollower(hw);
-		drivetrain = new Drivetrain(hw, follower);
+		drivetrain = new Drivetrain(hw, Constants.createFollower(hw), match);
 		
 		// Build mechanisms safely
 		Intake intake = createIntake(hw);
 		Spindex spindex = createSpindex(hw, match);
 		LimelightManager ll = createLimelight(hw, match);
-		TrajectoryEngine traj = createTrajectory(ll, follower, match);
-		AlignmentEngine align = createAlignment(match, drivetrain, ll, follower);
+		TrajectoryEngine traj = createTrajectory(ll, match);
+		AlignmentEngine align = createAlignment(match, drivetrain, ll);
 		Launcher launcher = createLauncher(hw, spindex, traj);
 		
 		mechanisms = new Mechanism[]{intake, spindex, launcher};
@@ -84,19 +81,19 @@ public class MechanismManager {
 		}
 	}
 	
-	private TrajectoryEngine createTrajectory(LimelightManager ll, Follower follower, MatchSettings match) {
+	private TrajectoryEngine createTrajectory(LimelightManager ll, MatchSettings match) {
 		if (ll == null || !Settings.Deploy.TRAJECTORY_ENGINE) return null;
 		try {
-			return new TrajectoryEngine(ll, follower, match);
+			return new TrajectoryEngine(ll);
 		} catch (Exception e) {
 			return null;
 		}
 	}
 	
-	private AlignmentEngine createAlignment(MatchSettings match, Drivetrain dt, LimelightManager ll, Follower follower) {
+	private AlignmentEngine createAlignment(MatchSettings match, Drivetrain dt, LimelightManager ll) {
 		if (ll == null || !Settings.Deploy.ALIGNMENT_ENGINE) return null;
 		try {
-			return new AlignmentEngine(match, dt, ll, follower);
+			return new AlignmentEngine(match, dt, ll);
 		} catch (Exception e) {
 			return null;
 		}
@@ -131,6 +128,7 @@ public class MechanismManager {
 	
 	public void update() {
 		for (Mechanism m : mechanisms) if (m != null) m.update();
+		drivetrain.update();
 	}
 	
 	public void stop() {
