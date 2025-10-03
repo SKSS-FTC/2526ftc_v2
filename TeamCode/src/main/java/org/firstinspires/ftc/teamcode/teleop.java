@@ -28,14 +28,16 @@ public class teleop extends LinearOpMode {
 //        Intake Intake = new Intake();
         ServoTraining Servo = new ServoTraining();
         LLOpMode LL = new LLOpMode();
+        SensorTraining Sensor = new SensorTraining();
 
         Train.init(this);
 //        Intake.init(this);
         Servo.init(this);
         LL.init(this);
+        Sensor.init(this);
 
 
-        limelight = hardwareMap.get(Limelight3A.class,"limelight");
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
         telemetry.setMsTransmissionInterval(11);
         limelight.pipelineSwitch(7);
         limelight.start();
@@ -64,37 +66,40 @@ public class teleop extends LinearOpMode {
             } else {
                 Train.stop();
             }
-        }
 
-        if (newGamePad1.a.state) {
+
+            if (newGamePad1.a.state) {
 //            Intake.forward(speed);
-        }
-
-        if (newGamePad1.b.state) {
-//            Intake.backwards(speed);
-        }
-
-        if (newGamePad1.a.released) {
-            Servo.normal();
-            // normal means 0
-        } else if (newGamePad1.b.released) {
-            Servo.right();
-            // right means 1
-        } else if (newGamePad1.x.released) {
-            Servo.left();
-            // left means -1
-        }
-
-        LLResult result = limelight.getLatestResult();
-        if (result.isValid()) {
-            // Access fiducial results
-            List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
-            for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
             }
-//         no need for a "Servo.stop();" apparently
-        } else {
-            telemetry.addData("Limelight", "No data available");
+
+            if (newGamePad1.b.state) {
+//            Intake.backwards(speed);
+            }
+
+            if (newGamePad1.a.released) {
+                Servo.normal();
+                // normal means 0
+            } else if (newGamePad1.b.released) {
+                Servo.right();
+                // right means 1
+            } else if (newGamePad1.x.released) {
+                Servo.left();
+                // left means -1
+            }
+
+            Sensor.color_telemetry();
+
+            LLResult result = limelight.getLatestResult();
+            if (result.isValid()) {
+                // Access fiducial results
+                List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
+                for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                    telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+                }
+
+            } else {
+                telemetry.addData("Limelight", "No data available");
+            }
         }
     }
 }
