@@ -11,6 +11,8 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorColor;
+
 
 public class SensorTraining {
 
@@ -28,6 +30,8 @@ public class SensorTraining {
     boolean blue;
     boolean red;
     boolean green;
+
+
 
     public SensorTraining() {
     }
@@ -64,25 +68,35 @@ public class SensorTraining {
 //    }
 
     public void color_telemetry() {
-        NormalizedRGBA colors = colorSensor.getNormalizedColors();
         opmode.telemetry.addLine()
-                .addData("Red", "%.3f", colors.red)
-                .addData("Green", "%.3f", colors.green)
-                .addData("Blue", "%.3f", colors.blue);
-        opmode.telemetry.update();
+                .addData("Red", "%.3f", getRedV())
+                .addData("Green", "%.3f", getGreenV())
+                .addData("Blue", "%.3f", getBlueV());
+//        opmode.telemetry.update();
+
+        if (getGreenV() > 20  || getBlueV() > 10) {
+            opmode.telemetry.addLine("green");
+            opmode.telemetry.update();
+        } else if (getGreenV() < 20){
+            opmode.telemetry.addLine("purple");
+            opmode.telemetry.update();
+        } else {
+            opmode.telemetry.addLine("no ball detected");
+            opmode.telemetry.update();
+        }
     }
 
 
     // gets blue red and green values!!! ^w^
-    public int getBlueV() {
+    public double getBlueV() {
         return sensorColor.blue();
     }
 
-    public int getRedV() {
+    public double getRedV() {
         return sensorColor.red();
     }
 
-    public int getGreenV() {
+    public double getGreenV() {
         return sensorColor.green();
     }
 

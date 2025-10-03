@@ -29,12 +29,14 @@ public class teleop extends LinearOpMode {
         ServoTraining Servo = new ServoTraining();
         LLOpMode LL = new LLOpMode();
         SensorTraining Sensor = new SensorTraining();
+        Color Color = new Color();
 
         Train.init(this);
 //        Intake.init(this);
         Servo.init(this);
         LL.init(this);
         Sensor.init(this);
+        Color.init(this);
 
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -87,7 +89,9 @@ public class teleop extends LinearOpMode {
                 // left means -1
             }
 
-            Sensor.color_telemetry();
+//            Sensor.color_telemetry();
+            Color.outputColor();
+            Color.getDist();
 
             LLResult result = limelight.getLatestResult();
             if (result.isValid()) {
