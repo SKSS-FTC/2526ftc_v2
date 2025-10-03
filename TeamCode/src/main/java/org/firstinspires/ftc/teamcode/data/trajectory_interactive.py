@@ -105,7 +105,7 @@ def interactive_plot(df: pd.DataFrame, summary: pd.DataFrame):
         else 0
     )
 
-    colorscale = px.colors.diverging.PiYG
+    colorscale = px.colors.diverging.PiYG[::-1]
 
     def rank_to_color(r):
         idx = int(r * (len(colorscale) - 1))
@@ -137,6 +137,8 @@ def interactive_plot(df: pd.DataFrame, summary: pd.DataFrame):
                     type="data",
                     array=[error_pct],
                     visible=True if error_pct > 0 else False,
+                    thickness=2,
+                    color="black",
                 ),
                 hovertext=hover_text,
                 hoverinfo="text",
