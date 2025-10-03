@@ -85,7 +85,7 @@ public class Controller extends Gamepad {
 		// add value modifiers here
 		double val = getRawValue(control);
 		
-		if (control == Control.LEFT_STICK_Y) {
+		if (control == Control.LEFT_STICK_Y || control == Control.LEFT_STICK_X) {
 			val = -val;
 		}
 		// add more here
@@ -103,7 +103,7 @@ public class Controller extends Gamepad {
 	 *
 	 * @return The processed robot-centric movement vector
 	 */
-	private Vector getRobotCentricDpad() {
+	public Vector getRobotCentricDpad() {
 		// Calculate the field-centric vector components from d-pad inputs.
 		// North/East are positive.
 		double fieldY = getProcessedValue(Action.ABS_NORTH) - getProcessedValue(Action.ABS_SOUTH);
@@ -145,6 +145,7 @@ public class Controller extends Gamepad {
 	 * @return The processed rotation value (positive = clockwise, negative = counterclockwise)
 	 */
 	public final double getProcessedRotation() {
+		
 		double rotationValue = getProcessedValue(Action.ROTATE_AXIS) + getProcessedValue(Action.ROTATE_RIGHT) - getProcessedValue(Action.ROTATE_LEFT);
 		// clamp wont work for me on this sdk version lol
 		if (rotationValue < -1) return -1;
@@ -233,10 +234,12 @@ public class Controller extends Gamepad {
 		ABS_EAST,
 		ABS_WEST,
 		ABS_SOUTH,
+		TOGGLE_CENTRICITY,
+		RESET_FOLLOWER,
 		GOTO_CLOSE_SHOOT,
 		GOTO_FAR_SHOOT,
 		GOTO_HUMAN_PLAYER,
-		GOTO_SECRET_TUNNEL,
+		GOTO_GATE,
 		CANCEL_ASSISTED_DRIVING,
 		INTAKE,
 		RELEASE_EXTRAS,

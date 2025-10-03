@@ -37,9 +37,10 @@ public class Settings {
 			actionControlMap.put(Controller.Action.GOTO_CLOSE_SHOOT, Controller.Control.CIRCLE);
 			actionControlMap.put(Controller.Action.GOTO_FAR_SHOOT, Controller.Control.CROSS);
 			actionControlMap.put(Controller.Action.GOTO_HUMAN_PLAYER, Controller.Control.SQUARE);
-			actionControlMap.put(Controller.Action.GOTO_SECRET_TUNNEL, Controller.Control.TRIANGLE);
-			actionControlMap.put(Controller.Action.CANCEL_ASSISTED_DRIVING, Controller.Control.LEFT_STICK_BUTTON);
-			actionControlMap.put(Controller.Action.PARK_EXTEND, Controller.Control.START);
+			actionControlMap.put(Controller.Action.GOTO_GATE, Controller.Control.TRIANGLE);
+			actionControlMap.put(Controller.Action.CANCEL_ASSISTED_DRIVING, Controller.Control.RIGHT_STICK_BUTTON);
+			actionControlMap.put(Controller.Action.RESET_FOLLOWER, Controller.Control.BACK);
+			actionControlMap.put(Controller.Action.TOGGLE_CENTRICITY, Controller.Control.LEFT_STICK_BUTTON);
 			
 			// Secondary Controller (Operator)
 			actionControlMap.put(Controller.Action.AIM, Controller.Control.LEFT_TRIGGER);
@@ -187,6 +188,7 @@ public class Settings {
 	 */
 	@Configurable
 	public static class Field {
+		public static Pose RESET_POSE = new Pose(72, 72, Math.toRadians(270));
 		public static Pose RED_GOAL_POSE = new Pose(131, 137.5, Math.toRadians(225));
 		public static Pose BLUE_GOAL_POSE = new Pose(12.5, 137.5, Math.toRadians(315));
 		public static Pose FAR_LAUNCH_ZONE_FRONT_CORNER = new Pose(72, 24);

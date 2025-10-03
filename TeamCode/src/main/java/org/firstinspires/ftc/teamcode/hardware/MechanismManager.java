@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import androidx.annotation.Nullable;
 
-import com.pedropathing.follower.Follower;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -27,14 +26,14 @@ public class MechanismManager {
 	public final AlignmentEngine alignmentEngine;
 	
 	public MechanismManager(HardwareMap hw, MatchSettings match) {
-		drivetrain = new Drivetrain(hw, Constants.createFollower(hw));
+		drivetrain = new Drivetrain(hw, Constants.createFollower(hw), match);
 		
 		// Build mechanisms safely
 		Intake intake = createIntake(hw);
 		Spindex spindex = createSpindex(hw, match);
 		LimelightManager ll = createLimelight(hw, match);
-		TrajectoryEngine traj = createTrajectory(ll, drivetrain.follower, match);
-		AlignmentEngine align = createAlignment(match, drivetrain, ll, drivetrain.follower);
+		TrajectoryEngine traj = createTrajectory(ll, match);
+		AlignmentEngine align = createAlignment(match, drivetrain, ll);
 		Launcher launcher = createLauncher(hw, spindex, traj);
 		
 		mechanisms = new Mechanism[]{intake, spindex, launcher};
@@ -82,7 +81,7 @@ public class MechanismManager {
 		}
 	}
 	
-	private TrajectoryEngine createTrajectory(LimelightManager ll, Follower follower, MatchSettings match) {
+	private TrajectoryEngine createTrajectory(LimelightManager ll, MatchSettings match) {
 		if (ll == null || !Settings.Deploy.TRAJECTORY_ENGINE) return null;
 		try {
 			return new TrajectoryEngine(ll);
@@ -91,10 +90,10 @@ public class MechanismManager {
 		}
 	}
 	
-	private AlignmentEngine createAlignment(MatchSettings match, Drivetrain dt, LimelightManager ll, Follower follower) {
+	private AlignmentEngine createAlignment(MatchSettings match, Drivetrain dt, LimelightManager ll) {
 		if (ll == null || !Settings.Deploy.ALIGNMENT_ENGINE) return null;
 		try {
-			return new AlignmentEngine(match, dt, ll, follower);
+			return new AlignmentEngine(match, dt, ll);
 		} catch (Exception e) {
 			return null;
 		}

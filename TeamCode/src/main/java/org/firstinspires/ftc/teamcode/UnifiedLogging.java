@@ -1,0 +1,59 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
+
+/**
+ * UnifiedLogging allows us to send data to both the Driver Station and the Panels Webview
+ * simultaneously, and handles all the messy stuff like formatting and Field Drawings.
+ */
+public class UnifiedLogging {
+	public final Telemetry driverStation;
+	public final TelemetryManager panels;
+	
+	public UnifiedLogging(Telemetry telemetry, TelemetryManager panels) {
+		this.driverStation = telemetry;
+		this.panels = panels;
+		Drawing.init();
+	}
+	
+	public void update() {
+		driverStation.update();
+		panels.update();
+	}
+	
+	public void addLine(String line) {
+		driverStation.addLine(line);
+		panels.addLine(line);
+	}
+	
+	public void addData(String key, Object value) {
+		driverStation.addData(key, value);
+		panels.addData(key, value);
+	}
+	
+	public void addNumber(String key, Object value) {
+		driverStation.addData(key, "%.2f", value);
+		panels.addData(key, String.format(value.toString(), "%.2f"));
+	}
+	
+	public void drawRobot(Pose pose) {
+		Drawing.drawRobot(pose);
+		Drawing.update();
+	}
+	
+	public void drawDebug(Follower follower) {
+		Drawing.drawDebug(follower);
+		Drawing.update();
+	}
+	
+	public void drawPath(PathChain path) {
+		Drawing.drawPath(path, Drawing.pathLook);
+	}
+	
+}

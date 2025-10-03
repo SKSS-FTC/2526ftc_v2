@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.configuration;
 
+import com.pedropathing.geometry.Pose;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,6 +66,53 @@ public class MatchSettings {
 	public void setAllianceColor(AllianceColor color) {
 		if (color != null) {
 			blackboard.put(ALLIANCE_COLOR_KEY, color.name().toLowerCase());
+		}
+	}
+	
+	/**
+	 * Gets the Autonomous starting position for the robot based on the match settings.
+	 *
+	 * @return A Pose of the starting position
+	 */
+	public Pose getAutonomousStartingPosition() {
+		switch (getAllianceColor()) {
+			case RED:
+				return getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
+						? Settings.Autonomous.RedClose.START
+						: Settings.Autonomous.RedFar.START;
+			case BLUE:
+				return getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
+						? Settings.Autonomous.BlueClose.START
+						: Settings.Autonomous.BlueFar.START;
+			default:
+				return new Pose(); // fallback
+		}
+	}
+	
+	/**
+	 * Gets the TeleOp starting position for the robot based on the end of the Autonomous period.
+	 *
+	 * @return A Pose of the starting position
+	 */
+	public Pose getTeleOpStartingPosition() {
+		// If either of these values are unset, Auto has not yet been run,
+		// so we have nothing to base starting position on. Instead, assume the robot is on the center of the field,
+		// our designated resetting position during testing.
+		if (blackboard.get(ALLIANCE_COLOR_KEY) == null || blackboard.get(AUTO_KEY) == null) {
+			return Settings.Field.RESET_POSE;
+		}
+		
+		switch (getAllianceColor()) {
+			case RED:
+				return getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
+						? Settings.Autonomous.RedClose.PARK
+						: Settings.Autonomous.RedFar.PARK;
+			case BLUE:
+				return getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
+						? Settings.Autonomous.BlueClose.PARK
+						: Settings.Autonomous.BlueFar.PARK;
+			default:
+				return new Pose(); // fallback
 		}
 	}
 	

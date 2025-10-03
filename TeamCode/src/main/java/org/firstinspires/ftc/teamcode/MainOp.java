@@ -1,17 +1,18 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.RESET_POSE;
+
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
+import org.firstinspires.ftc.teamcode.configuration.Settings;
 import org.firstinspires.ftc.teamcode.hardware.Intake;
 import org.firstinspires.ftc.teamcode.hardware.Launcher;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
-import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
-import org.firstinspires.ftc.teamcode.software.AlignmentEngine;
 import org.firstinspires.ftc.teamcode.software.Drivetrain;
 
 import java.util.function.Consumer;
@@ -23,7 +24,7 @@ import java.util.function.Consumer;
 @TeleOp(name = "MainOp", group = ".Competition Modes")
 public class MainOp extends OpMode {
 	public MatchSettings matchSettings;
-	private TelemetryManager logging;
+	private UnifiedLogging logging;
 	private MechanismManager mechanisms;
 	private Controller mainController;
 	private Controller subController;
@@ -54,7 +55,7 @@ public class MainOp extends OpMode {
 		mechanisms = new MechanismManager(hardwareMap, matchSettings);
 		mainController = new Controller(gamepad1, mechanisms.drivetrain.follower, matchSettings);
 		subController = new Controller(gamepad2, mechanisms.drivetrain.follower, matchSettings);
-		logging = PanelsTelemetry.INSTANCE.getTelemetry();
+		logging = new UnifiedLogging(telemetry, PanelsTelemetry.INSTANCE.getTelemetry());
 	}
 	
 	/**
@@ -63,8 +64,7 @@ public class MainOp extends OpMode {
 	@Override
 	public final void init_loop() {
 		// draw the robot at its starting position
-		Drawing.drawRobot(mechanisms.drivetrain.follower.getPose());
-		Drawing.sendPacket();
+		logging.drawRobot(mechanisms.drivetrain.follower.getPose());
 	}
 	
 	/**
@@ -87,10 +87,10 @@ public class MainOp extends OpMode {
 		setControllerLEDs();
 		
 		// Log everything that happened
-		Drawing.drawDebug(mechanisms.drivetrain.follower);
-		telemetry.addData("Heading", mechanisms.drivetrain.follower.getHeading());
-		telemetry.addData("X", mechanisms.drivetrain.follower.getPose().getX());
-		telemetry.addData("Y", mechanisms.drivetrain.follower.getPose().getY());
+		logging.drawDebug(mechanisms.drivetrain.follower);
+		logging.addNumber("Heading", mechanisms.drivetrain.follower.getHeading());
+		logging.addNumber("X", mechanisms.drivetrain.follower.getPose().getX());
+		logging.addNumber("Y", mechanisms.drivetrain.follower.getPose().getY());
 		logging.update();
 	}
 	
@@ -101,6 +101,7 @@ public class MainOp extends OpMode {
 	@Override
 	public final void stop() {
 		mechanisms.stop();
+		blackboard.clear(); // do not save match settings in between matches
 	}
 	
 	/**
@@ -111,6 +112,15 @@ public class MainOp extends OpMode {
 		double drive = mainController.getProcessedDrive();
 		double strafe = mainController.getProcessedStrafe();
 		double rotate = mainController.getProcessedRotation();
+		
+		if (mainController.wasJustPressed(Controller.Action.TOGGLE_CENTRICITY)) {
+			ifMechanismValid(mechanisms.drivetrain, Drivetrain::toggleCentricity);
+		}
+		
+		if (mainController.wasJustPressed(Controller.Action.RESET_FOLLOWER)) {
+			ifMechanismValid(mechanisms.drivetrain, dt -> dt.follower.setPose(RESET_POSE));
+		}
+		
 		ifMechanismValid(mechanisms.drivetrain, dt -> dt.mecanumDrive(drive, strafe, rotate));
 		
 		// Go-to actions
@@ -118,7 +128,7 @@ public class MainOp extends OpMode {
 				Controller.Action.GOTO_CLOSE_SHOOT,
 				Controller.Action.GOTO_FAR_SHOOT,
 				Controller.Action.GOTO_HUMAN_PLAYER,
-				Controller.Action.GOTO_SECRET_TUNNEL
+				Controller.Action.GOTO_GATE
 		};
 		for (Controller.Action action : gotoActions) {
 			if (mainController.wasJustPressed(action)) {
@@ -127,6 +137,9 @@ public class MainOp extends OpMode {
 				);
 				break;
 			}
+			if (mainController.getProcessedValue(action) > 0) {
+				logging.addData("goto", action);
+			}
 		}
 		
 		if (mainController.wasJustPressed(Controller.Action.CANCEL_ASSISTED_DRIVING)) {
@@ -134,8 +147,9 @@ public class MainOp extends OpMode {
 		}
 		
 		// Alignment & Launcher
-		if (subController.getProcessedValue(Controller.Action.AIM) > 0.2) {
-			ifMechanismValid(mechanisms.get(AlignmentEngine.class), AlignmentEngine::run);
+		if (subController.wasJustPressed(Controller.Action.AIM) &&
+				mechanisms.alignmentEngine.isInLaunchZone(mechanisms.drivetrain.follower.getPose())) {
+			mechanisms.alignmentEngine.run();
 			ifMechanismValid(mechanisms.get(Launcher.class), Launcher::ready);
 		} else {
 			ifMechanismValid(mechanisms.get(Launcher.class), Launcher::stop);
@@ -154,16 +168,20 @@ public class MainOp extends OpMode {
 		} else {
 			ifMechanismValid(mechanisms.get(Intake.class), Intake::stop);
 		}
-
-	    /*
-	    Optional extra loads (commented out)
-	    if (subController.getProcessedValue(Controller.Action.RELEASE_EXTRAS) > 0)
-	        ifMechanismValid(mechanisms.get(Spindex.class), Spindex::loadExtra);
-	    if (subController.getProcessedValue(Controller.Action.RELEASE_PURPLE) > 0)
-	        ifMechanismValid(mechanisms.get(Spindex.class), Spindex::loadPurple);
-	    if (subController.getProcessedValue(Controller.Action.RELEASE_GREEN) > 0)
-	        ifMechanismValid(mechanisms.get(Spindex.class), Spindex::loadGreen);
-	    */
+		
+		if (mechanisms.drivetrain.getState() == Drivetrain.State.PATHING) {
+			logging.addData("headed to", mechanisms.drivetrain.follower.getCurrentPath().endPose());
+			logging.addData("from", mechanisms.drivetrain.follower.getPose());
+			logging.addData("completion", mechanisms.drivetrain.follower.getPathCompletion());
+		}
+		logging.addData("follower busy?", mechanisms.drivetrain.follower.isBusy());
+		logging.addData("heading error", mechanisms.drivetrain.follower.getHeadingError());
+		Pose targetPose = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.BLUE)
+				? Settings.Field.BLUE_GOAL_POSE
+				: Settings.Field.RED_GOAL_POSE;
+		logging.addData("heading from goal",
+				Math.toDegrees(mechanisms.alignmentEngine.angleToTarget(mechanisms.drivetrain.getPose(),
+						targetPose)));
 		
 		// Classifier controls
 		if (subController.getProcessedValue(Controller.Action.EMPTY_CLASSIFIER_STATE) > 0)

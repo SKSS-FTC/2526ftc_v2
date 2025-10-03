@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -15,7 +15,6 @@ import org.firstinspires.ftc.teamcode.hardware.Intake;
 import org.firstinspires.ftc.teamcode.hardware.Launcher;
 import org.firstinspires.ftc.teamcode.hardware.MechanismManager;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
-import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
 
 /**
  * The main Autonomous script that makes the robot move by itself during the Auto period of a match.
@@ -29,6 +28,7 @@ public class MainAuto extends OpMode {
 	private MatchConfigurationWizard wizard;
 	private MechanismManager mechanisms;
 	private MatchSettings matchSettings;
+	private UnifiedLogging logging;
 	
 	// Declare each segment of path with a descriptive name. These are then constructed at runtime.
 	private PathChain farPreset1Prep, farPreset1End, farLaunch1;
@@ -508,14 +508,14 @@ public class MainAuto extends OpMode {
 		autonomousPathUpdate();
 		
 		// Log everything
-		Drawing.drawDebug(mechanisms.drivetrain.follower);
-		telemetry.addData("Path State", pathState);
-		telemetry.addData("X", mechanisms.drivetrain.follower.getPose().getX());
-		telemetry.addData("Y", mechanisms.drivetrain.follower.getPose().getY());
-		telemetry.addData("Heading", Math.toDegrees(mechanisms.drivetrain.follower.getPose().getHeading()));
-		telemetry.addData("Opmode Timer", opmodeTimer.getElapsedTimeSeconds());
-		telemetry.addData("Path", pathState);
-		telemetry.update();
+		logging.drawDebug(mechanisms.drivetrain.follower);
+		logging.addData("Path State", pathState);
+		logging.addNumber("X", mechanisms.drivetrain.follower.getPose().getX());
+		logging.addNumber("Y", mechanisms.drivetrain.follower.getPose().getY());
+		logging.addNumber("Heading", Math.toDegrees(mechanisms.drivetrain.follower.getPose().getHeading()));
+		logging.addNumber("Opmode Timer", opmodeTimer.getElapsedTimeSeconds());
+		logging.addData("Path", pathState);
+		logging.update();
 	}
 	
 	/**
@@ -531,6 +531,7 @@ public class MainAuto extends OpMode {
 		matchSettings = new MatchSettings(blackboard);
 		wizard = new MatchConfigurationWizard(matchSettings, gamepad1, telemetry);
 		mechanisms = new MechanismManager(hardwareMap, matchSettings);
+		logging = new UnifiedLogging(telemetry, PanelsTelemetry.INSTANCE.getTelemetry());
 	}
 	
 	/**
@@ -543,8 +544,7 @@ public class MainAuto extends OpMode {
 		wizard.refresh();
 		
 		// Draw the initial pose of the robot
-		Drawing.drawRobot(mechanisms.drivetrain.follower.getPose());
-		Drawing.sendPacket();
+		logging.drawRobot(mechanisms.drivetrain.follower.getPose());
 	}
 	
 	/**
@@ -554,7 +554,7 @@ public class MainAuto extends OpMode {
 	public void start() {
 		// Set up
 		mechanisms.init();
-		mechanisms.drivetrain.follower.setStartingPose(getStartingPose());
+		mechanisms.drivetrain.follower.setStartingPose(matchSettings.getAutonomousStartingPosition());
 		
 		// Create the paths based on the configuration/starting pose/alliance color.
 		// This must be done here and not during init, because the match config is hitherto unknown.
@@ -574,26 +574,6 @@ public class MainAuto extends OpMode {
 	@Override
 	public void stop() {
 		mechanisms.stop();
-	}
-	
-	/**
-	 * Gives the starting pose for the robot based on the match settings.
-	 *
-	 * @return The starting pose for the robot.
-	 */
-	private Pose getStartingPose() {
-		switch (matchSettings.getAllianceColor()) {
-			case RED:
-				return matchSettings.getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
-						? Settings.Autonomous.RedClose.PARK
-						: Settings.Autonomous.RedFar.PARK;
-			case BLUE:
-				return matchSettings.getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
-						? Settings.Autonomous.BlueClose.PARK
-						: Settings.Autonomous.BlueFar.PARK;
-			default:
-				return new Pose(); // fallback
-		}
 	}
 	
 	/**
