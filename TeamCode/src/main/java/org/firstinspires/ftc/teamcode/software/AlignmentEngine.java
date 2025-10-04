@@ -7,7 +7,6 @@ import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LA
 import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LAUNCH_ZONE_LEFT_CORNER;
 import static org.firstinspires.ftc.teamcode.configuration.Settings.Field.FAR_LAUNCH_ZONE_RIGHT_CORNER;
 
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.configuration.MatchSettings;
@@ -24,13 +23,11 @@ import org.firstinspires.ftc.teamcode.hardware.Mechanism;
  */
 public class AlignmentEngine extends Mechanism {
 	private final Drivetrain drivetrain;
-	private final Follower follower;
 	private final MatchSettings matchSettings;
 	private final LimelightManager limelightManager;
 	
-	public AlignmentEngine(MatchSettings matchSettings, Drivetrain drivetrain, LimelightManager limelightManager, Follower follower) {
+	public AlignmentEngine(MatchSettings matchSettings, Drivetrain drivetrain, LimelightManager limelightManager) {
 		this.drivetrain = drivetrain;
-		this.follower = follower;
 		this.matchSettings = matchSettings;
 		this.limelightManager = limelightManager;
 	}
@@ -75,7 +72,7 @@ public class AlignmentEngine extends Mechanism {
 	 * @return True if the robot is aligned with the goal, false otherwise
 	 */
 	public boolean isAligned() {
-		Pose currentPose = follower.getPose();
+		Pose currentPose = drivetrain.follower.getPose();
 		Pose targetPose = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.BLUE)
 				? Settings.Field.BLUE_GOAL_POSE
 				: Settings.Field.RED_GOAL_POSE;
@@ -85,7 +82,7 @@ public class AlignmentEngine extends Mechanism {
 	}
 	
 	public void run() {
-		Pose currentPose = follower.getPose();
+		Pose currentPose = drivetrain.follower.getPose();
 		
 		Pose targetPose = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.BLUE)
 				? Settings.Field.BLUE_GOAL_POSE
@@ -93,8 +90,7 @@ public class AlignmentEngine extends Mechanism {
 		
 		double angleError = angleToTarget(currentPose, targetPose);
 		
-		
-		drivetrain.interpolateToOffset(0, 0, angleError);
+		drivetrain.rotate(angleError);
 	}
 	
 	public void update() {
@@ -127,7 +123,7 @@ public class AlignmentEngine extends Mechanism {
 	}
 	
 	// returns signed smallest angle (radians) the robot must rotate to face target
-	private double angleToTarget(Pose currentPose, Pose targetPose) {
+	public double angleToTarget(Pose currentPose, Pose targetPose) {
 		double dx = targetPose.getX() - currentPose.getX();
 		double dy = targetPose.getY() - currentPose.getY();
 		

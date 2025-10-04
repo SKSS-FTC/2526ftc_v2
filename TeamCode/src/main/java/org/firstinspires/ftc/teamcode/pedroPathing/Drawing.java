@@ -12,13 +12,15 @@ import com.pedropathing.util.PoseHistory;
 
 public class Drawing {
 	public static final double ROBOT_RADIUS = 7.5;
+	public static final Style pathLook = new Style(
+			"", "#4FFF2B", 1.0
+	);
 	private static final FieldManager panelsField = PanelsField.INSTANCE.getField();
-	
 	private static final Style targetLook = new Style(
 			"", "#FDF1FA", 0.75
 	);
 	private static final Style realLook = new Style(
-			"", "#4FFF2B", 0.5
+			"", "#5E90FF", 0.5
 	);
 	
 	/**
@@ -26,6 +28,7 @@ public class Drawing {
 	 */
 	public static void init() {
 		panelsField.setOffsets(PanelsField.INSTANCE.getPresets().getPEDRO_PATHING());
+		update();
 	}
 	
 	/**
@@ -42,8 +45,6 @@ public class Drawing {
 		}
 		drawPoseHistory(follower.getPoseHistory(), realLook);
 		drawRobot(follower.getPose(), realLook);
-		
-		sendPacket();
 	}
 	
 	/**
@@ -145,7 +146,7 @@ public class Drawing {
 	/**
 	 * This tries to send the current packet to FTControl Panels.
 	 */
-	public static void sendPacket() {
+	public static void update() {
 		panelsField.update();
 	}
 }
