@@ -75,17 +75,17 @@ public class MatchSettings {
 	 * @return A Pose of the starting position
 	 */
 	public Pose getAutonomousStartingPose() {
-		switch (getAllianceColor()) {
-			case RED:
-				return getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
-						? Settings.Autonomous.RedClose.START
-						: Settings.Autonomous.RedFar.START;
-			case BLUE:
-				return getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
-						? Settings.Autonomous.BlueClose.START
-						: Settings.Autonomous.BlueFar.START;
-			default:
-				return new Pose(); // fallback
+		AllianceColor allianceColor = getAllianceColor();
+		AutoStartingPosition startingPosition = getAutoStartingPosition();
+		
+		if (allianceColor == AllianceColor.RED) {
+			return startingPosition == AutoStartingPosition.CLOSE
+					? Settings.Autonomous.RedClose.START
+					: Settings.Autonomous.RedFar.START;
+		} else { // Assumes BLUE if not RED
+			return startingPosition == AutoStartingPosition.CLOSE
+					? Settings.Autonomous.BlueClose.START
+					: Settings.Autonomous.BlueFar.START;
 		}
 	}
 	
@@ -102,17 +102,17 @@ public class MatchSettings {
 			return Settings.Field.RESET_POSE;
 		}
 		
-		switch (getAllianceColor()) {
-			case RED:
-				return getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
-						? Settings.Autonomous.RedClose.PARK
-						: Settings.Autonomous.RedFar.PARK;
-			case BLUE:
-				return getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
-						? Settings.Autonomous.BlueClose.PARK
-						: Settings.Autonomous.BlueFar.PARK;
-			default:
-				return new Pose(); // fallback
+		AllianceColor allianceColor = getAllianceColor();
+		AutoStartingPosition startingPosition = getAutoStartingPosition();
+		
+		if (allianceColor == AllianceColor.RED) {
+			return startingPosition == AutoStartingPosition.CLOSE
+					? Settings.Autonomous.RedClose.PARK
+					: Settings.Autonomous.RedFar.PARK;
+		} else {
+			return startingPosition == AutoStartingPosition.CLOSE
+					? Settings.Autonomous.BlueClose.PARK
+					: Settings.Autonomous.BlueFar.PARK;
 		}
 	}
 	
