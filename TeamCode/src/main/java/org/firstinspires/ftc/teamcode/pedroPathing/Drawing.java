@@ -17,10 +17,14 @@ public class Drawing {
 	);
 	private static final FieldManager panelsField = PanelsField.INSTANCE.getField();
 	private static final Style targetLook = new Style(
-			"", "#FDF1FA", 0.75
+			"", "#3B3534", 0.75
 	);
-	private static final Style realLook = new Style(
-			"", "#5E90FF", 0.5
+	public static Style blueLook = new Style(
+			"", "#2124FF", 1.25
+	);
+	public static final Style robotLook = blueLook;
+	public static Style redLook = new Style(
+			"", "#FF1F27", 1.25
 	);
 	
 	/**
@@ -43,8 +47,8 @@ public class Drawing {
 			Pose closestPoint = follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
 			drawRobot(new Pose(closestPoint.getX(), closestPoint.getY(), follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue())), targetLook);
 		}
-		drawPoseHistory(follower.getPoseHistory(), realLook);
-		drawRobot(follower.getPose(), realLook);
+		drawPoseHistory(follower.getPoseHistory(), robotLook);
+		drawRobot(follower.getPose(), robotLook);
 	}
 	
 	/**
@@ -140,7 +144,7 @@ public class Drawing {
 	 * @param poseTracker the PoseHistory to get the pose history from
 	 */
 	public static void drawPoseHistory(PoseHistory poseTracker) {
-		drawPoseHistory(poseTracker, realLook);
+		drawPoseHistory(poseTracker, robotLook);
 	}
 	
 	/**

@@ -8,6 +8,8 @@ import com.pedropathing.paths.PathChain;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
 
+import java.util.Locale;
+
 /**
  * UnifiedLogging allows us to send data to both the Driver Station and the Panels Webview
  * simultaneously, and handles all the messy stuff like formatting and Field Drawings.
@@ -37,9 +39,9 @@ public class UnifiedLogging {
 		panels.addData(key, value);
 	}
 	
-	public void addNumber(String key, Object value) {
+	public void addNumber(String key, double value) {
 		driverStation.addData(key, "%.2f", value);
-		panels.addData(key, String.format(value.toString(), "%.2f"));
+		panels.addData(key, String.format(Locale.US, "%.2f", value));
 	}
 	
 	public void drawRobot(Pose pose) {

@@ -35,7 +35,7 @@ public class Drivetrain extends Mechanism {
 	public Drivetrain(HardwareMap hardwareMap, Follower follower, MatchSettings matchSettings) {
 		// The Constants class now holds all hardware and tuning configurations.
 		this.follower = follower;
-		follower.setStartingPose(matchSettings.getTeleOpStartingPosition());
+		follower.setStartingPose(matchSettings.getTeleOpStartingPose());
 		switchToManual(); // Start in manual control mode.
 		
 		// Initialize the poses for each predefined position
@@ -133,16 +133,6 @@ public class Drivetrain extends Mechanism {
 				.setLinearHeadingInterpolation(follower.getHeading(), targetPose.getHeading())
 				.build();
 		follower.followPath(path);
-	}
-	
-	/**
-	 * Commands the robot to rotate a given amount of radians.
-	 *
-	 * @param radians the amount to rotate
-	 */
-	public void rotate(double radians) {
-		this.state = State.PATHING;
-		follower.turn(radians, false);
 	}
 	
 	

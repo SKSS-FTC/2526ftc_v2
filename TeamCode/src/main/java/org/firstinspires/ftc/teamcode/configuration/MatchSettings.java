@@ -74,7 +74,7 @@ public class MatchSettings {
 	 *
 	 * @return A Pose of the starting position
 	 */
-	public Pose getAutonomousStartingPosition() {
+	public Pose getAutonomousStartingPose() {
 		switch (getAllianceColor()) {
 			case RED:
 				return getAutoStartingPosition() == MatchSettings.AutoStartingPosition.CLOSE
@@ -94,7 +94,7 @@ public class MatchSettings {
 	 *
 	 * @return A Pose of the starting position
 	 */
-	public Pose getTeleOpStartingPosition() {
+	public Pose getTeleOpStartingPose() {
 		// If either of these values are unset, Auto has not yet been run,
 		// so we have nothing to base starting position on. Instead, assume the robot is on the center of the field,
 		// our designated resetting position during testing.

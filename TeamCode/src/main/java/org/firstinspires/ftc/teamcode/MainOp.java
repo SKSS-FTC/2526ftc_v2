@@ -64,7 +64,7 @@ public class MainOp extends OpMode {
 	@Override
 	public final void init_loop() {
 		// draw the robot at its starting position
-		logging.drawRobot(mechanisms.drivetrain.follower.getPose());
+		logging.drawDebug(mechanisms.drivetrain.follower);
 	}
 	
 	/**
@@ -88,7 +88,7 @@ public class MainOp extends OpMode {
 		
 		// Log everything that happened
 		logging.drawDebug(mechanisms.drivetrain.follower);
-		logging.addNumber("Heading", mechanisms.drivetrain.follower.getHeading());
+		logging.addNumber("Heading°", Math.toDegrees(mechanisms.drivetrain.follower.getHeading()));
 		logging.addNumber("X", mechanisms.drivetrain.follower.getPose().getX());
 		logging.addNumber("Y", mechanisms.drivetrain.follower.getPose().getY());
 		logging.update();
@@ -131,7 +131,7 @@ public class MainOp extends OpMode {
 				Controller.Action.GOTO_GATE
 		};
 		for (Controller.Action action : gotoActions) {
-			if (mainController.wasJustPressed(action)) {
+			if (mainController.wasJustPressed(action) && mainController.getProcessedValue(Controller.Control.START) <= 0.0) {
 				ifMechanismValid(mechanisms.drivetrain, dt ->
 						dt.goTo(Drivetrain.Position.valueOf(action.name().substring("GOTO_".length())))
 				);
@@ -172,14 +172,14 @@ public class MainOp extends OpMode {
 		if (mechanisms.drivetrain.getState() == Drivetrain.State.PATHING) {
 			logging.addData("headed to", mechanisms.drivetrain.follower.getCurrentPath().endPose());
 			logging.addData("from", mechanisms.drivetrain.follower.getPose());
-			logging.addData("completion", mechanisms.drivetrain.follower.getPathCompletion());
 		}
-		logging.addData("follower busy?", mechanisms.drivetrain.follower.isBusy());
-		logging.addData("heading error", mechanisms.drivetrain.follower.getHeadingError());
+		if (mechanisms.drivetrain.follower.isBusy()) {
+			logging.addLine("FOLLOWER IS BUSY");
+		}
 		Pose targetPose = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.BLUE)
 				? Settings.Field.BLUE_GOAL_POSE
 				: Settings.Field.RED_GOAL_POSE;
-		logging.addData("heading from goal",
+		logging.addNumber("angle to goal",
 				Math.toDegrees(mechanisms.alignmentEngine.angleToTarget(mechanisms.drivetrain.getPose(),
 						targetPose)));
 		

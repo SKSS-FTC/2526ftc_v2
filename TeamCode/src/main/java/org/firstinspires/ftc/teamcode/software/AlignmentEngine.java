@@ -84,13 +84,18 @@ public class AlignmentEngine extends Mechanism {
 	public void run() {
 		Pose currentPose = drivetrain.follower.getPose();
 		
+		Pose newPose = currentPose.copy()
+				.withX(Math.round(currentPose.getX()))
+				.withY(Math.round(currentPose.getY()));
+		
 		Pose targetPose = (matchSettings.getAllianceColor() == MatchSettings.AllianceColor.BLUE)
 				? Settings.Field.BLUE_GOAL_POSE
 				: Settings.Field.RED_GOAL_POSE;
 		
-		double angleError = angleToTarget(currentPose, targetPose);
+		double angleError = angleToTarget(newPose, targetPose);
 		
-		drivetrain.rotate(angleError);
+		
+		drivetrain.goTo(newPose.withHeading(angleError));
 	}
 	
 	public void update() {
@@ -122,17 +127,15 @@ public class AlignmentEngine extends Mechanism {
 		return inFarZone || inCloseZone;
 	}
 	
-	// returns signed smallest angle (radians) the robot must rotate to face target
+	// returns signed smallest angle to face target
 	public double angleToTarget(Pose currentPose, Pose targetPose) {
 		double dx = targetPose.getX() - currentPose.getX();
 		double dy = targetPose.getY() - currentPose.getY();
 		
 		double desired = Math.atan2(dy, dx); // absolute angle to goal
-		double current = currentPose.getHeading();
 		
-		double error = desired - current;
-		while (error > Math.PI) error -= 2 * Math.PI;
-		while (error <= -Math.PI) error += 2 * Math.PI;
-		return error; // radians, positive -> rotate CCW, negative -> rotate CW
+		while (desired > Math.PI) desired -= 2 * Math.PI;
+		while (desired <= -Math.PI) desired += 2 * Math.PI;
+		return desired; // radians, positive -> rotate CCW, negative -> rotate CW
 	}
 }
