@@ -50,9 +50,38 @@ import java.lang.Math;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-
+/**
+ * Represents a Mecanum drive chassis and its associated hardware and software components.
+ * This class integrates the Road Runner V1 library for  motion planning and control.
+ * It handles the initialization of motors, sensors (IMU, voltage), and the localization system.
+ *
+ * <p><b>IMPORTANT:</b> This class contains numerous robot-specific configuration values
+ * within the nested {@link Params} class. These values, such as {@code inPerTick},
+ * {@code trackWidthTicks}, feedforward gains ({@code kS}, {@code kV}, {@code kA}), and controller gains,
+ * are unique to the physical characteristics and performance of a specific robot.</p>
+ *
+ * <p>The default values provided in this class were determined by following the tuning process
+ * detailed at <a href="https://rr.brott.dev/docs/v1-0/tuning/">https://rr.brott.dev/docs/v1-0/tuning/</a>.
+ * To use this class on a different robot, you <b>MUST</b> retune these parameters to match your
+ * own hardware. Failure to do so will result in poor and unpredictable robot behavior.</p>
+ *
+ * <p>This class also sets up default constraints for path following and turning, and provides
+ * methods for creating and executing trajectory-following actions.</p>
+ *
+ * @see com.acmerobotics.roadrunner.Action
+ *
+ * @see Params
+ */
 @Config
 public final class MecanumDrive {
+
+    /**
+     * A container for robot-specific physical and control parameters.
+     * <p><b>Tuning Required:</b> These values are unique to each robot and must be
+     * carefully tuned for optimal performance. Follow the official Road Runner tuning guide
+     * at <a href="https://rr.brott.dev/docs/v1-0/tuning/">https://rr.brott.dev/docs/v1-0/tuning/</a>
+     * to determine the correct values for your specific robot build.</p>
+     */
     public static class Params {
         // IMU orientation
         // TODO: fill in these values based on
