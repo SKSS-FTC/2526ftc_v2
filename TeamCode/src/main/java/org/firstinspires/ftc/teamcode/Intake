@@ -33,7 +33,7 @@ public class Intake {
     public void displayTelemetry() {
         linearOpMode.telemetry.addData("Intake Motor Power", intakeSpin.getPower());
         linearOpMode.telemetry.update();
-
+//f
     
     }
 }
