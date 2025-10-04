@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+
+
 import android.graphics.Color;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -14,6 +16,7 @@ public class ArtifactHandlingSystem {
     private final DcMotor leftOuttakeMotor;
     private final DcMotor rightOuttakeMotor;
     private final LinearOpMode linearOpMode;
+    private final DcMotor intakeMotor;
 
     private final ColorSensor colorSensor;
 
@@ -30,6 +33,8 @@ public class ArtifactHandlingSystem {
         this.leftOuttakeMotor = linearOpMode.hardwareMap.dcMotor.get("leftOuttakeMotor");
         this.rightOuttakeMotor = linearOpMode.hardwareMap.dcMotor.get("rightOuttakeMotor");
         this.linearOpMode = linearOpMode;
+        this.intakeMotor = linearOpMode.hardwareMap.dcMotor.get("intakeMotor");
+
     }
 
     public void configureMotorModes() {
@@ -71,9 +76,25 @@ public class ArtifactHandlingSystem {
         }
     }
 
+    public void shootAutoArtifact() {
+        leftOuttakeMotor.setPower(0.8);
+        rightOuttakeMotor.setPower(0.8);
+    }
+
+    public void intakeArtifact(boolean intakeArtifact) {
+        if (intakeArtifact) {
+            intakeMotor.setPower(1);
+        } else {
+            intakeMotor.setPower(0);
+        }
+    }
+
     public void displayTelemetry() {
         linearOpMode.telemetry.addData("Left Outtake Motor Power", ".2f", leftOuttakeMotor.getPower());
         linearOpMode.telemetry.addData("Right Outtake Motor Power", ".2f", rightOuttakeMotor.getPower());
         // containerServo.setPosition(0.95);
+        linearOpMode.telemetry.addData("Left Outtake Motor Power", leftOuttakeMotor.getPower());
+        linearOpMode.telemetry.addData("Right Outtake Motor Power", rightOuttakeMotor.getPower());
+        linearOpMode.telemetry.addData("Intake Motor Power", intakeMotor.getPower());
     }
 }

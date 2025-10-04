@@ -28,10 +28,11 @@ public class MainMecanumTeleOpBlue extends LinearOpMode {
         while (opModeIsActive()) {
             robotControls.updateControls();
 
-            artifactHandlingSystem.shootArtifact(robotControls.shootArtifact);
             driveTrain.adjustTurnSpeed();
             driveTrain.setMotorPowers();
             driveTrain.resetYaw();
+            artifactHandlingSystem.shootArtifact(robotControls.shootArtifact);
+            artifactHandlingSystem.intakeArtifact(robotControls.intakeArtifact);
 
             displayTelemetry();
         }
