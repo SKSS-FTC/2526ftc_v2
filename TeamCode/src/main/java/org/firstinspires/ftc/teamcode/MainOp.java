@@ -18,7 +18,8 @@ import org.firstinspires.ftc.teamcode.software.Drivetrain;
 import java.util.function.Consumer;
 
 /**
- * This is our main TeleOp class for the driver-controlled period, which occurs after Auto.
+ * This is our main TeleOp class for the driver-controlled period, which occurs
+ * after Auto.
  * Handles controller profile selection and robot operation during matches.
  */
 @TeleOp(name = "MainOp", group = ".Competition Modes")
@@ -35,11 +36,7 @@ public class MainOp extends OpMode {
 	 */
 	private static <T> void ifMechanismValid(T obj, Consumer<T> action) {
 		if (obj != null) {
-			try {
-				action.accept(obj);
-			} catch (Exception ignored) {
-				// swallow failures
-			}
+			action.accept(obj);
 		}
 	}
 	
@@ -77,7 +74,8 @@ public class MainOp extends OpMode {
 	}
 	
 	/**
-	 * Runs repeatedly after "start" is pressed on the Driver Station, during the actual game.
+	 * Runs repeatedly after "start" is pressed on the Driver Station, during the
+	 * actual game.
 	 */
 	@Override
 	public final void loop() {
@@ -131,10 +129,10 @@ public class MainOp extends OpMode {
 				Controller.Action.GOTO_GATE
 		};
 		for (Controller.Action action : gotoActions) {
-			if (mainController.wasJustPressed(action) && mainController.getProcessedValue(Controller.Control.START) <= 0.0) {
-				ifMechanismValid(mechanisms.drivetrain, dt ->
-						dt.goTo(Drivetrain.Position.valueOf(action.name().substring("GOTO_".length())))
-				);
+			if (mainController.wasJustPressed(action)
+					&& mainController.getProcessedValue(Controller.Control.START) <= 0.0) {
+				ifMechanismValid(mechanisms.drivetrain,
+						dt -> dt.goTo(Drivetrain.Position.valueOf(action.name().substring("GOTO_".length()))));
 				break;
 			}
 			if (mainController.getProcessedValue(action) > 0) {

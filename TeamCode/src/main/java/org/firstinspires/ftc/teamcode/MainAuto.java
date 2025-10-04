@@ -382,17 +382,7 @@ public class MainAuto extends OpMode {
 	private void updateClosePath() {
 		switch (pathState) {
 			case 0:
-				ifMechanismValid(mechanisms.get(Launcher.class), Launcher::launch);
-				boolean hasSpindex = ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-					if (s.isEmpty()) {
-						mechanisms.drivetrain.follower.followPath(closePreset1Prep);
-						setPathState(1);
-					}
-				});
-				if (!hasSpindex) {
-					mechanisms.drivetrain.follower.followPath(closePreset1Prep);
-					setPathState(1);
-				}
+				launchAndProceedWhenEmpty(closePreset1Prep, 1);
 				break;
 			case 1:
 				if (!mechanisms.drivetrain.follower.isBusy()) {
@@ -410,13 +400,7 @@ public class MainAuto extends OpMode {
 				break;
 			case 3:
 				if (!mechanisms.drivetrain.follower.isBusy()) {
-					ifMechanismValid(mechanisms.get(Launcher.class), Launcher::launch);
-					ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-						if (s.isEmpty()) {
-							mechanisms.drivetrain.follower.followPath(closePreset2Prep);
-							setPathState(4);
-						}
-					});
+					launchAndProceedWhenEmpty(closePreset2Prep, 4);
 				}
 				break;
 			case 4:
@@ -435,13 +419,7 @@ public class MainAuto extends OpMode {
 				break;
 			case 6:
 				if (!mechanisms.drivetrain.follower.isBusy()) {
-					ifMechanismValid(mechanisms.get(Launcher.class), Launcher::launch);
-					ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-						if (s.isEmpty()) {
-							mechanisms.drivetrain.follower.followPath(closePreset3Prep);
-							setPathState(7);
-						}
-					});
+					launchAndProceedWhenEmpty(closePreset3Prep, 7);
 				}
 				break;
 			case 7:
@@ -460,13 +438,7 @@ public class MainAuto extends OpMode {
 				break;
 			case 9:
 				if (!mechanisms.drivetrain.follower.isBusy()) {
-					ifMechanismValid(mechanisms.get(Launcher.class), Launcher::launch);
-					ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-						if (s.isEmpty()) {
-							mechanisms.drivetrain.follower.followPath(closePark);
-							setPathState(10);
-						}
-					});
+					launchAndProceedWhenEmpty(closePark, 10);
 				}
 				break;
 			case 10:
@@ -481,17 +453,7 @@ public class MainAuto extends OpMode {
 	private void updateFarPath() {
 		switch (pathState) {
 			case 0:
-				ifMechanismValid(mechanisms.get(Launcher.class), Launcher::launch);
-				if (ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-					if (s.isEmpty()) {
-						mechanisms.drivetrain.follower.followPath(farPreset1Prep);
-						setPathState(1);
-					}
-				})) {
-				} else {
-					mechanisms.drivetrain.follower.followPath(farPreset1Prep);
-					setPathState(1);
-				}
+				launchAndProceedWhenEmpty(farPreset1Prep, 1);
 				break;
 			case 1:
 				if (!mechanisms.drivetrain.follower.isBusy()) {
@@ -509,13 +471,7 @@ public class MainAuto extends OpMode {
 				break;
 			case 3:
 				if (!mechanisms.drivetrain.follower.isBusy()) {
-					ifMechanismValid(mechanisms.get(Launcher.class), Launcher::launch);
-					ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-						if (s.isEmpty()) {
-							mechanisms.drivetrain.follower.followPath(farPreset2Prep);
-							setPathState(4);
-						}
-					});
+					launchAndProceedWhenEmpty(farPreset2Prep, 4);
 				}
 				break;
 			case 4:
@@ -534,14 +490,8 @@ public class MainAuto extends OpMode {
 				break;
 			case 6:
 				if (!mechanisms.drivetrain.follower.isBusy()) {
-					ifMechanismValid(mechanisms.get(Launcher.class), Launcher::launch);
-					ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-						if (s.isEmpty()) {
-							ifMechanismValid(mechanisms.get(Intake.class), Intake::in);
-							mechanisms.drivetrain.follower.followPath(farPreset3);
-							setPathState(7);
-						}
-					});
+					ifMechanismValid(mechanisms.get(Intake.class), Intake::in);
+					launchAndProceedWhenEmpty(farPreset3, 7);
 				}
 				break;
 			case 7:
@@ -553,13 +503,7 @@ public class MainAuto extends OpMode {
 				break;
 			case 8:
 				if (!mechanisms.drivetrain.follower.isBusy()) {
-					ifMechanismValid(mechanisms.get(Launcher.class), Launcher::launch);
-					ifMechanismValid(mechanisms.get(Spindex.class), s -> {
-						if (s.isEmpty()) {
-							mechanisms.drivetrain.follower.followPath(farPark);
-							setPathState(9);
-						}
-					});
+					launchAndProceedWhenEmpty(farPark, 9);
 				}
 				break;
 			case 9:
@@ -676,6 +620,25 @@ public class MainAuto extends OpMode {
 			return true;
 		} else {
 			return false;
+		}
+	}
+	
+	/**
+	 * Helper method to launch and wait for spindex to empty before proceeding to
+	 * next path.
+	 * This reduces code duplication in the state machine.
+	 */
+	private void launchAndProceedWhenEmpty(PathChain nextPath, int nextState) {
+		ifMechanismValid(mechanisms.get(Launcher.class), Launcher::launch);
+		boolean hasSpindex = ifMechanismValid(mechanisms.get(Spindex.class), s -> {
+			if (s.isEmpty()) {
+				mechanisms.drivetrain.follower.followPath(nextPath);
+				setPathState(nextState);
+			}
+		});
+		if (!hasSpindex) {
+			mechanisms.drivetrain.follower.followPath(nextPath);
+			setPathState(nextState);
 		}
 	}
 }

@@ -14,16 +14,22 @@ import org.firstinspires.ftc.teamcode.configuration.Settings;
 import org.firstinspires.ftc.teamcode.hardware.Mechanism;
 
 /**
- * The AlignmentEngine aligns the robot chassis during aiming. This is fully decoupled from the
- * {@link TrajectoryEngine} such that they move independently of each other; this means if we get
- * pushed by another robot, the launcher will maintain the angle of the shot by rotating the launcher component,
- * while the alignment engine realigns the chassis; both try to point in the direction of the goal.
- * This allows the AE to fix large yaw errors while the TE fixes small yaw and pitch errors
+ * The AlignmentEngine aligns the robot chassis during aiming. This is fully
+ * decoupled from the
+ * {@link TrajectoryEngine} such that they move independently of each other;
+ * this means if we get
+ * pushed by another robot, the launcher will maintain the angle of the shot by
+ * rotating the launcher component,
+ * while the alignment engine realigns the chassis; both try to point in the
+ * direction of the goal.
+ * This allows the AE to fix large yaw errors while the TE fixes small yaw and
+ * pitch errors
  * with both systems working in decoupled realtime tandem.
  */
 public class AlignmentEngine extends Mechanism {
 	private final Drivetrain drivetrain;
 	private final MatchSettings matchSettings;
+	@SuppressWarnings("FieldCanBeLocal") // Reserved for future visual alignment features
 	private final LimelightManager limelightManager;
 	
 	public AlignmentEngine(MatchSettings matchSettings, Drivetrain drivetrain, LimelightManager limelightManager) {
@@ -56,14 +62,16 @@ public class AlignmentEngine extends Mechanism {
 		return !(has_neg && has_pos);
 	}
 	
-	// dont worry about it lol
-	// https://stackoverflow.com/questions/2049582
+	/**
+	 * Calculates the cross product for point-in-triangle testing.
+	 * Reference: https://stackoverflow.com/questions/2049582
+	 */
 	public static double crossProduct(Pose A, Pose B, Pose C) {
 		return (B.getX() - A.getX()) * (C.getY() - A.getY()) - (B.getY() - A.getY()) * (C.getX() - A.getX());
 	}
 	
 	public void init() {
-		// luigi wins by doing absolutely nothing
+		// No initialization required for this mechanism
 	}
 	
 	/**
@@ -94,7 +102,6 @@ public class AlignmentEngine extends Mechanism {
 		
 		double angleError = angleToTarget(newPose, targetPose);
 		
-		
 		drivetrain.goTo(newPose.withHeading(angleError));
 	}
 	
@@ -112,16 +119,14 @@ public class AlignmentEngine extends Mechanism {
 				pose,
 				FAR_LAUNCH_ZONE_FRONT_CORNER,
 				FAR_LAUNCH_ZONE_LEFT_CORNER,
-				FAR_LAUNCH_ZONE_RIGHT_CORNER
-		);
+				FAR_LAUNCH_ZONE_RIGHT_CORNER);
 		
 		// Check if the pose is inside the CLOSE launch zone
 		boolean inCloseZone = isInsideTriangle(
 				pose,
 				CLOSE_LAUNCH_ZONE_FRONT_CORNER,
 				CLOSE_LAUNCH_ZONE_LEFT_CORNER,
-				CLOSE_LAUNCH_ZONE_RIGHT_CORNER
-		);
+				CLOSE_LAUNCH_ZONE_RIGHT_CORNER);
 		
 		// Return true if the pose is in *either* launch zone
 		return inFarZone || inCloseZone;
@@ -134,8 +139,10 @@ public class AlignmentEngine extends Mechanism {
 		
 		double desired = Math.atan2(dy, dx); // absolute angle to goal
 		
-		while (desired > Math.PI) desired -= 2 * Math.PI;
-		while (desired <= -Math.PI) desired += 2 * Math.PI;
+		while (desired > Math.PI)
+			desired -= 2 * Math.PI;
+		while (desired <= -Math.PI)
+			desired += 2 * Math.PI;
 		return desired; // radians, positive -> rotate CCW, negative -> rotate CW
 	}
 }

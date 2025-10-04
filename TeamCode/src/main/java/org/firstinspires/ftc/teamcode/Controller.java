@@ -11,8 +11,10 @@ import java.util.HashMap;
 
 /**
  * @noinspection CyclicClassDependency, DataFlowIssue
- * The Controller class wraps around the FTC-provided {@link Gamepad}.
- * It provides versatility and does complex calculations to allow us to have a cleanly controlled
+ * The Controller class wraps around the FTC-provided
+ * {@link Gamepad}.
+ * It provides versatility and does complex calculations to allow
+ * us to have a cleanly controlled
  * TeleOp.
  */
 public class Controller extends Gamepad {
@@ -33,7 +35,8 @@ public class Controller extends Gamepad {
 	
 	/**
 	 * Stores the previous state of the controller.
-	 * This is useful for figuring out if we just started pressing a button or if it has been held.
+	 * This is useful for figuring out if we just started pressing a button or if it
+	 * has been held.
 	 */
 	public final void saveLastState() {
 		for (Control control : Control.values()) {
@@ -45,7 +48,8 @@ public class Controller extends Gamepad {
 	 * Checks if an control was just pressed.
 	 *
 	 * @param control The control to check
-	 * @return True if that control was pressed this frame and not last frame, False otherwise
+	 * @return True if that control was pressed this frame and not last frame, False
+	 * otherwise
 	 */
 	public final boolean wasJustPressed(Control control) {
 		return getRawValue(control) != 0.0 && previousControlState.getOrDefault(control, 0.0) == 0;
@@ -55,14 +59,16 @@ public class Controller extends Gamepad {
 	 * Checks if an action was just pressed.
 	 *
 	 * @param action The action to check
-	 * @return True if that action was pressed this frame and not last frame, False otherwise
+	 * @return True if that action was pressed this frame and not last frame, False
+	 * otherwise
 	 */
 	public final boolean wasJustPressed(Action action) {
 		return wasJustPressed(getControlForAction(action));
 	}
 	
 	/**
-	 * Maps each action to a control. This allows us to ask if the action "Spin" was pressed instead
+	 * Maps each action to a control. This allows us to ask if the action "Spin" was
+	 * pressed instead
 	 * of hard-coding what control makes it spin.
 	 *
 	 * @param action The action to get the control for
@@ -73,10 +79,13 @@ public class Controller extends Gamepad {
 	}
 	
 	/**
-	 * Applies normalization to raw values. For example, the left stick Y is automatically inverted.
+	 * Applies normalization to raw values. For example, the left stick Y is
+	 * automatically inverted.
 	 * This should be used to normalize controls, not to modify them.
-	 * In this example, the left stick Y is inverted so that it follows the normalized Y-axis of the robot.
-	 * This does not cause a change in function of the how the value operates, which should be done in postprocessing.
+	 * In this example, the left stick Y is inverted so that it follows the
+	 * normalized Y-axis of the robot.
+	 * This does not cause a change in function of the how the value operates, which
+	 * should be done in postprocessing.
 	 *
 	 * @param control The control to get the value for
 	 * @return The processed value for that control
@@ -98,7 +107,8 @@ public class Controller extends Gamepad {
 	}
 	
 	/**
-	 * Makes the Dpad of the controller move the robot absolutely on the field by translating the
+	 * Makes the Dpad of the controller move the robot absolutely on the field by
+	 * translating the
 	 * inputs to the robot's coordinate system.
 	 *
 	 * @return The processed robot-centric movement vector
@@ -111,7 +121,8 @@ public class Controller extends Gamepad {
 		
 		Vector dpadVector = new Vector(fieldX, fieldY);
 		
-		// To convert a field-centric vector to a robot-centric one, rotate it opposite the robot's current heading.
+		// To convert a field-centric vector to a robot-centric one, rotate it opposite
+		// the robot's current heading.
 		dpadVector.rotateVector(-follower.getHeading());
 		
 		return dpadVector;
@@ -120,7 +131,8 @@ public class Controller extends Gamepad {
 	/**
 	 * Processes inputs related to the robot's forward movement.
 	 *
-	 * @return The processed forward movement value (positive = forward, negative = backward)
+	 * @return The processed forward movement value (positive = forward, negative =
+	 * backward)
 	 */
 	public final double getProcessedDrive() {
 		Vector robotVec = getRobotCentricDpad();
@@ -131,7 +143,8 @@ public class Controller extends Gamepad {
 	/**
 	 * Processes inputs related to the robot's strafe movement.
 	 *
-	 * @return The processed strafe movement value (negative = left, positive = right)
+	 * @return The processed strafe movement value (negative = left, positive =
+	 * right)
 	 */
 	public final double getProcessedStrafe() {
 		Vector robotVec = getRobotCentricDpad();
@@ -142,24 +155,22 @@ public class Controller extends Gamepad {
 	/**
 	 * Processes inputs related to the robot's rotation.
 	 *
-	 * @return The processed rotation value (positive = clockwise, negative = counterclockwise)
+	 * @return The processed rotation value (positive = clockwise, negative =
+	 * counterclockwise)
 	 */
 	public final double getProcessedRotation() {
-		
-		double rotationValue = getProcessedValue(Action.ROTATE_AXIS) + getProcessedValue(Action.ROTATE_RIGHT) - getProcessedValue(Action.ROTATE_LEFT);
-		// clamp wont work for me on this sdk version lol
-		if (rotationValue < -1) return -1;
-		if (rotationValue > 1) return 1;
-		return rotationValue;
+		double rotationValue = getProcessedValue(Action.ROTATE_AXIS) + getProcessedValue(Action.ROTATE_RIGHT)
+				- getProcessedValue(Action.ROTATE_LEFT);
+		return Math.max(-1, Math.min(1, rotationValue));
 	}
-	
 	
 	/**
 	 * @param control The control to get the value for
 	 * @return The value of the control
 	 * @noinspection OverlyComplexMethod, OverlyLongMethod
 	 * Never edit this.
-	 * Returns the raw value of a control by interfacing with the FTC {@link Gamepad}.
+	 * Returns the raw value of a control by interfacing with the FTC
+	 * {@link Gamepad}.
 	 */
 	private double getRawValue(Control control) {
 		switch (control) {
@@ -218,11 +229,13 @@ public class Controller extends Gamepad {
 		}
 	}
 	
-	
 	/**
-	 * Actions are representations of what the driver WANTS the robot to do when they press a button.
-	 * For example, if we've mapped Cross to Shoot, the driver wants the robot to Action.SHOOT when cross is pressed.
-	 * This is useful to decouple because we can easily remap controls while keeping the code clean.
+	 * Actions are representations of what the driver WANTS the robot to do when
+	 * they press a button.
+	 * For example, if we've mapped Cross to Shoot, the driver wants the robot to
+	 * Action.SHOOT when cross is pressed.
+	 * This is useful to decouple because we can easily remap controls while keeping
+	 * the code clean.
 	 */
 	public enum Action {
 		MOVE_Y,
@@ -256,8 +269,10 @@ public class Controller extends Gamepad {
 	}
 	
 	/**
-	 * Controls are the counterparts to {@link Action}s. They represent the actual buttons that will be pressed
-	 * to make an action happen. These are mapped in settings, and should be accessed through Actions
+	 * Controls are the counterparts to {@link Action}s. They represent the actual
+	 * buttons that will be pressed
+	 * to make an action happen. These are mapped in settings, and should be
+	 * accessed through Actions
 	 * instead of directly.
 	 */
 	public enum Control {

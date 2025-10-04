@@ -137,9 +137,11 @@ public class Launcher extends Mechanism {
 	}
 	
 	/**
-	 * A synchronous combination of two motors such that they spin at the exact same
-	 * speed.
-	 * TODO: sync with different speeds to control topspin
+	 * A synchronous combination of two motors that maintains equal speeds using
+	 * a proportional feedback controller.
+	 * <p>
+	 * TODO: Implement differential speeds to control topspin/backspin on launched
+	 * artifacts
 	 */
 	public static class SyncBelt {
 		private final DcMotor beltRight;

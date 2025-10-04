@@ -14,9 +14,7 @@ public class MatchConfigurationWizard {
 	private final MatchSettings matchSettings;
 	private final Gamepad gamepad1;
 	private final UnifiedLogging logging;
-	
-	public boolean confirmed = false;
-	
+	private boolean confirmed = false;
 	
 	/**
 	 * Creates a new MatchConfigurationWizard

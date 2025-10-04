@@ -8,7 +8,8 @@ import org.firstinspires.ftc.teamcode.configuration.Settings;
 import org.firstinspires.ftc.teamcode.hardware.Mechanism;
 
 /**
- * Interface between the Limelight camera and the robot, allowing us to get specific data smoothly.
+ * Interface between the Limelight camera and the robot, allowing us to get
+ * specific data smoothly.
  */
 public class LimelightManager extends Mechanism {
 	public final Limelight3A limelight;
@@ -64,8 +65,12 @@ public class LimelightManager extends Mechanism {
 	
 	public MatchSettings.Motif detectMotif() {
 		setCurrentPipeline(Pipeline.APRILTAG);
-		// TODO match fiducial IDs
-		switch (limelight.getLatestResult().getFiducialResults().get(0).getFiducialId()) {
+		LLResult result = limelight.getLatestResult();
+		if (result.getFiducialResults().isEmpty()) {
+			return MatchSettings.Motif.UNKNOWN;
+		}
+		
+		switch (result.getFiducialResults().get(0).getFiducialId()) {
 			case 21:
 				return MatchSettings.Motif.GPP;
 			case 22:
@@ -86,7 +91,8 @@ public class LimelightManager extends Mechanism {
 	 * Switches the current pipeline to a new pipeline
 	 *
 	 * @param newPipeline The new pipeline to switch to:
-	 *                    APRILTAG (2), GREEN (3), PURPLE (4), RED_GOAL (5), BLUE_GOAL (6)
+	 *                    APRILTAG (2), GREEN (3), PURPLE (4), RED_GOAL (5),
+	 *                    BLUE_GOAL (6)
 	 */
 	public void setCurrentPipeline(Pipeline newPipeline) {
 		currentPipeline = newPipeline;

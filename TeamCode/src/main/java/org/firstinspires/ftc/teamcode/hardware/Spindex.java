@@ -25,7 +25,8 @@ import java.util.List;
  * Controls a 3-slot rotating spindex using the Command Pattern.
  * <p>
  * This design delegates all complex actions to dedicated "Command" objects.
- * The Spindex's main loop simply executes the current command, making the system
+ * The Spindex's main loop simply executes the current command, making the
+ * system
  * highly scalable, readable, and robust against interruptions.
  */
 public class Spindex extends Mechanism {
@@ -39,15 +40,16 @@ public class Spindex extends Mechanism {
 	public final double exitOffset;
 	public final double intakeOffset;
 	
-	// State Variables
+	// State Variables (package-private for Command access)
 	final MatchSettings.ArtifactColor[] slots = new MatchSettings.ArtifactColor[3];
 	final Object lock = new Object();
-	public long lastActionTimeMs = 0; // Public for Command access
+	long lastActionTimeMs = 0;
 	private volatile double commandedPosition;
 	// --- Command Pattern Implementation ---
 	private Command currentCommand = new Command.IdleCommand();
 	
-	public Spindex(Servo spindexServo, Servo exitSealServo, Servo intakeSealServo, ColorSensor spindexColorSensor, MatchSettings matchSettings) {
+	public Spindex(Servo spindexServo, Servo exitSealServo, Servo intakeSealServo, ColorSensor spindexColorSensor,
+	               MatchSettings matchSettings) {
 		this.spindexServo = spindexServo;
 		this.exitSealServo = exitSealServo;
 		this.intakeSealServo = intakeSealServo;
@@ -66,7 +68,8 @@ public class Spindex extends Mechanism {
 	
 	private static double wrapServo(double v) {
 		v %= 1.0;
-		if (v < 0) v += 1.0;
+		if (v < 0)
+			v += 1.0;
 		return v;
 	}
 	
@@ -146,7 +149,8 @@ public class Spindex extends Mechanism {
 	 * Submits a command to run the full intake sequence: find an empty slot,
 	 * rotate to it, open the seal, and wait for a new artifact.
 	 *
-	 * @return Returns true if an intake command was started, false if the spindex is full.
+	 * @return Returns true if an intake command was started, false if the spindex
+	 * is full.
 	 */
 	public boolean prepareForIntake() {
 		// First, check if there's an empty slot without locking, for a quick exit.
@@ -295,7 +299,8 @@ public class Spindex extends Mechanism {
 				}
 			}
 		}
-		if (availableSlotsForNeededArtifacts.isEmpty()) return new ArrayList<>();
+		if (availableSlotsForNeededArtifacts.isEmpty())
+			return new ArrayList<>();
 		availableSlotsForNeededArtifacts.sort((slotA, slotB) -> {
 			double distA = circularDistance(commandedPosition, getExitPositionForSlot(slotA));
 			double distB = circularDistance(commandedPosition, getExitPositionForSlot(slotB));
@@ -317,7 +322,6 @@ public class Spindex extends Mechanism {
 		return best;
 	}
 }
-
 
 /**
  * Defines the interface for a command that the Spindex can execute.
@@ -352,18 +356,19 @@ abstract class Command {
 	/**
 	 * Allows a command to intelligently handle a new incoming command.
 	 *
-	 * @return true if the new command was handled (e.g., retargeted), false otherwise.
+	 * @return true if the new command was handled (e.g., retargeted), false
+	 * otherwise.
 	 */
 	public boolean handleNewCommand(Command newCommand) {
 		return false;
 	}
 	
-	
 	// --- Concrete Command Implementations ---
 	
 	// Add this method inside the abstract Command class
 	public Command then(Command nextCommand) {
-		// Note: We're passing 'this.spindex' so the new command group has the spindex reference.
+		// Note: We're passing 'this.spindex' so the new command group has the spindex
+		// reference.
 		return new SequentialCommand(this.spindex, this, nextCommand);
 	}
 	
@@ -440,14 +445,17 @@ abstract class Command {
 			if (newCommand instanceof RotateCommand) {
 				RotateCommand newRotateCmd = (RotateCommand) newCommand;
 				this.targetPosition = newRotateCmd.targetPosition;
-				// If we were already rotating, continue. If sealing, the new target will be used
+				// If we were already rotating, continue. If sealing, the new target will be
+				// used
 				// when we transition to the ROTATING state. This is intelligent retargeting.
 				return true;
 			}
 			return false;
 		}
 		
-		private enum State {SEALING, ROTATING, FINISHED}
+		private enum State {
+			SEALING, ROTATING, FINISHED
+		}
 	}
 	
 	// Add this class alongside the other command implementations
@@ -505,7 +513,9 @@ abstract class Command {
 			return state == State.FINISHED;
 		}
 		
-		private enum State {SEALING, ROTATING, FIRING, FINISHED}
+		private enum State {
+			SEALING, ROTATING, FIRING, FINISHED
+		}
 	}
 	
 	public static class EjectCommand extends Command {
@@ -539,7 +549,9 @@ abstract class Command {
 			return state == State.FINISHED;
 		}
 		
-		private enum State {READY_TO_FIRE, FINISHED}
+		private enum State {
+			READY_TO_FIRE, FINISHED
+		}
 	}
 	
 	/**
@@ -627,7 +639,9 @@ abstract class Command {
 			return state == State.FINISHED;
 		}
 		
-		private enum State {START, SEALING, ROTATING, INTAKING, FINISHING, FINISHED}
+		private enum State {
+			START, SEALING, ROTATING, INTAKING, FINISHING, FINISHED
+		}
 	}
 	
 	/**

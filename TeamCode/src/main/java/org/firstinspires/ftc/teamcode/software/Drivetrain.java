@@ -47,7 +47,7 @@ public class Drivetrain extends Mechanism {
 	
 	@Override
 	public void init() {
-	
+		// No initialization required - drivetrain is initialized in constructor
 	}
 	
 	public void toggleCentricity() {
@@ -89,13 +89,18 @@ public class Drivetrain extends Mechanism {
 	}
 	
 	/**
-	 * Moves the robot to correct for a given offset from a target (e.g., from an AprilTag).
-	 * This calculates a field-centric target pose based on the robot's current pose and
+	 * Moves the robot to correct for a given offset from a target (e.g., from an
+	 * AprilTag).
+	 * This calculates a field-centric target pose based on the robot's current pose
+	 * and
 	 * the robot-centric offsets, then creates and follows a path to it.
 	 *
-	 * @param offsetX       The robot's lateral offset from the target. Positive is to the right.
-	 * @param offsetY       The robot's forward offset from the target. Positive is in front.
-	 * @param offsetHeading The robot's heading offset from the target. Positive is clockwise.
+	 * @param offsetX       The robot's lateral offset from the target. Positive is
+	 *                      to the right.
+	 * @param offsetY       The robot's forward offset from the target. Positive is
+	 *                      in front.
+	 * @param offsetHeading The robot's heading offset from the target. Positive is
+	 *                      clockwise.
 	 */
 	public void interpolateToOffset(double offsetX, double offsetY, double offsetHeading) {
 		Pose currentPose = follower.getPose();
@@ -105,8 +110,7 @@ public class Drivetrain extends Mechanism {
 		Pose targetPose = new Pose(
 				currentPose.getX() + offsetX,
 				currentPose.getY() + offsetY,
-				currentHeading - offsetHeading
-		);
+				currentHeading - offsetHeading);
 		
 		goTo(targetPose);
 	}
@@ -134,7 +138,6 @@ public class Drivetrain extends Mechanism {
 				.build();
 		follower.followPath(path);
 	}
-	
 	
 	/**
 	 * Switches the drivetrain to manual (tele-op) control mode.
