@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.configuration;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.UnifiedLogging;
 
 /**
  * MatchConfigurationWizard provides an interface for configuring match settings
@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class MatchConfigurationWizard {
 	private final MatchSettings matchSettings;
 	private final Gamepad gamepad1;
-	private final Telemetry telemetry;
+	private final UnifiedLogging logging;
 	
 	public boolean confirmed = false;
 	
@@ -23,12 +23,12 @@ public class MatchConfigurationWizard {
 	 *
 	 * @param matchSettings The MatchSettings instance to modify
 	 * @param gamepad1      The primary gamepad for input
-	 * @param telemetry     Telemetry instance for displaying current settings
+	 * @param logging       Telemetry instance for displaying current settings
 	 */
-	public MatchConfigurationWizard(MatchSettings matchSettings, Gamepad gamepad1, Telemetry telemetry) {
+	public MatchConfigurationWizard(MatchSettings matchSettings, Gamepad gamepad1, UnifiedLogging logging) {
 		this.matchSettings = matchSettings;
 		this.gamepad1 = gamepad1;
-		this.telemetry = telemetry;
+		this.logging = logging;
 	}
 	
 	/**
@@ -69,31 +69,33 @@ public class MatchConfigurationWizard {
 		MatchSettings.AutoStartingPosition autoStartingPosition = matchSettings.getAutoStartingPosition();
 		
 		if (!confirmed) {
-			telemetry.addLine("=== MATCH CONFIGURATION ===");
-			telemetry.addLine("  D-Pad UP    → BLUE Alliance");
-			telemetry.addLine("  D-Pad DOWN  → RED Alliance");
-			telemetry.addLine("  D-Pad LEFT  → Close Starting Position");
-			telemetry.addLine("  D-Pad RIGHT → Far Starting Position");
-			telemetry.addLine("  CROSS       → Confirm Configuration");
+			logging.addLine("=== MATCH CONFIGURATION ===");
+			logging.addLine("  D-Pad UP    → BLUE Alliance");
+			logging.addLine("  D-Pad DOWN  → RED Alliance");
+			logging.addLine("  D-Pad LEFT  → Close Starting Position");
+			logging.addLine("  D-Pad RIGHT → Far Starting Position");
+			logging.addLine("  CROSS       → Confirm Configuration");
 		} else {
-			telemetry.addLine("=== CONFIGURATION CONFIRMED ===");
-			telemetry.addLine("❎ Press cross to cancel");
+			logging.addLine("=== CONFIGURATION CONFIRMED ===");
+			logging.addLine("❎ Press cross to cancel");
 		}
 		
-		telemetry.addLine("");
+		logging.addLine("");
 		
 		if (currentColor == MatchSettings.AllianceColor.BLUE) {
-			telemetry.addLine("\uD83D\uDD35 BLUE Alliance Selected");
+			logging.addLine("\uD83D\uDD35 BLUE Alliance Selected");
 		} else {
-			telemetry.addLine("\uD83D\uDD34 RED Alliance Selected");
+			logging.addLine("\uD83D\uDD34 RED Alliance Selected");
 		}
 		
 		if (autoStartingPosition == MatchSettings.AutoStartingPosition.CLOSE) {
-			telemetry.addLine("\uD83D\uDD0D Close Starting Position Selected");
+			logging.addLine("\uD83D\uDD0D Close Starting Position Selected");
 		} else {
-			telemetry.addLine("\uD83D\uDD2D Far Starting Position Selected");
+			logging.addLine("\uD83D\uDD2D Far Starting Position Selected");
 		}
 		
-		telemetry.update();
+		logging.addData("Starting Pose", matchSettings.getAutonomousStartingPose());
+		
+		logging.update();
 	}
 }
