@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.configuration;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.teamcode.UnifiedLogging;
-
 /**
  * MatchConfigurationWizard provides an interface for configuring match settings
  * during the init_loop phase of autonomous programs.
