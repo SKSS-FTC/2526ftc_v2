@@ -1,19 +1,14 @@
 package org.firstinspires.ftc.teamcode.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp(name = "Decode2025RobotCode_TeleOp", group = "Robot")
-@Disabled
 public class Decode2025RobotCode_TeleOp extends OpMode {
-
     public DcMotor frontLeftDrive = null;
     public DcMotor frontRightDrive  = null;
     public DcMotor rearLeftDrive = null;
@@ -40,7 +35,7 @@ public class Decode2025RobotCode_TeleOp extends OpMode {
 
         RevHubOrientationOnRobot RevOrientation = new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD);
 
         imu.initialize(new IMU.Parameters(RevOrientation));
     }
@@ -66,11 +61,14 @@ public class Decode2025RobotCode_TeleOp extends OpMode {
 
     }
 
-
+    double forward, strafe, rotate;
 
     @Override
     public void loop() {
+        forward = -gamepad1.left_stick_y;
+        strafe = gamepad1.left_stick_x;
+        rotate = gamepad1. right_stick_x;
 
+        drive(forward, strafe, rotate);
     }
 }
-
