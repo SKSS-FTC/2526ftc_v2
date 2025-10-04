@@ -204,7 +204,7 @@ public class DriveTrain {
         backRightMotor.setPower(-power);
     }
 
-    private void setMovePower(int power) {
+    private void setMovePower(float power) {
         // Set the power for all motors
         frontLeftMotor.setPower(power);
         frontRightMotor.setPower(power);
