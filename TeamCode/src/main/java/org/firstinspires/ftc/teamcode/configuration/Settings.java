@@ -267,25 +267,25 @@ public class Settings {
 		// These are filler values and will need to be tuned.
 		public static class RedClose {
 			// Start near the backdrop, facing forward.
-			public static Pose START = new Pose(12, -60, Math.toRadians(90));
+			public static Pose START = new Pose(12, 60, Math.toRadians(90));
 			// Position for the center spike mark.
-			public static Pose PRESET_1_PREP = new Pose(12, -34, Math.toRadians(90));
+			public static Pose PRESET_1_PREP = new Pose(12, 34, Math.toRadians(90));
 			// Scoring position on the backdrop. Robot is flush, facing left.
-			public static Pose PRESET_1_END = new Pose(48, -36, Math.toRadians(180));
+			public static Pose PRESET_1_END = new Pose(48, 36, Math.toRadians(180));
 			// A middle waypoint to help navigate under the stage truss.
-			public static Pose LAUNCH_1 = new Pose(24, -12, Math.toRadians(180));
+			public static Pose LAUNCH_1 = new Pose(24, 12, Math.toRadians(180));
 			// Position to pick up pixels from the stack across the field.
-			public static Pose PRESET_2_PREP = new Pose(12, -34, Math.toRadians(90));
+			public static Pose PRESET_2_PREP = new Pose(12, 34, Math.toRadians(90));
 			// Scoring position on the backdrop. Robot is flush, facing left.
-			public static Pose PRESET_2_END = new Pose(48, -36, Math.toRadians(180));
+			public static Pose PRESET_2_END = new Pose(48, 36, Math.toRadians(180));
 			// A middle waypoint to help navigate under the stage truss.
-			public static Pose LAUNCH_2 = new Pose(24, -12, Math.toRadians(180));
-			public static Pose PRESET_3_PREP = new Pose(12, -34, Math.toRadians(90));
+			public static Pose LAUNCH_2 = new Pose(24, 12, Math.toRadians(180));
+			public static Pose PRESET_3_PREP = new Pose(12, 34, Math.toRadians(90));
 			// Scoring position on the backdrop. Robot is flush, facing left.
-			public static Pose PRESET_3_END = new Pose(48, -36, Math.toRadians(180));
+			public static Pose PRESET_3_END = new Pose(48, 36, Math.toRadians(180));
 			// A middle waypoint to help navigate under the stage truss.
-			public static Pose LAUNCH_3 = new Pose(24, -12, Math.toRadians(180));
-			public static Pose PARK = new Pose(24, -12, Math.toRadians(180));
+			public static Pose LAUNCH_3 = new Pose(24, 12, Math.toRadians(180));
+			public static Pose PARK = new Pose(24, 12, Math.toRadians(180));
 			
 		}
 		
