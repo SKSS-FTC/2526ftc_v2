@@ -126,7 +126,7 @@ public class ArtifactHandlingSystem {
 
     public void sendArtifactToOuttake() {
         if (celebrateOn) {
-            return; // Don't process samples while celebrating
+            return; // Don't process artifacts while celebrating
         }
 
         Object[] detectedColor = detectColor();
