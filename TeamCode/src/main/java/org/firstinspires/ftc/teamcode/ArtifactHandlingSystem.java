@@ -40,7 +40,7 @@ public class ArtifactHandlingSystem {
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         outtakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         leftContainerServo.setDirection(DcMotorSimple.Direction.FORWARD);
         rightContainerServo.setDirection(DcMotorSimple.Direction.REVERSE);
     }
