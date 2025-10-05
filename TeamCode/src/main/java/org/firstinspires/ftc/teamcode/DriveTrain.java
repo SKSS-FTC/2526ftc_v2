@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class DriveTrain {
@@ -34,9 +33,6 @@ public class DriveTrain {
         imu = linearOpMode.hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(orientation));
 
-        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
         this.linearOpMode = linearOpMode;
         this.robotControls = new RobotControls(linearOpMode);
     }
@@ -47,8 +43,10 @@ public class DriveTrain {
         backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         imu.resetYaw();
     }
@@ -150,6 +148,8 @@ public class DriveTrain {
         linearOpMode.telemetry.addData("Counter", counter);
     }
 
+
+
     public void setMotorPowers() {
         if (robotControls.strafeToClassifier) {
             return;
@@ -203,5 +203,13 @@ public class DriveTrain {
         frontRightMotor.setPower(power);
         backLeftMotor.setPower(power);
         backRightMotor.setPower(-power);
+    }
+
+    public void setMovePower(double power) {
+        // Set the power for all motors
+        frontLeftMotor.setPower(power);
+        frontRightMotor.setPower(power);
+        backLeftMotor.setPower(power);
+        backRightMotor.setPower(power);
     }
 }

@@ -15,8 +15,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@Autonomous(name = "Test")
-public class DecodeLM1Auto extends LinearOpMode {
+@Autonomous(name = "Auto Forward")
+public class AutoForwardLM1 extends LinearOpMode {
 
     GoBildaPinpointDriver odo;
     DcMotor frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
@@ -28,8 +28,8 @@ public class DecodeLM1Auto extends LinearOpMode {
 
         initAuto();
 
-            driveToPos(CLASSIFIER_X, CLASSIFIER_Y);
-            gyroTurnToAngle(110);
+        driveToPos(400, 0);
+
         //TODO: When the robot classes get built we need to add actions for outake to score the pre-load
 //      Example  Code:
 //      ArtifactHandlingSystem.shootAutoArtifact();
@@ -51,79 +51,79 @@ public class DecodeLM1Auto extends LinearOpMode {
 
     }
 
-        private void driveToPos(double targetX, double targetY) {
+    private void driveToPos(double targetX, double targetY) {
+        odo.update();
+        boolean telemAdded = false;
+
+        while (opModeIsActive() &&
+                (Math.abs(targetX - odo.getPosX(DistanceUnit.CM)) > 30 || Math.abs(targetY - odo.getPosY(DistanceUnit.CM)) > 30)
+        ){
             odo.update();
-            boolean telemAdded = false;
 
-            while (opModeIsActive() &&
-                    (Math.abs(targetX - odo.getPosX(DistanceUnit.CM)) > 30 || Math.abs(targetY - odo.getPosY(DistanceUnit.CM)) > 30)
-            ){
-                odo.update();
+            double x = 0.001*(targetX - odo.getPosX(DistanceUnit.CM));
+            double y = -0.001*(targetY - odo.getPosY(DistanceUnit.CM));
 
-                double x = 0.001*(targetX - odo.getPosX(DistanceUnit.CM));
-                double y = -0.001*(targetY - odo.getPosY(DistanceUnit.CM));
+            double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS); // getRobotOrientationAsQuaternion().  .().firstAngle(); //.getHeading();
 
-                double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS); // getRobotOrientationAsQuaternion().  .().firstAngle(); //.getHeading();
+            double rotY = y * Math.cos(-botHeading) - x * Math.sin(-botHeading);
+            double rotX = y * Math.sin(-botHeading) + x * Math.cos(-botHeading);
 
-                double rotY = y * Math.cos(-botHeading) - x * Math.sin(-botHeading);
-                double rotX = y * Math.sin(-botHeading) + x * Math.cos(-botHeading);
+            if (!telemAdded) {
+                telemetry.addData("x: ", x);
+                telemetry.addData("y: ", y);
+                telemetry.addData("rotX: ", rotX);
+                telemetry.addData("rotY: ", rotY);
+                telemetry.update();
+                telemAdded = true;
+            }
 
-                if (!telemAdded) {
-                    telemetry.addData("x: ", x);
-                    telemetry.addData("y: ", y);
-                    telemetry.addData("rotX: ", rotX);
-                    telemetry.addData("rotY: ", rotY);
-                    telemetry.update();
-                    telemAdded = true;
-                }
+            if (Math.abs(rotX) < 0.15) {
+                rotX = Math.signum(rotX) * 0.15;
+            }
 
-                if (Math.abs(rotX) < 0.15) {
-                    rotX = Math.signum(rotX) * 0.15;
-                }
+            if (Math.abs(rotY) < 0.15) {
+                rotY = Math.signum(rotY) * 0.15;
+            }
 
-                if (Math.abs(rotY) < 0.15) {
-                    rotY = Math.signum(rotY) * 0.15;
-                }
+            double denominator = Math.max(Math.abs(y) + Math.abs(x), 1);
+            double frontLeftPower = (rotX + rotY)
+                    / denominator;
+            double backLeftPower = (rotX - rotY) / denominator;
+            double frontRightPower = (rotX - rotY) / denominator;
+            double backRightPower = (rotX + rotY) / denominator;
 
-                double denominator = Math.max(Math.abs(y) + Math.abs(x), 1);
-                double frontLeftPower = (rotX + rotY)
-                        / denominator;
-                double backLeftPower = (rotX - rotY) / denominator;
-                double frontRightPower = (rotX - rotY) / denominator;
-                double backRightPower = (rotX + rotY) / denominator;
-
-                frontLeftMotor.setPower(frontLeftPower);
-                backLeftMotor.setPower(backLeftPower);
-                frontRightMotor.setPower(frontRightPower);
-                backRightMotor.setPower(backRightPower);
+            frontLeftMotor.setPower(frontLeftPower);
+            backLeftMotor.setPower(backLeftPower);
+            frontRightMotor.setPower(frontRightPower);
+            backRightMotor.setPower(backRightPower);
 
 /*                telemetry.addData("X: ", odo.getPosX());
                 telemetry.addData("Y: ", odo.getPosY());
                 telemetry.addData("Heading Odo: ", Math.toDegrees(odo.getHeading()));
                 telemetry.addData("Heading IMU: ", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
 */                telemetry.update();
-            }
-
-            frontLeftMotor.setPower(0);
-            backLeftMotor.setPower(0);
-            frontRightMotor.setPower(0);
-            backRightMotor.setPower(0);
         }
 
+        frontLeftMotor.setPower(0);
+        backLeftMotor.setPower(0);
+        frontRightMotor.setPower(0);
+        backRightMotor.setPower(0);
+    }
 
-        private void gyroTurnToAngle(double turnAngle) {
-            double error, currentHeadingAngle, driveMotorsPower;
-            imu.resetYaw();
 
-            error = turnAngle;
+    private void gyroTurnToAngle(double turnAngle) {
+        double error, currentHeadingAngle, driveMotorsPower;
+        imu.resetYaw();
 
-            while (opModeIsActive() && ((error > 1) || (error < -1))) {
-                odo.update();
-                telemetry.addData("X: ", odo.getPosX(DistanceUnit.CM));
-                telemetry.addData("Y: ", odo.getPosY(DistanceUnit.CM));
+        error = turnAngle;
+
+        while (opModeIsActive() && ((error > 1) || (error < -1))) {
+            odo.update();
+            telemetry.addData("X: ", odo.getPosX(DistanceUnit.CM));
+            telemetry.addData("Y: ", odo.getPosY(DistanceUnit.CM));
 //                telemetry.addData("Heading Odo: ", Math.toDegrees(odo.getHeading()));
-                telemetry.addData("Heading IMU: ", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-                telemetry.update();
+            telemetry.addData("Heading IMU: ", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            telemetry.update();
 
                 /*driveMotorsPower = error / 200;
 
@@ -132,31 +132,31 @@ public class DecodeLM1Auto extends LinearOpMode {
                 } else if ((driveMotorsPower > -0.2) && (driveMotorsPower < 0)) {
                     driveMotorsPower = -0.2;
                 }*/
-                driveMotorsPower = error / 50;
+            driveMotorsPower = error / 50;
 
-                if ((driveMotorsPower < 0.35) && (driveMotorsPower > 0)) {
-                    driveMotorsPower = 0.35;
-                } else if ((driveMotorsPower > -0.35) && (driveMotorsPower < 0)) {
-                    driveMotorsPower = -0.35;
-                }
-                // Positive power causes left turn
-                frontLeftMotor.setPower(-driveMotorsPower);
-                backLeftMotor.setPower(-driveMotorsPower);
-                frontRightMotor.setPower(driveMotorsPower);
-                backRightMotor.setPower(driveMotorsPower);
-
-                currentHeadingAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-                error = turnAngle - currentHeadingAngle;
+            if ((driveMotorsPower < 0.35) && (driveMotorsPower > 0)) {
+                driveMotorsPower = 0.35;
+            } else if ((driveMotorsPower > -0.35) && (driveMotorsPower < 0)) {
+                driveMotorsPower = -0.35;
             }
-            frontLeftMotor.setPower(0);
-            backLeftMotor.setPower(0);
-            frontRightMotor.setPower(0);
-            backRightMotor.setPower(0);
+            // Positive power causes left turn
+            frontLeftMotor.setPower(-driveMotorsPower);
+            backLeftMotor.setPower(-driveMotorsPower);
+            frontRightMotor.setPower(driveMotorsPower);
+            backRightMotor.setPower(driveMotorsPower);
 
-
+            currentHeadingAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            error = turnAngle - currentHeadingAngle;
         }
+        frontLeftMotor.setPower(0);
+        backLeftMotor.setPower(0);
+        frontRightMotor.setPower(0);
+        backRightMotor.setPower(0);
 
-        private void initAuto() {
+
+    }
+
+    private void initAuto() {
         odo = hardwareMap.get(GoBildaPinpointDriver.class,"odo");
         //        odo.setOffsets(101.6, 95.25 ); //these are tuned for 3110-0002-0001 Product Insight #1
         odo.setOffsets(107.95, 95.25, DistanceUnit.CM ); //took on 12/20 by Rohan
