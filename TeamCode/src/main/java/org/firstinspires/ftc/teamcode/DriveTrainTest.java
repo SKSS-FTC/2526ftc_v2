@@ -10,11 +10,13 @@ public class DriveTrainTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         driveTrain = new DriveTrain(this);
+        driveTrain.configureMotorModes();
 
         waitForStart();
         if (isStopRequested()) return;
         while (opModeIsActive()) {
-            driveTrain.setMovePower(0.25);
+            driveTrain.setMovePower(0.5);
+
         }
 
     }
