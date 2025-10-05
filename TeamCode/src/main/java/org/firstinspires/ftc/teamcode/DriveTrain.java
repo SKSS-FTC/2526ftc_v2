@@ -13,7 +13,6 @@ public class DriveTrain {
     private final IMU imu;
 
     private final LinearOpMode linearOpMode;
-    private final RobotControls robotControls;
     private int counter = 0;
 
     private double ROTATE_SPEED_ADJUSTER = ConstantsTeleOp.RIGHT_JOYSTICK_SPEED_ADJUSTER;
@@ -34,7 +33,6 @@ public class DriveTrain {
         imu.initialize(new IMU.Parameters(orientation));
 
         this.linearOpMode = linearOpMode;
-        this.robotControls = new RobotControls(linearOpMode);
     }
 
     public void configureMotorModes() {
@@ -137,8 +135,12 @@ public class DriveTrain {
     }
 
     public void displayTelemetry() {
-        linearOpMode.telemetry.addData("Left Stick (X, Y)", "%5.2f, %5.2f", robotControls.leftStickX / DRIVE_AND_STRAFE_SPEED_ADJUSTER, robotControls.leftStickY / DRIVE_AND_STRAFE_SPEED_ADJUSTER);
-        linearOpMode.telemetry.addData("Right Stick (Rotation)", "%5.2f", robotControls.rightStickX / ROTATE_SPEED_ADJUSTER);
+        linearOpMode.telemetry.addData("Left Stick (X, Y)", "%5.2f, %5.2f", linearOpMode.gamepad1.left_stick_x / DRIVE_AND_STRAFE_SPEED_ADJUSTER, -linearOpMode.gamepad1.left_stick_y / DRIVE_AND_STRAFE_SPEED_ADJUSTER);
+        linearOpMode.telemetry.addData("Right Stick (Rotation)", "%5.2f", linearOpMode.gamepad1.right_stick_x / ROTATE_SPEED_ADJUSTER);
+        linearOpMode.telemetry.addData("Raw Left Stick (X, Y)", "%5.2f, %5.2f", linearOpMode.gamepad1.left_stick_x, linearOpMode.gamepad1.left_stick_y);
+        linearOpMode.telemetry.addData("Raw Right Stick (Rotation)", "%5.2f", linearOpMode.gamepad1.right_stick_x);
+        linearOpMode.telemetry.addData("Fast Mode", linearOpMode.gamepad1.left_bumper);
+        linearOpMode.telemetry.addData("Slow Mode", linearOpMode.gamepad1.right_bumper);
 
         linearOpMode.telemetry.addData("Front Left Position", frontLeftMotor.getCurrentPosition());
         linearOpMode.telemetry.addData("Front Right Position", frontRightMotor.getCurrentPosition());
@@ -149,11 +151,11 @@ public class DriveTrain {
     }
 
     public void setMotorPowers() {
-        if (robotControls.strafeToClassifier) {
+        if (linearOpMode.gamepad1.back) {
             return;
         }
 
-        Powers motorPower = getPowers(robotControls.leftStickY / DRIVE_AND_STRAFE_SPEED_ADJUSTER, robotControls.leftStickX / DRIVE_AND_STRAFE_SPEED_ADJUSTER, robotControls.rightStickX / ROTATE_SPEED_ADJUSTER);
+        Powers motorPower = getPowers(-linearOpMode.gamepad1.left_stick_y / DRIVE_AND_STRAFE_SPEED_ADJUSTER, linearOpMode.gamepad1.left_stick_x / DRIVE_AND_STRAFE_SPEED_ADJUSTER, linearOpMode.gamepad1.right_stick_x / ROTATE_SPEED_ADJUSTER);
         frontLeftMotor.setPower(motorPower.getFrontLeftPower());
         frontRightMotor.setPower(motorPower.getFrontRightPower());
         backLeftMotor.setPower(motorPower.getBackLeftPower());
@@ -161,19 +163,19 @@ public class DriveTrain {
     }
 
     public void adjustTurnSpeed() {
-        if (robotControls.slowMode) {
+        if (linearOpMode.gamepad1.right_bumper) {
             ROTATE_SPEED_ADJUSTER = 3;
             DRIVE_AND_STRAFE_SPEED_ADJUSTER = 3;
         }
 
-        if (robotControls.fastMode) {
+        if (linearOpMode.gamepad1.left_bumper) {
             ROTATE_SPEED_ADJUSTER = 1;
             DRIVE_AND_STRAFE_SPEED_ADJUSTER = 1;
         }
     }
 
     public void resetYaw() {
-        if (robotControls.resetYaw) {
+        if (linearOpMode.gamepad1.start) {
             imu.resetYaw();
             counter++;
         }

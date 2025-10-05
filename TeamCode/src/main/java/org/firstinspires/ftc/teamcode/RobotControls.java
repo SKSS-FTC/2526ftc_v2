@@ -11,26 +11,11 @@ public class RobotControls {
 
     boolean intakeArtifact;
     float shootArtifact;
-    boolean resetYaw;
-    float leftStickX;
-    float leftStickY;
-    float rightStickX;
-    boolean fastMode;
-    boolean slowMode;
-    boolean strafeToClassifier;
     boolean manuallySend;
     boolean celebrate;
     boolean increaseHoodAngle;
     boolean decreaseHoodAngle;
     public void updateControls() {
-        resetYaw = linearOpMode.gamepad1.start;
-        leftStickX = -linearOpMode.gamepad1.left_stick_x;
-        leftStickY = linearOpMode.gamepad1.left_stick_y;
-        rightStickX = -linearOpMode.gamepad1.right_stick_x;
-        fastMode = linearOpMode.gamepad1.left_bumper;
-        slowMode = linearOpMode.gamepad1.right_bumper;
-        strafeToClassifier = linearOpMode.gamepad1.back;
-
         shootArtifact = linearOpMode.gamepad2.right_trigger;
         intakeArtifact = linearOpMode.gamepad2.a;
         manuallySend = linearOpMode.gamepad2.b;
