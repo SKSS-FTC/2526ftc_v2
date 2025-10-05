@@ -149,6 +149,8 @@ public class DriveTrain {
         linearOpMode.telemetry.addData("Counter", counter);
     }
 
+
+
     public void setMotorPowers() {
         if (robotControls.strafeToClassifier) {
             return;
@@ -208,7 +210,7 @@ public class DriveTrain {
         // Set the power for all motors
         frontLeftMotor.setPower(power);
         frontRightMotor.setPower(power);
-        backLeftMotor.setPower(power);
+        backLeftMotor.setPower(-power);
         backRightMotor.setPower(power);
     }
 }
