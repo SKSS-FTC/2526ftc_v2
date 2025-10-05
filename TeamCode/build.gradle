@@ -25,11 +25,7 @@ android {
         jniLibs.useLegacyPackaging true
     }
 }
-repositories {
-    maven {
-        url = 'https://maven.brott.dev/'
-    }
-}
+
 dependencies {
     implementation project(':FtcRobotController')
 }
