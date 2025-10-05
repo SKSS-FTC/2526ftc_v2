@@ -4,12 +4,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous
-public class DriveTrainTest extends LinearOpMode {
-    private DriveTrain driveTrain;
+public class DriveTrainForward extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        driveTrain = new DriveTrain(this);
+        DriveTrain driveTrain = new DriveTrain(this);
+
         driveTrain.configureMotorModes();
 
         waitForStart();

@@ -8,12 +8,12 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
-public class Vision {
+public class VisionAuto {
 
     private final AprilTagProcessor aprilTag;
     private final VisionPortal visionPortal;
 
-    public Vision(HardwareMap hardwareMap, String webcamName) {
+    public VisionAuto(HardwareMap hardwareMap, String webcamName) {
         aprilTag = new AprilTagProcessor.Builder().build();
 
         visionPortal = new VisionPortal.Builder()

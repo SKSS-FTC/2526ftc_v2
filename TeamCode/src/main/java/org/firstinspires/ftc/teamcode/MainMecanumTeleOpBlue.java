@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class MainMecanumTeleOpBlue extends LinearOpMode {
 
     private ArtifactHandlingSystem artifactHandlingSystem;
-
     private RobotControls robotControls;
     private DriveTrain driveTrain;
 
