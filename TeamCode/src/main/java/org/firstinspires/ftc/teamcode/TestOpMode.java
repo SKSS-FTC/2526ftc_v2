@@ -36,10 +36,13 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.view.View;
 
+import com.qualcomm.hardware.motors.RevRoboticsUltraPlanetaryHdHexMotor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
@@ -60,15 +63,18 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 public class TestOpMode extends LinearOpMode {
 
+
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
-   /* private DcMotor frontLeft = null;
+    /*private DcMotor frontLeft = null;
     private DcMotor backLeft = null;
     private DcMotor frontRight = null;
-    private DcMotor backRight = null;*/
-   public class SensorColor extends LinearOpMode {
-    private DcMotor ballLauncher1 = null;
-    private DcMotor ballLauncher2 = null;
+    private DcMotor backRight = null;
+   public class SensorColor extends LinearOpMode {*/
+    private DcMotorEx ballLauncher1 = null;
+    private DcMotorEx ballLauncher2 = null;
+
+
 
     @Override
     public void runOpMode() {
@@ -79,8 +85,10 @@ public class TestOpMode extends LinearOpMode {
         backLeft = hardwareMap.get(DcMotor.class, "back_left");
         frontRight = hardwareMap.get(DcMotor.class, "front_right");
         backRight = hardwareMap.get(DcMotor.class, "back_right");*/
-        ballLauncher1 = hardwareMap.get(DcMotor.class, "ball_launcher1");
-        ballLauncher2 = hardwareMap.get(DcMotor.class, "ball_launcher2");
+
+        ballLauncher2 = hardwareMap.get(DcMotorEx.class, "ball_launcher2");
+        ballLauncher1 = hardwareMap.get(DcMotorEx.class, "ball_launcher1");
+
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -96,8 +104,11 @@ public class TestOpMode extends LinearOpMode {
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backRight.setDirection(DcMotor.Direction.FORWARD);*/
-        ballLauncher1.setDirection(DcMotor.Direction.FORWARD);
-        ballLauncher2.setDirection(DcMotor.Direction.FORWARD);
+
+
+
+
+        waitForStart();
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -106,8 +117,20 @@ public class TestOpMode extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
+
+
+
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+
+
+
+
+
+
+
+
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
@@ -123,13 +146,10 @@ public class TestOpMode extends LinearOpMode {
             double backRightPower  = axial + lateral - yaw;
 
 
-            if (gamepad1.a ) {
-                ballLauncher1.setPower(1);
-            }
 
-            if (gamepad1.b ) {
-                ballLauncher2.setPower(1);
-            }
+
+
+
 
             max = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
             max = Math.max(max, Math.abs(backLeftPower));
@@ -147,7 +167,7 @@ public class TestOpMode extends LinearOpMode {
 
         }
     }}
- public void runOpMode() {
+ /*public void runOpMode() {
 
      NormalizedColorSensor colorSensor = hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
 
@@ -224,7 +244,7 @@ public class TestOpMode extends LinearOpMode {
 
 
      }
-    
+
  }
 
 
@@ -239,4 +259,4 @@ public class TestOpMode extends LinearOpMode {
 
 
 
-
+*/
