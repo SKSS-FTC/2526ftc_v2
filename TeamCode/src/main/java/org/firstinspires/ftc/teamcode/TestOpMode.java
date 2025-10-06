@@ -90,7 +90,7 @@ public class TestOpMode extends LinearOpMode {
         ballLauncher1 = hardwareMap.get(DcMotorEx.class, "ball_launcher1");
 
 
-        // ########################################################################################
+        // #######################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
         // Most robots need the motors on one side to be reversed to drive forward.
